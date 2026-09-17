@@ -10,9 +10,9 @@ for /f "tokens=5" %%P in ('netstat -ano ^| findstr :5005 ^| findstr LISTENING') 
 
 timeout /t 2 /nobreak >nul
 
-echo Starting LMS Server (port 5005)...
+echo Starting AMS Server (port 5005)...
 cd /d "%~dp0"
-start "LMS Server" cmd /k "node server.js"
+start "AMS Server" cmd /k "node server.js"
 
 echo Server started at http://localhost:5005
 pause

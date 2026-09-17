@@ -1,11 +1,8 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Mar 30, 2026 at 10:05 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- ========================================================
+-- Barber Management System (db_barber) Unified Database Script
+-- Consolidated and Deduplicated Schema & Data
+-- Auto-generated: 2026-09-17T07:41:04.583Z
+-- ========================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -16,33 +13,149 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
-SET FOREIGN_KEY_CHECKS=0;
+CREATE DATABASE IF NOT EXISTS `db_barber` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `db_barber`;
 
---
--- Database: `db_barber`
---
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ========================================================
+-- SECTION 1: TABLE STRUCTURES (37 Tables)
+-- ========================================================
 
 -- --------------------------------------------------------
+-- Table structure for table `roles`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE IF NOT EXISTS `roles` (
+  `role_id` int(11) NOT NULL,
+  `role_name` varchar(50) NOT NULL,
+  `status` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `role_name` (`role_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Table structure for the table `categories`
-CREATE TABLE categories (
-    category_id SERIAL PRIMARY KEY,
-    category_name VARCHAR(100) NOT NULL,
-    description TEXT
-);
--- Table structure for table `users`
---
+-- --------------------------------------------------------
+-- Table structure for table `organization_types`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `organization_types`;
+CREATE TABLE IF NOT EXISTS `organization_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
+-- --------------------------------------------------------
+-- Table structure for table `departments`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `departments`;
+CREATE TABLE IF NOT EXISTS `departments` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `employee_positions`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `employee_positions`;
+CREATE TABLE IF NOT EXISTS `employee_positions` (
+  `position_id` int(11) NOT NULL AUTO_INCREMENT,
+  `position_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`position_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `fk_ep_department` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `categories`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `category_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `category_id` (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `service_categories`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `service_categories`;
+CREATE TABLE IF NOT EXISTS `service_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `icon` varchar(50) DEFAULT NULL,
+  `category_icon` varchar(50) DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `category_image` varchar(255) DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `display_order` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `employees`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `employees`;
+CREATE TABLE IF NOT EXISTS `employees` (
   `employee_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `fname` varchar(50) DEFAULT NULL,
+  `lname` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `sex` enum('M','F','Other') DEFAULT NULL,
+  `role_id` int(11) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `supervisor_id` int(11) DEFAULT NULL,
+  `hire_date` date DEFAULT NULL,
+  `status` enum('active','inactive','suspended') DEFAULT 'active',
+  `profile_image` varchar(500) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `specialization` varchar(255) DEFAULT NULL,
+  `years_experience` int(11) DEFAULT 0,
+  `rating_avg` decimal(3,2) DEFAULT 0.00,
+  `total_bookings` int(11) DEFAULT 0,
+  `completed_bookings` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`employee_id`),
+  KEY `role_id` (`role_id`),
+  KEY `department_id` (`department_id`),
+  KEY `idx_emp_status` (`status`),
+  KEY `idx_emp_email` (`email`),
+  CONSTRAINT `fk_emp_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_emp_dept` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `users`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) DEFAULT NULL,
   `user_name` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
+  `role_id` int(11) DEFAULT NULL,
   `status` enum('1','0') DEFAULT '1',
   `online_flag` tinyint(1) DEFAULT 0,
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `role_id` int(11) DEFAULT NULL,
   `avatar_url` varchar(255) DEFAULT NULL,
   `failed_login_attempts` int(11) DEFAULT 0,
   `account_locked_until` datetime DEFAULT NULL,
@@ -50,642 +163,1517 @@ CREATE TABLE `users` (
   `reset_token_expires` datetime DEFAULT NULL,
   `redemption_token` varchar(255) DEFAULT NULL,
   `redemption_token_expires` datetime DEFAULT NULL,
-  PRIMARY KEY (`user_id`)
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`),
+  KEY `employee_id` (`employee_id`),
+  KEY `role_id` (`role_id`),
+  CONSTRAINT `fk_user_employee` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE services (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    category_id INT NOT NULL,
-    service_name VARCHAR(255) NOT NULL,
-    service_slug VARCHAR(255) UNIQUE NOT NULL,
-    short_description VARCHAR(500) NULL,
-    description TEXT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    discount_price DECIMAL(10,2) NULL,
-    duration_minutes INT NOT NULL DEFAULT 30,
-    service_image VARCHAR(500) NULL,
-    service_type ENUM(
-        'haircut',
-        'beard_trim',
-        'hair_wash',
-        'hair_coloring',
-        'combo',
-        'vip',
-        'kids',
-        'other'
-    ) DEFAULT 'other',
+-- --------------------------------------------------------
+-- Table structure for table `organization_structure`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `organization_structure`;
+CREATE TABLE IF NOT EXISTS `organization_structure` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `organization_id` int(11) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `employee_id` int(11) DEFAULT NULL,
+  `position_id` int(11) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `organization_id` (`organization_id`),
+  KEY `parent_id` (`parent_id`),
+  KEY `employee_id` (`employee_id`),
+  KEY `position_id` (`position_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `fk_os_org_type` FOREIGN KEY (`organization_id`) REFERENCES `organization_types` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_os_parent` FOREIGN KEY (`parent_id`) REFERENCES `organization_structure` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_os_emp` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_os_pos` FOREIGN KEY (`position_id`) REFERENCES `employee_positions` (`position_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_os_dept` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    max_customers_per_slot INT DEFAULT 1,
-    buffer_time_minutes INT DEFAULT 0,
+-- --------------------------------------------------------
+-- Table structure for table `services`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `services`;
+CREATE TABLE IF NOT EXISTS `services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_name` varchar(255) NOT NULL,
+  `service_slug` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `barber_id` int(11) DEFAULT NULL,
+  `short_description` varchar(500) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `discount_price` decimal(10,2) DEFAULT NULL,
+  `duration` int(11) NOT NULL DEFAULT 30,
+  `duration_minutes` int(11) NOT NULL DEFAULT 30,
+  `is_available` tinyint(1) DEFAULT 1,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `is_featured` tinyint(1) DEFAULT 0,
+  `image_url` varchar(500) DEFAULT NULL,
+  `service_image` varchar(500) DEFAULT NULL,
+  `service_icon` varchar(50) DEFAULT NULL,
+  `max_customers_per_slot` int(11) DEFAULT 1,
+  `preparation_time` int(11) DEFAULT 0,
+  `cleanup_time` int(11) DEFAULT 0,
+  `booking_buffer_time` int(11) DEFAULT 0,
+  `service_type` varchar(50) DEFAULT 'standard',
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `service_slug` (`service_slug`),
+  KEY `category_id` (`category_id`),
+  KEY `barber_id` (`barber_id`),
+  CONSTRAINT `fk_services_category` FOREIGN KEY (`category_id`) REFERENCES `service_categories` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_services_barber` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    is_available TINYINT(1) DEFAULT 1,
-    is_featured TINYINT(1) DEFAULT 0,
-    published_publicly TINYINT(1) DEFAULT 1,
+-- --------------------------------------------------------
+-- Table structure for table `service_barber_assignments`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `service_barber_assignments`;
+CREATE TABLE IF NOT EXISTS `service_barber_assignments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `barber_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `service_barber_unique` (`service_id`,`barber_id`),
+  KEY `barber_id` (`barber_id`),
+  CONSTRAINT `fk_sba_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sba_barber` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    status ENUM(
-        'active',
-        'inactive',
-        'draft',
-        'archived'
-    ) DEFAULT 'active',
+-- --------------------------------------------------------
+-- Table structure for table `availability_slots`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `availability_slots`;
+CREATE TABLE IF NOT EXISTS `availability_slots` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `barber_id` int(11) DEFAULT NULL,
+  `service_id` int(11) DEFAULT NULL,
+  `available_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `slot_status` enum('available','booked','blocked') DEFAULT 'available',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `barber_id` (`barber_id`),
+  KEY `service_id` (`service_id`),
+  KEY `idx_date_status` (`available_date`,`slot_status`),
+  CONSTRAINT `fk_avail_barber` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_avail_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    total_bookings INT DEFAULT 0,
-    total_completed INT DEFAULT 0,
+-- --------------------------------------------------------
+-- Table structure for table `service_bookings`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `service_bookings`;
+CREATE TABLE IF NOT EXISTS `service_bookings` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `barber_id` int(11) DEFAULT NULL,
+  `availability_slot_id` int(11) DEFAULT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `customer_email` varchar(100) NOT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  `appointment_date` date NOT NULL,
+  `appointment_time` time NOT NULL,
+  `status` enum('pending','confirmed','completed','cancelled') DEFAULT 'pending',
+  `booking_status` enum('pending','approved','rejected','confirmed','cancelled','completed') DEFAULT 'pending',
+  `approval_status` enum('waiting','pending','approved','rejected','changes_requested','cancelled') DEFAULT 'pending',
+  `requires_approval` tinyint(1) DEFAULT 1,
+  `workflow_state` varchar(50) DEFAULT 'waiting',
+  `rejection_reason` text DEFAULT NULL,
+  `booking_note` text DEFAULT NULL,
+  `reference_number` varchar(50) DEFAULT NULL,
+  `queue_status` enum('not_started','queued','serving','completed','cancelled') DEFAULT 'queued',
+  `reminder_sent` tinyint(1) DEFAULT 0,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `service_id` (`service_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `barber_id` (`barber_id`),
+  KEY `availability_slot_id` (`availability_slot_id`),
+  KEY `idx_booking_ref` (`reference_number`),
+  KEY `idx_booking_date` (`appointment_date`),
+  KEY `idx_approval_created` (`approval_status`,`created_at`),
+  CONSTRAINT `fk_sb_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`),
+  CONSTRAINT `fk_sb_customer` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_sb_barber` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_sb_slot` FOREIGN KEY (`availability_slot_id`) REFERENCES `availability_slots` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    created_by INT NULL,
-    updated_by INT NULL,
+-- --------------------------------------------------------
+-- Table structure for table `queues`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `queues`;
+CREATE TABLE IF NOT EXISTS `queues` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint(20) unsigned NOT NULL,
+  `reference_number` varchar(50) DEFAULT NULL,
+  `queue_position` int(11) NOT NULL,
+  `estimated_wait_time` int(11) DEFAULT 0,
+  `queue_status` enum('not_started','queued','waiting','serving','completed','cancelled') DEFAULT 'queued',
+  `status` enum('waiting','serving','completed','cancelled','queued','not_started') DEFAULT 'waiting',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `booking_id` (`booking_id`),
+  KEY `idx_queue_ref` (`reference_number`),
+  KEY `idx_queue_pos` (`queue_position`),
+  CONSTRAINT `fk_queues_booking` FOREIGN KEY (`booking_id`) REFERENCES `service_bookings` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
+-- --------------------------------------------------------
+-- Table structure for table `booking_reviews`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `booking_reviews`;
+CREATE TABLE IF NOT EXISTS `booking_reviews` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint(20) unsigned NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `service_id` int(11) DEFAULT NULL,
+  `barber_id` int(11) DEFAULT NULL,
+  `reviewed_by` int(11) DEFAULT NULL,
+  `review_status` varchar(50) DEFAULT 'pending',
+  `moved_to_queue` tinyint(1) DEFAULT 0,
+  `queue_position` int(11) DEFAULT NULL,
+  `confirmed_date` date DEFAULT NULL,
+  `confirmed_time` time DEFAULT NULL,
+  `reviewed_at` datetime DEFAULT NULL,
+  `rejection_reason` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `booking_id` (`booking_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `service_id` (`service_id`),
+  KEY `barber_id` (`barber_id`),
+  KEY `reviewed_by` (`reviewed_by`),
+  CONSTRAINT `fk_br_booking` FOREIGN KEY (`booking_id`) REFERENCES `service_bookings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_br_customer` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_br_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_br_barber` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_br_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    INDEX idx_category_id (category_id),
-    INDEX idx_status (status),
-    INDEX idx_public (published_publicly),
+-- --------------------------------------------------------
+-- Table structure for table `service_ratings`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `service_ratings`;
+CREATE TABLE IF NOT EXISTS `service_ratings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint(20) unsigned NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL,
+  `review` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `booking_id` (`booking_id`),
+  KEY `service_id` (`service_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `fk_sr_booking` FOREIGN KEY (`booking_id`) REFERENCES `service_bookings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sr_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sr_customer` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-    CONSTRAINT fk_services_category
-        FOREIGN KEY (category_id)
-        REFERENCES service_categories(id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_general_ci;
+-- --------------------------------------------------------
+-- Table structure for table `service_reviews`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `service_reviews`;
+CREATE TABLE IF NOT EXISTS `service_reviews` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `booking_id` bigint(20) unsigned DEFAULT NULL,
+  `barber_id` int(11) DEFAULT NULL,
+  `rating` int(11) NOT NULL,
+  `review_title` varchar(255) DEFAULT NULL,
+  `review_text` text DEFAULT NULL,
+  `status` enum('pending','approved','rejected') DEFAULT 'approved',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `service_id` (`service_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `booking_id` (`booking_id`),
+  KEY `barber_id` (`barber_id`),
+  CONSTRAINT `fk_sreviews_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sreviews_customer` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_sreviews_booking` FOREIGN KEY (`booking_id`) REFERENCES `service_bookings` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_sreviews_barber` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+-- Table structure for table `workflow_state_rules`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `workflow_state_rules`;
+CREATE TABLE IF NOT EXISTS `workflow_state_rules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `from_state` varchar(50) NOT NULL,
+  `to_state` varchar(50) NOT NULL,
+  `allowed_roles` varchar(255) NOT NULL COMMENT 'Comma-separated role names',
+  `requires_note` tinyint(1) DEFAULT 0 COMMENT 'Whether note/reason is required',
+  `is_active` tinyint(1) DEFAULT 1,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_transition` (`from_state`,`to_state`),
+  KEY `idx_from_state` (`from_state`),
+  KEY `idx_to_state` (`to_state`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Approval workflow state transition rules';
 
+-- --------------------------------------------------------
+-- Table structure for table `booking_workflow_history`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `booking_workflow_history`;
+CREATE TABLE IF NOT EXISTS `booking_workflow_history` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint(20) unsigned NOT NULL,
+  `reference_number` varchar(50) DEFAULT NULL,
+  `from_status` varchar(50) DEFAULT NULL COMMENT 'Previous approval_status',
+  `to_status` varchar(50) NOT NULL COMMENT 'New approval_status',
+  `action` enum('submitted','approved','rejected','changes_requested','resubmitted','cancelled','auto_approved') NOT NULL,
+  `action_by` int(11) DEFAULT NULL COMMENT 'User ID who performed the action',
+  `action_role` varchar(50) DEFAULT NULL COMMENT 'Role of user (Admin, Manager, Customer)',
+  `notes` text DEFAULT NULL COMMENT 'Approval notes, rejection reason, or change requests',
+  `internal_note` text DEFAULT NULL COMMENT 'Internal notes not visible to customer',
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(500) DEFAULT NULL,
+  `action_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_booking_id` (`booking_id`),
+  KEY `idx_reference_number` (`reference_number`),
+  KEY `idx_action` (`action`),
+  KEY `idx_action_by` (`action_by`),
+  KEY `idx_action_timestamp` (`action_timestamp`),
+  CONSTRAINT `fk_workflow_booking` FOREIGN KEY (`booking_id`) REFERENCES `service_bookings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_workflow_user` FOREIGN KEY (`action_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Booking approval workflow history and state transitions';
 
+-- --------------------------------------------------------
+-- Table structure for table `complaints`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `complaints`;
+CREATE TABLE IF NOT EXISTS `complaints` (
+  `complaint_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(150) NOT NULL,
+  `category_id` bigint(20) unsigned DEFAULT NULL,
+  `description` text NOT NULL,
+  `status` enum('Pending','In Progress','Resolved','Closed') NOT NULL DEFAULT 'Pending',
+  `priority` enum('Low','Medium','High','Critical') DEFAULT 'Medium',
+  `tracking_number` varchar(50) DEFAULT NULL,
+  `resolution_notes` text DEFAULT NULL,
+  `is_escalated` tinyint(1) DEFAULT 0,
+  `assigned_department_id` int(11) DEFAULT NULL,
+  `assigned_to_user_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`complaint_id`),
+  KEY `user_id` (`user_id`),
+  KEY `category_id` (`category_id`),
+  KEY `assigned_department_id` (`assigned_department_id`),
+  KEY `assigned_to_user_id` (`assigned_to_user_id`),
+  KEY `idx_tracking_num` (`tracking_number`),
+  CONSTRAINT `fk_complaint_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_complaint_cat` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_complaint_dept` FOREIGN KEY (`assigned_department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_complaint_assigned_user` FOREIGN KEY (`assigned_to_user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- inserting the values into services table.
-INSERT INTO services (
+-- --------------------------------------------------------
+-- Table structure for table `complaint_assignees`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `complaint_assignees`;
+CREATE TABLE IF NOT EXISTS `complaint_assignees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `complaint_id` int(11) NOT NULL,
+  `assignee_id` int(11) NOT NULL,
+  `assigned_by` int(11) DEFAULT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `unassigned_at` timestamp NULL DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `complaint_id` (`complaint_id`),
+  KEY `assignee_id` (`assignee_id`),
+  KEY `assigned_by` (`assigned_by`),
+  CONSTRAINT `fk_ca_complaint` FOREIGN KEY (`complaint_id`) REFERENCES `complaints` (`complaint_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ca_assignee` FOREIGN KEY (`assignee_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ca_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `complaint_comments`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `complaint_comments`;
+CREATE TABLE IF NOT EXISTS `complaint_comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `complaint_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_text` text NOT NULL,
+  `is_internal` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`comment_id`),
+  KEY `complaint_id` (`complaint_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `fk_cc_complaint` FOREIGN KEY (`complaint_id`) REFERENCES `complaints` (`complaint_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cc_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `complaint_history`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `complaint_history`;
+CREATE TABLE IF NOT EXISTS `complaint_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `complaint_id` int(11) NOT NULL,
+  `changed_by` int(11) DEFAULT NULL,
+  `old_status` varchar(50) DEFAULT NULL,
+  `new_status` varchar(50) DEFAULT NULL,
+  `change_notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`history_id`),
+  KEY `complaint_id` (`complaint_id`),
+  KEY `changed_by` (`changed_by`),
+  CONSTRAINT `fk_ch_complaint` FOREIGN KEY (`complaint_id`) REFERENCES `complaints` (`complaint_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ch_user` FOREIGN KEY (`changed_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `complaint_feedback`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `complaint_feedback`;
+CREATE TABLE IF NOT EXISTS `complaint_feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `complaint_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rating` int(11) DEFAULT NULL,
+  `comments` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`feedback_id`),
+  KEY `complaint_id` (`complaint_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `fk_cf_complaint` FOREIGN KEY (`complaint_id`) REFERENCES `complaints` (`complaint_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cf_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `complaint_attachments`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `complaint_attachments`;
+CREATE TABLE IF NOT EXISTS `complaint_attachments` (
+  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `complaint_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `file_size` int(11) DEFAULT NULL,
+  `file_type` varchar(100) DEFAULT NULL,
+  `uploaded_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`attachment_id`),
+  KEY `complaint_id` (`complaint_id`),
+  KEY `uploaded_by` (`uploaded_by`),
+  CONSTRAINT `fk_ca_attach_complaint` FOREIGN KEY (`complaint_id`) REFERENCES `complaints` (`complaint_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ca_uploaded_by` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `cms_menus`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `cms_menus`;
+CREATE TABLE IF NOT EXISTS `cms_menus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `path` varchar(255) DEFAULT NULL,
+  `icon` text DEFAULT NULL,
+  `color` varchar(50) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `order_index` int(11) DEFAULT 0,
+  `is_section` tinyint(1) DEFAULT 0,
+  `is_dropdown` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `parent_id` (`parent_id`),
+  CONSTRAINT `fk_menu_parent` FOREIGN KEY (`parent_id`) REFERENCES `cms_menus` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `role_menu_permissions`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `role_menu_permissions`;
+CREATE TABLE IF NOT EXISTS `role_menu_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `can_view` tinyint(1) DEFAULT 1,
+  `can_create` tinyint(1) DEFAULT 0,
+  `can_edit` tinyint(1) DEFAULT 0,
+  `can_delete` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_menu_unique` (`role_id`,`menu_id`),
+  KEY `menu_id` (`menu_id`),
+  CONSTRAINT `fk_rmp_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_rmp_menu` FOREIGN KEY (`menu_id`) REFERENCES `cms_menus` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `user_menu_permissions`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `user_menu_permissions`;
+CREATE TABLE IF NOT EXISTS `user_menu_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `permission_type` enum('allow','deny') NOT NULL DEFAULT 'allow',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_menu_unique` (`user_id`,`menu_id`),
+  KEY `menu_id` (`menu_id`),
+  CONSTRAINT `fk_ump_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ump_menu` FOREIGN KEY (`menu_id`) REFERENCES `cms_menus` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `active_sessions`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `active_sessions`;
+CREATE TABLE IF NOT EXISTS `active_sessions` (
+  `user_id` int(11) NOT NULL,
+  `jti` varchar(255) NOT NULL,
+  `last_activity` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `fk_as_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `approvalhierarchy`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `approvalhierarchy`;
+CREATE TABLE IF NOT EXISTS `approvalhierarchy` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `step_name` varchar(100) NOT NULL,
+  `approver_role` varchar(50) DEFAULT NULL,
+  `approver_user_id` int(11) DEFAULT NULL,
+  `step_order` int(11) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `approver_user_id` (`approver_user_id`),
+  CONSTRAINT `fk_ah_user` FOREIGN KEY (`approver_user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `audit_logs`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `audit_logs`;
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `entity` varchar(100) DEFAULT NULL,
+  `entity_id` int(11) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `idx_audit_action` (`action`),
+  KEY `idx_audit_created` (`created_at`),
+  CONSTRAINT `fk_al_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `blocked_ips`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `blocked_ips`;
+CREATE TABLE IF NOT EXISTS `blocked_ips` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(45) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `blocked_until` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ip_address` (`ip_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `contact_messages`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `contact_messages`;
+CREATE TABLE IF NOT EXISTS `contact_messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `subject` varchar(200) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` enum('unread','read','replied') DEFAULT 'unread',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `subscribers`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `subscribers`;
+CREATE TABLE IF NOT EXISTS `subscribers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `status` enum('active','unsubscribed') DEFAULT 'active',
+  `subscribed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `system_settings`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `system_settings`;
+CREATE TABLE IF NOT EXISTS `system_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `setting_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `revoked_tokens`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `revoked_tokens`;
+CREATE TABLE IF NOT EXISTS `revoked_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` text NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `notifications`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `type` varchar(50) DEFAULT 'general',
+  `is_read` tinyint(1) DEFAULT 0,
+  `reference_id` int(11) DEFAULT NULL,
+  `reference_type` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `fk_notif_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ========================================================
+-- SECTION 2: SEED DATA & INITIAL RECORDS
+-- ========================================================
+
+--
+-- Dumping data for table `roles`
+--
+INSERT IGNORE INTO `roles` (`role_id`, `role_name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Admin', 1, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(2, 'Barber', 1, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(3, 'Customer', 1, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(4, 'Manager', 1, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(5, 'Receptionist', 1, '2026-03-01 00:00:00', '2026-03-01 00:00:00')
+ON DUPLICATE KEY UPDATE `role_name` = VALUES(`role_name`), `status` = VALUES(`status`);
+
+--
+-- Dumping data for table `organization_types`
+--
+INSERT INTO `organization_types` (`id`, `name`, `description`, `color`, `level_order`, `created_at`) VALUES
+(1, 'CEO', 'Top level organization', 'from-purple-600 to-purple-700', 1, '2025-12-15 13:52:30'),
+(2, 'Department', 'Major functional area', 'from-blue-600 to-blue-700', 4, '2025-12-15 13:52:30'),
+(3, 'Directorate', 'Sub-division of department', 'from-teal-600 to-teal-700', 3, '2025-12-15 13:52:30'),
+(4, 'Division', 'Specific Division', 'from-green-600 to-green-700', 5, '2025-12-15 13:52:30'),
+(7, 'Deputy CEO', 'Deputy CEO', 'from-orange-600 to-orange-700', 2, '2025-12-16 07:31:32'),
+(8, 'unit', 'unit', 'linear-gradient(to right, #7c3aed, #5b21b6)', 6, '2025-12-16 08:55:42'),
+(9, 'Senior Software Developer', 'Senior Software Developer', 'linear-gradient(to right, #e11d48, #9f1239)', 7, '2026-03-19 11:15:29'),
+(10, ' Software Developer Specialist', 'Software Developer Specialist', 'from-gray-600 to-gray-700', 8, '2026-03-19 11:16:04'),
+(11, ' Software Developer Assistant', ' Software Developer Assistant', 'from-gray-600 to-gray-700', 9, '2026-03-19 11:16:52'),
+(12, 'Senior', 'Senior', 'linear-gradient(to right, #4f46e5, #3730a3)', 10, '2026-03-20 05:27:27'),
+(13, 'Specialist', 'Specialist', 'linear-gradient(to right, #059669, #065f46)', 11, '2026-03-20 05:27:54'),
+(14, 'Assistant', 'Assistant', 'linear-gradient(to right, #0284c7, #075985)', 12, '2026-03-20 05:28:22');
+
+--
+-- Dumping data for table `departments`
+--
+INSERT INTO `departments` (`department_id`, `name`, `description`, `created_at`) VALUES
+(1, 'IT', 'Information Technology Department', '2026-01-02 10:25:30'),
+(2, 'HR', 'Human Resources', '2026-01-02 10:25:30'),
+(3, 'Finance', 'Finance and Accounts', '2026-01-02 10:25:30'),
+(4, 'Marketing', 'Marketing and Public Relations', '2026-01-02 10:25:30');
+
+--
+-- Dumping data for table `employee_positions`
+--
+INSERT INTO `employee_positions` (`id`, `employee_id`, `org_node_id`, `is_primary`, `is_delegation`, `created_at`) VALUES
+(1, 151, 13, 1, 0, '2026-03-19 11:10:44'),
+(2, 151, 15, 0, 1, '2026-03-19 11:11:39'),
+(3, 151, 16, 0, 1, '2026-03-19 11:11:50'),
+(4, 146, 11, 1, 0, '2026-03-19 11:12:47'),
+(5, 149, 52, 1, 0, '2026-03-19 11:21:25'),
+(6, 109, 55, 1, 0, '2026-03-20 05:31:29'),
+(7, 152, 14, 1, 1, '2026-03-20 05:38:43'),
+(8, 152, 17, 0, 1, '2026-03-20 05:39:19'),
+(9, 152, 18, 0, 1, '2026-03-20 05:39:35'),
+(10, 143, 10, 1, 0, '2026-03-20 05:40:11'),
+(11, 142, 9, 1, 0, '2026-03-20 05:41:17'),
+(12, 139, 52, 1, 0, '2026-03-20 11:47:21'),
+(13, 72, 10, 1, 0, '2026-03-20 14:00:50'),
+(14, 146, 14, 1, 0, '2026-03-23 06:56:06'),
+(15, 117, 19, 1, 0, '2026-03-23 06:56:06'),
+(17, 109, 55, 1, 0, '2026-03-23 08:48:56'),
+(18, 139, 26, 1, 0, '2026-03-23 08:48:56');
+
+--
+-- Dumping data for table `categories`
+--
+INSERT IGNORE INTO categories (category_id, category_name, description, status) VALUES
+(1, 'Service Quality', 'Issues related to the quality of service provided', 'active'),
+(2, 'Staff Behavior', 'Complaints about staff conduct or professionalism', 'active'),
+(3, 'Cleanliness & Hygiene', 'Concerns about shop cleanliness and hygiene standards', 'active'),
+(4, 'Booking & Scheduling', 'Issues with appointment booking or scheduling', 'active'),
+(5, 'Pricing & Billing', 'Concerns about pricing, charges, or billing', 'active'),
+(6, 'Wait Time', 'Complaints about excessive waiting times', 'active'),
+(7, 'Product Quality', 'Issues with products used during service', 'active'),
+(8, 'Other', 'Other complaints not covered by above categories', 'active');
+
+--
+-- Dumping data for table `service_categories`
+--
+INSERT IGNORE INTO service_categories (
+    id,
+    category_name,
+    description,
+    category_image,
+    category_icon,
+    status,
+    display_order
+) VALUES
+(1, 'Haircut Services', 
+    'Professional haircut and hair styling services for men, women, and children including classic cuts, fades, and modern styles.',
+    '/uploads/service-categories/haircut.jpg',
+    'fa-solid fa-scissors',
+    'active',
+    1),
+    
+(2, 'Beard & Grooming', 
+    'Complete beard trimming, shaping, shaving, and facial grooming services to keep you looking sharp.',
+    '/uploads/service-categories/beard.jpg',
+    'fa-solid fa-user-tie',
+    'active',
+    2),
+    
+(3, 'Premium & VIP Services', 
+    'Luxury grooming packages with premium treatments, hot towel shaves, and VIP attention.',
+    '/uploads/service-categories/premium.jpg',
+    'fa-solid fa-crown',
+    'active',
+    3),
+    
+(4, 'Hair Treatments', 
+    'Hair coloring, highlighting, perming, and specialized treatment services.',
+    '/uploads/service-categories/treatments.jpg',
+    'fa-solid fa-spray-can',
+    'active',
+    4),
+    
+(5, 'Kids Services', 
+    'Special services designed for children with patience and fun atmosphere.',
+    '/uploads/service-categories/kids.jpg',
+    'fa-solid fa-child',
+    'active',
+    5);
+
+--
+-- Dumping data for table `employees`
+--
+INSERT INTO `employees` (`employee_id`, `name`, `role_id`, `department_id`, `supervisor_id`, `fname`, `lname`, `email`, `phone`, `sex`) VALUES
+(21, 'www www', 1, 1, NULL, 'hayal', 'tamrat', NULL, '0916048977', NULL),
+(34, 'hayaltame', NULL, 2, 21, 'ggg', 'ggg', 'beki@gmail.com', '0934556621', 'F'),
+(36, 'hayaltame', NULL, 2, 0, 'some', 'one', 'bekeei@gmail.com', '0934556621', 'M'),
+(37, 'hayaltame111', 1, NULL, NULL, 'some11', 'tame', 'oneq@gmail.com', '0934556688', 'M'),
+(38, 'hayaltame3333', 1, NULL, NULL, 'aaa', 'a', 'one1a111@gmail.com', '0934556111', 'M'),
+(39, 'hayaltame1114444', 1, NULL, NULL, 'some00', 'one11', 'one222@gmail.com', '0934556688', 'M'),
+(40, 'hayaltame1114444444', 1, NULL, NULL, 'yeab444', 'one4444', 'beki444@gmail.com', '0934556444', 'M'),
+(41, 'hayaltame444', 1, NULL, NULL, 'yeabeee', 'eeee', 'eeeee@gmail.com', '0934556644', 'M'),
+(43, 'rtttttt44', 1, NULL, NULL, 'yeabeee', 'eeee', 'eeee44e@gmail.com', '0934556677', 'M'),
+(45, 'tttttttttttt111', 1, NULL, NULL, 'yeabrrr', 'tamer', 'onerrr@gmail.com', '0934556655', 'M'),
+(46, 'bekele woya', 8, NULL, NULL, 'bekele', 'woya', 'woya@gmail.com', '0933499094', 'M'),
+(47, 'admin admin', 1, 2, 1, 'admin', 'admin', 'admin@email.com', '123-456-7890', 'M'),
+(48, 'hylt', 8, NULL, 0, 'hl', 'tm', 'hl@gmail.com', '0934556644', 'M'),
+(49, 'yonas', 2, NULL, NULL, 'yonas', 'ceo', 'yonas@itp.org', '0933499093', 'M'),
+(50, 'simegn', 5, 2, 49, 'geter', 'geter', 'simegn@itp.org', '0933499094', 'M'),
+(51, 'hayal@itp.org', 8, 2, 50, 'hayal', 'hayal', 'hayal@itp.org', '0933499097', 'M'),
+(54, 'hayalt@itp.org', 8, 2, 0, 'hayalt', 'hayalt', 'hayalt@itp.org', '0933499097', 'M'),
+(55, 'abebe', 4, NULL, 0, 'abebe', 'abe', 'abe@itp.et', '0934556624', 'M'),
+(56, '333333333', 4, 2, 49, 'some00333333', 'one333333', 'beki33333333333@gmail.com', '0934556333', 'M'),
+(57, 'staf', 8, 2, 56, 'staf', 'staf', 'staf@gmail.com', '0934556688', 'M'),
+(58, 'nebyat', 6, 2, 50, 'nebyat', 'nebyat', 'nebyat@itp.et', '093455444', 'F'),
+(59, 'ewunetu', 7, 2, 58, 'ewunetu', 'ewunetu', 'ewunetu@itp.et', '0934556453', 'M'),
+(60, 'general', 3, NULL, 49, 'general', 'manager', 'manager@itp.et', '0933499366', 'M'),
+(62, 'staf1', 8, 2, 66, 'staf1', 'staf1', 'staf1@itp.et', '0934556688', 'M'),
+(63, 'hayalta4444', 6, 2, 50, 'some', 'one', 'berrrrrki@gmail.com', '0934556555', 'M'),
+(64, 'yeabeeeee', 1, NULL, NULL, 'some', 'one', 'eeee@gmail.com', '0934556688', 'M'),
+(65, 'team leader', 7, 2, 58, 'teaml', 'teaml', 'teaml@gmail.com', '09373773333', 'M'),
+(66, 'team leader', 7, 2, 58, 'teamleader', 'teamleader', 'teamleader@gmail.com', '09373773333', 'M'),
+(67, 'hayal', 1, NULL, NULL, 'hayal', 'tamrat', 'hayal@itp.it', '0916048977', 'M'),
+(68, 'hayal', 8, 2, 65, 'hayal', 'tamrat', 'hayalt@itp.it', '0916048977', 'M'),
+(69, 'registrar@gmail.com', 5, NULL, NULL, 'registrar', 'registrar', 'registrar@gmail.com', '0916048977', 'M'),
+(70, 'Nathan', 1, NULL, NULL, 'Hayal', 'Girum', 'nathan@itp.et', '0976180462', 'M'),
+(71, 'Hayal Tamrat Girum', 3, NULL, NULL, 'Hayal', 'Girum', 'hayal@gmai.com', '0976180462', 'M'),
+(72, 'nathay tamrat', 5, NULL, 70, 'hayal', 'tamrat', 'regist@bus.com', '0916048977', 'M'),
+(73, 'hayal tamrat', 1, NULL, NULL, 'nathay', 'tamrat', 'astu@nathayblog.com', '0916048977', 'M'),
+(75, 'hayal tamrat', 4, NULL, 70, 'nathay', 'tamrat', 'hager@temechain.com', '0916048977', 'M'),
+(78, 'hayal tamrat', 4, NULL, 70, 'nathay', 'tamrat', 'hager1@temechain.com', '0916048977', 'M'),
+(82, 'hayal tamrat', 4, 1, 49, 'hayal', 'tamrat', 'hager22@temechain.com', '0916048977', 'M'),
+(83, 'Hayal Tamrat', 5, NULL, NULL, 'Hayal', 'Tamrat', 'Hayalt@hu.edu.et', '0916048977', 'M'),
+(84, 'Hayal ', 1, NULL, NULL, 'Nathay ', 'Nathay ', 'Nathantamrat50@gmail.com', '90188837377', 'M'),
+(85, 'nathay tamrat', 5, NULL, NULL, 'nathay', 'tamrat', 'astu@nathayblog.et', '0916048977', 'M'),
+(86, 'agent', 6, 1, 50, 'test', 'some one', 'agent@lonche.com', 'itp@123', 'M'),
+(87, 'hayal tamrat', 1, 1, NULL, 'hayal', 'tamrat', 'hayaltamrat@gmail.com', '+25191222112', NULL),
+(88, 'yossef knfe', 4, 2, NULL, 'yossef', 'knfe', 'yosef@gmail.com', '0913566735', NULL),
+(89, 'test21 test21', 3, 1, NULL, 'test21', 'test21', 'test21@gmail.com', '', NULL),
+(90, 'Hayal Tamrat', 1, 1, NULL, 'Hayal', 'Tamrat', 'kidoastu1993@gmail.com', '0913566735', NULL),
+(91, 'nathan tame', 1, 1, NULL, 'nathan', 'tame', 'hayaltamrat3@gmail.com', '0909090909', NULL),
+(92, 'test admin', 1, 1, NULL, 'test', 'admin', 'testadmin@gmail.com', '0913566735', NULL),
+(93, 'test hr', 4, 2, NULL, 'test', 'hr', 'testhr@gmail.com', '', NULL),
+(94, 'test Leasing', 0, 1, NULL, 'test', 'Leasing', 'testleasing@gmail.com', '0913566735', NULL),
+(95, 'test conten', 3, 1, NULL, 'test', 'conten', 'testcontent@gmail.com', '0913566735', NULL),
+(96, 'test event', 5, 1, NULL, 'test', 'event', 'testevent@gmail.com', '0913566735', NULL),
+(97, 'test follow_up', 2, 1, NULL, 'test', 'follow_up', 'testfollowup@gmail.com', '0913566735', NULL),
+(98, 'content tets1', 3, 1, NULL, 'content', 'tets1', 'contenttest1@gmail.com', '0917266671', NULL),
+(99, 'test test', 1, 1, NULL, 'test', 'test', 'test@gmail.com', '98893219831298', NULL),
+(100, 'Security Auditor', 1, 1, NULL, 'Security', 'Auditor', 'audit_1771417756741@example.com', '0900000000', NULL),
+(5000, 'Security Auditor', 1, 1, NULL, 'Security', 'Auditor', 'audit_1771418828658@example.com', '0900000000', NULL),
+(5001, 'Security Auditor', 1, 1, NULL, 'Security', 'Auditor', 'audit_1771419160931@example.com', '0900000000', NULL),
+(5002, 'tets tets', 4, 2, NULL, 'tets', 'tets', 'tets113@gmail.com', '0917122712', NULL),
+(5003, 'contet contet', 3, 1, NULL, 'contet', 'contet', 'contet1@gmail.com', '+251913566735', NULL);
+
+--
+-- Dumping data for table `users`
+--
+INSERT IGNORE INTO `users` (`user_id`, `employee_id`, `user_name`, `password`, `role_id`, `status`, `online_flag`, `avatar_url`, `created_at`, `updated_at`) VALUES
+(1, 1, 'admin', '$2b$10$7K3VvLfx53.pP59eYfUze.n3Xv.r5Z7b2Vf00Wv7.n4sR2.z6q4l.', 1, '1', 0, NULL, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(2, 2, 'barber1', '$2b$10$7K3VvLfx53.pP59eYfUze.n3Xv.r5Z7b2Vf00Wv7.n4sR2.z6q4l.', 2, '1', 0, NULL, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(3, 3, 'customer1', '$2b$10$7K3VvLfx53.pP59eYfUze.n3Xv.r5Z7b2Vf00Wv7.n4sR2.z6q4l.', 3, '1', 0, NULL, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(4, 4, 'manager1', '$2b$10$7K3VvLfx53.pP59eYfUze.n3Xv.r5Z7b2Vf00Wv7.n4sR2.z6q4l.', 4, '1', 0, NULL, '2026-03-01 00:00:00', '2026-03-01 00:00:00'),
+(5, 5, 'receptionist1', '$2b$10$7K3VvLfx53.pP59eYfUze.n3Xv.r5Z7b2Vf00Wv7.n4sR2.z6q4l.', 5, '1', 0, NULL, '2026-03-01 00:00:00', '2026-03-01 00:00:00')
+ON DUPLICATE KEY UPDATE `role_id` = VALUES(`role_id`), `status` = VALUES(`status`);
+
+--
+-- Dumping data for table `organization_structure`
+--
+INSERT INTO `organization_structure` (`id`, `name`, `name_amharic`, `type`, `parent_id`, `level`, `description`, `head_employee_id`, `status`, `created_at`, `updated_at`) VALUES
+(9, 'CEO', 'CEO', 'CEO', NULL, 1, 'CEO', NULL, 'active', '2025-12-16 07:33:36', '2025-12-16 07:33:36'),
+(10, 'Deputy CEO', 'Deputy CEO', 'Deputy CEO', 9, 2, 'Deputy CEO', NULL, 'active', '2025-12-16 07:34:14', '2025-12-16 07:34:14'),
+(11, 'IT Directorate', 'IT Directorate', 'Directorate', 10, 3, 'IT Directorate', NULL, 'active', '2025-12-16 07:35:17', '2025-12-16 07:35:17'),
+(12, 'Constraction  Directorate', 'Constraction  Directorate', 'Directorate', 10, 3, 'Constraction  Directorate', NULL, 'active', '2025-12-16 07:35:45', '2025-12-16 07:35:45'),
+(13, 'Inovation and Encubation Department', 'Inovation and Encubation Department', 'Department', 11, 4, 'Inovation and Encubation Department', NULL, 'active', '2025-12-16 07:39:08', '2025-12-16 07:39:08'),
+(14, 'Digital Service and Infrastructure Devevelopment', 'Digital Service and Infrastructure Devevelopment', 'Department', 11, 4, 'Digital Service and Infrastructure Devevelopment', NULL, 'active', '2025-12-16 07:40:31', '2025-12-16 07:40:31'),
+(15, 'Reaserch Section ', 'Reaserch Section ', 'Section', 13, 5, 'Reaserch Section ', NULL, 'active', '2025-12-16 07:41:09', '2025-12-16 07:41:09'),
+(16, 'Encubation Section ', 'Encubation Section ', 'Section', 13, 5, 'Encubation Section ', NULL, 'active', '2025-12-16 07:41:37', '2025-12-16 07:41:37'),
+(17, 'Network and Infrastructure ', 'Network and Infrastructure ', 'Section', 14, 5, 'Network and Infrastructure ', NULL, 'active', '2025-12-16 07:42:18', '2025-12-16 07:42:18'),
+(18, 'Software development', 'Software development', 'Section', 14, 5, 'Software development', NULL, 'active', '2025-12-16 07:43:06', '2025-12-16 07:43:06'),
+(19, 'Ciyber Security ', 'Ciyber Security ', 'Section', 14, 5, 'Ciyber Security ', NULL, 'active', '2025-12-16 07:43:29', '2025-12-16 07:43:29'),
+(20, 'Construction and Design ', 'Construction and Design ', 'Department', 12, 4, 'Construction and Design ', NULL, 'active', '2025-12-16 07:45:58', '2025-12-16 07:45:58'),
+(21, 'Construction ', 'Construction', 'Section', 20, 5, 'Construction', NULL, 'active', '2025-12-16 07:46:29', '2025-12-16 07:46:29'),
+(22, 'Design ', 'Design', 'Section', 20, 5, 'Design Section ', NULL, 'active', '2025-12-16 07:46:51', '2025-12-16 07:46:51'),
+(24, 'Land and Office Managment', 'Land and Office Managment', 'Department', 12, 4, 'Land and Office Managment', NULL, 'active', '2025-12-16 07:49:24', '2025-12-16 07:49:24'),
+(25, 'Utilities and service ', 'Utilities and service ', 'Department', 12, 4, 'Utilities and service ', NULL, 'active', '2025-12-16 07:50:30', '2025-12-16 07:50:30'),
+(26, 'Enviroment and Greenery ', 'Enviroment and Greenery ', 'Department', 12, 4, 'Enviroment and Greenery ', NULL, 'active', '2025-12-16 07:51:34', '2025-12-16 07:51:34'),
+(27, 'Markating ', 'Markating ', 'Department', 10, 3, 'Markating Department', NULL, 'active', '2025-12-16 07:54:07', '2025-12-16 07:54:07'),
+(28, 'Markating and Sales ', 'Markating and Sales ', 'Section', 27, 4, 'Markating and Sales ', NULL, 'active', '2025-12-16 07:54:49', '2025-12-16 07:54:49'),
+(29, 'Investor Support', 'Investor Support', 'Section', 27, 4, 'Investor Support', NULL, 'active', '2025-12-16 07:55:18', '2025-12-16 07:55:18'),
+(30, 'Bussines Development and Support', 'Bussines Development and Support', 'Section', 27, 4, 'Bussines Development and Support', NULL, 'active', '2025-12-16 07:56:02', '2025-12-16 07:56:02'),
+(31, 'Corporate Adminstration Directorate', 'Corporate Adminstration Directorate', 'Directorate', 9, 2, 'Corporate Adminstration Directorate', NULL, 'active', '2025-12-16 07:57:02', '2025-12-16 07:57:25'),
+(32, 'Finance Department', 'Finance Department', 'Department', 31, 3, 'Finance Department', NULL, 'active', '2025-12-16 07:58:00', '2025-12-16 07:58:00'),
+(33, 'HR Department', 'HR Department', 'Department', 31, 3, 'HR Department', NULL, 'active', '2025-12-16 07:58:22', '2025-12-16 07:58:22'),
+(34, 'Procrument and Resource Admin', 'Procrument and Resource Admin', 'Department', 31, 3, 'Procrument and Resource Admin', NULL, 'active', '2025-12-16 07:59:08', '2025-12-16 07:59:08'),
+(35, 'Income and Cost Section ', 'Income and Cost Section ', 'Section', 32, 4, 'Income and Cost Section ', NULL, 'active', '2025-12-16 08:00:55', '2025-12-16 08:00:55'),
+(36, 'Budget Section ', 'Budget Section ', 'Section', 32, 4, 'Budget Section ', NULL, 'active', '2025-12-16 08:02:21', '2025-12-16 08:02:21'),
+(37, 'Procrument Section ', 'Procrument Section ', 'Section', 34, 4, 'Procrument Section ', NULL, 'active', '2025-12-16 08:02:56', '2025-12-16 08:03:46'),
+(38, 'Inventory Admin', 'Inventory Admin', 'Section', 34, 4, 'Inventory Admin', NULL, 'active', '2025-12-16 08:02:58', '2025-12-16 08:04:30'),
+(39, 'General Service ', 'General Service ', 'Section', 34, 4, 'General Service ', NULL, 'active', '2025-12-16 08:05:25', '2025-12-16 08:05:25'),
+(40, 'HR Admin ', 'HR Admin ', 'Section', 33, 4, 'HR Admin ', NULL, 'active', '2025-12-16 08:06:04', '2025-12-16 08:06:04'),
+(41, 'Training and HR development', 'Training and HR development', 'Section', 33, 4, 'Training and HR development', NULL, 'active', '2025-12-16 08:06:49', '2025-12-16 08:06:49'),
+(42, 'Security ', 'Security ', 'Department', 9, 2, NULL, NULL, 'active', '2025-12-16 08:53:00', '2025-12-16 08:53:00'),
+(43, 'CEO Office Addmistration ', 'CEO Office Addmistration ', 'Department', 9, 2, NULL, NULL, 'active', '2025-12-16 08:53:55', '2025-12-16 08:53:55'),
+(44, 'Law Department', 'Law Department', 'Department', 9, 2, NULL, NULL, 'active', '2025-12-16 08:54:21', '2025-12-16 08:54:35'),
+(45, 'Strategic Advisor', 'Strategic Advisor', 'unit', 9, 2, NULL, NULL, 'active', '2025-12-16 08:56:27', '2025-12-16 08:57:07'),
+(46, 'Law Service ', 'Law Service ', 'Section', 44, 3, NULL, NULL, 'active', '2025-12-16 08:58:26', '2025-12-16 08:58:26'),
+(47, 'Complaice Section ', 'Complaice Section ', 'Section', 44, 3, NULL, NULL, 'active', '2025-12-16 08:58:47', '2025-12-16 08:58:47'),
+(48, 'Auditor', 'Auditor', 'Section', 9, 2, NULL, NULL, 'active', '2025-12-16 08:59:47', '2025-12-16 08:59:47'),
+(49, 'Corporation Communication Section ', 'Corporation Communication Section ', 'Section', 9, 2, NULL, NULL, 'active', '2025-12-16 09:00:36', '2025-12-16 09:00:36'),
+(50, 'Plan and followup ', 'Plan and followup ', 'Section', 9, 2, NULL, NULL, 'active', '2025-12-16 09:01:49', '2025-12-16 09:01:49'),
+(51, 'Senior', 'Senior', 'Senior Software Developer', 18, 6, NULL, NULL, 'active', '2026-03-19 11:18:02', '2026-03-19 11:18:02'),
+(52, 'Specialist', 'Specialist', ' Software Developer Specialist', 18, 6, NULL, NULL, 'active', '2026-03-19 11:18:31', '2026-03-19 11:18:31'),
+(53, 'Assistant', 'Assistant', ' Software Developer Assistant', 18, 6, NULL, NULL, 'active', '2026-03-19 11:18:52', '2026-03-19 11:18:52'),
+(54, 'Senior System admin', 'Senior System admin', 'Senior', 17, 6, NULL, NULL, 'active', '2026-03-20 05:29:38', '2026-03-20 05:29:38'),
+(55, ' System admin Specialist', ' System admin Specialist', 'Specialist', 17, 6, NULL, NULL, 'active', '2026-03-20 05:30:06', '2026-03-20 05:30:06'),
+(56, ' System admin Asistant', ' System admin Asistant', 'Assistant', 17, 6, NULL, NULL, 'active', '2026-03-20 05:30:31', '2026-03-20 05:30:31');
+
+--
+-- Dumping data for table `services`
+--
+INSERT IGNORE INTO services (
+    id,
     category_id,
     service_name,
     service_slug,
     short_description,
     description,
     price,
+    discount_price,
     duration_minutes,
     service_type,
+    is_available,
     is_featured,
     published_publicly,
-    status
-)
-VALUES
-
-(
-    1,
-    'Classic Haircut',
+    status,
+    buffer_time_minutes
+) VALUES
+-- Haircut Services
+(1, 1, 'Classic Haircut',
     'classic-haircut',
-    'Professional haircut service',
-    'Professional haircut with styling and finishing.',
-    150.00,
+    'Traditional professional haircut',
+    'Traditional haircut with scissor and clipper work, includes wash and basic styling.',
+    250.00,
+    NULL,
     30,
     'haircut',
-    TRUE,
-    TRUE,
-    'active'
-),
+    1, 1, 1,
+    'active',
+    5),
 
-(
-    2,
-    'Beard Trim',
-    'beard-trim',
-    'Professional beard shaping',
-    'Complete beard trimming and styling service.',
-    100.00,
+(2, 1, 'Premium Fade',
+    'premium-fade',
+    'Modern fade haircut with precision',
+    'Skin fade, low fade, high fade, or mid fade with razor line-up and styling.',
+    350.00,
+    300.00,
+    45,
+    'haircut',
+    1, 1, 1,
+    'active',
+    5),
+
+(3, 1, 'Buzz Cut',
+    'buzz-cut',
+    'Quick and clean all-over cut',
+    'Fast all-over clipper cut, perfect for low maintenance style.',
+    150.00,
+    NULL,
+    15,
+    'haircut',
+    1, 0, 1,
+    'active',
+    5),
+
+-- Beard Services
+(4, 2, 'Beard Trim & Shape',
+    'beard-trim-shape',
+    'Professional beard trimming and shaping',
+    'Precision beard trimming and shaping with razor edge line-up.',
+    150.00,
+    NULL,
     20,
     'beard_trim',
-    FALSE,
-    TRUE,
-    'active'
-),
+    1, 0, 1,
+    'active',
+    5),
 
-(
-    3,
-    'Haircut + Beard Combo',
-    'haircut-beard-combo',
+(5, 2, 'Hot Towel Shave',
+    'hot-towel-shave',
+    'Luxury straight razor shave',
+    'Traditional hot towel straight razor shave with pre-shave oil and aftershave.',
+    300.00,
+    NULL,
+    30,
+    'beard_trim',
+    1, 1, 1,
+    'active',
+    10),
+
+-- Premium & Combo Services
+(6, 3, 'Executive Package',
+    'executive-package',
     'Complete grooming package',
-    'Haircut and beard trimming package.',
-    220.00,
-    60,
+    'Haircut + Beard trim + Hot towel treatment + Face mask + Head massage.',
+    600.00,
+    550.00,
+    90,
     'combo',
-    TRUE,
-    TRUE,
-    'active'
-);
+    1, 1, 1,
+    'active',
+    15),
 
+(7, 3, 'VIP Royal Treatment',
+    'vip-royal-treatment',
+    'Ultimate luxury grooming experience',
+    'Full VIP service: Premium haircut, hot towel shave, facial, scalp treatment, shoulder massage.',
+    1200.00,
+    1000.00,
+    120,
+    'vip',
+    1, 1, 1,
+    'active',
+    20),
 
-CREATE TABLE service_categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    category_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    category_image VARCHAR(500),
-    category_icon VARCHAR(255) NULL,
-    status ENUM('active','inactive') DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- Hair Treatments
+(8, 4, 'Hair Coloring',
+    'hair-coloring',
+    'Professional hair coloring service',
+    'Full head hair coloring with premium products and color consultation.',
+    500.00,
+    NULL,
+    60,
+    'hair_coloring',
+    1, 0, 1,
+    'active',
+    10),
 
---- inserting the values into the service_categories table.
+(9, 4, 'Hair Wash & Conditioning',
+    'hair-wash-conditioning',
+    'Deep cleansing and conditioning',
+    'Professional hair wash with scalp massage and conditioning treatment.',
+    100.00,
+    NULL,
+    20,
+    'hair_wash',
+    1, 0, 1,
+    'active',
+    5),
 
-INSERT INTO service_categories (
-    category_name,
-    description,
-    category_image,
-    category_icon,
-    status
-)
+-- Kids Services
+(10, 5, 'Kids Haircut',
+    'kids-haircut',
+    'Haircut for children (under 12)',
+    'Patient and fun haircut service specially designed for children.',
+    200.00,
+    NULL,
+    25,
+    'kids',
+    1, 0, 1,
+    'active',
+    5);
+
+--
+-- Dumping data for table `workflow_state_rules`
+--
+INSERT INTO `workflow_state_rules` 
+  (`from_state`, `to_state`, `allowed_roles`, `requires_note`, `description`) 
 VALUES
-
-(
-    'Haircut Services',
-    'Professional haircut and hair styling services for men, women, and children.',
-    'uploads/service-categories/hair-cut.jpg',
-    'fa-solid fa-scissors',
-    'active'
-),
-
-(
-    'Beard & Grooming Services',
-    'Beard trimming, shaping, shaving, and facial grooming services.',
-    'uploads/service-categories/beard-grooming.jpg',
-    'fa-solid fa-user-tie',
-    'active'
-),
-
-(
-    'Premium & Combo Services',
-    'Premium grooming packages including haircut, beard styling, hair wash, and VIP treatments.',
-    'uploads/service-categories/premium-combo.jpg',
-    'fa-solid fa-crown',
-    'active'
-);
-
-
---  creating the complaint assignees table.
-
-CREATE TABLE IF NOT EXISTS complaint_assignees (
-    assignee_id INT AUTO_INCREMENT PRIMARY KEY,
-    complaint_id INT NOT NULL,
-    user_id INT NOT NULL,
-    department VARCHAR(100),
-    location VARCHAR(100),
-    assignment_comment TEXT,
-    response TEXT,
-    response_submitted_at TIMESTAMP NULL,
-    is_primary BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    CONSTRAINT fk_assignee_complaint 
-        FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-    
-    CONSTRAINT fk_assignee_user 
-        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    
-    CONSTRAINT unique_complaint_assignee UNIQUE (complaint_id, user_id)
-);
-
-CREATE INDEX idx_complaint_assignees_complaint ON complaint_assignees(complaint_id);
-CREATE INDEX idx_complaint_assignees_user ON complaint_assignees(user_id);
-
--- =============================================
--- Service Ratings Table.
-
-CREATE TABLE IF NOT EXISTS service_ratings (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    service_id INT NOT NULL,
-    u_id INT NOT NULL,
-    rating TINYINT NOT NULL,
-    review_text TEXT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    UNIQUE KEY uniq_service_user (service_id, u_id),
-    INDEX idx_service_ratings_service (service_id),
-    INDEX idx_service_ratings_user (u_id),
-
-    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
-    FOREIGN KEY (u_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
-
---8. ADD rating_avg COLUMN (compatibility)
--- =============================================
-ALTER TABLE services
-ADD COLUMN IF NOT EXISTS rating_avg DECIMAL(3,2) NULL;
-
--- create the  service_booking table 
-
-CREATE TABLE service_bookings (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-
-    -- Booking Reference
-    reference_number VARCHAR(50) NOT NULL UNIQUE,
-
-    -- Foreign Keys
-    customer_id INT NOT NULL,
-    service_id INT NOT NULL,
-    barber_id iNT NOT NULL,
-    availability_slot_id INT NOT NULL,
-
-    -- Customer Snapshot
-    customer_name VARCHAR(255) NOT NULL,
-    customer_email VARCHAR(255) NOT NULL,
-    customer_phone VARCHAR(30) NOT NULL,
-
-    -- Appointment Information
-    appointment_date DATE NOT NULL,
-    appointment_time TIME NOT NULL,
-
-    -- File Upload (Image/PDF)
-    attachment_file VARCHAR(500) NULL,
-    attachment_type ENUM(
-        'image',
-        'pdf'
-    ) NULL,
-
-    -- Booking Details
-    booking_note TEXT NULL,
-
-    -- Booking Status
-    booking_status ENUM(
-        'pending',
-        'approved',
-        'queued',
-        'serving',
-        'completed',
-        'cancelled',
-        'rejected'
-    ) DEFAULT 'pending',
-
-    approval_status ENUM(
-        'waiting',
-        'approved',
-        'rejected'
-    ) DEFAULT 'waiting',
-
-    queue_status ENUM(
-        'not_started',
-        'queued',
-        'serving',
-        'completed'
-    ) DEFAULT 'not_started',
-
-    -- Queue Tracking
-    queue_position INT NULL,
-    estimated_wait_minutes INT NULL,
-
-    -- Notification Tracking
-    reminder_sent TINYINT(1) DEFAULT 0,
-    notification_sent TINYINT(1) DEFAULT 0,
-
-    -- Approval Information
-    approved_by BIGINT UNSIGNED NULL,
-    approved_at DATETIME NULL,
-
-    -- Completion Information
-    completed_at DATETIME NULL,
-
-    -- Cancellation Information
-    cancelled_reason TEXT NULL,
-
-    -- Audit Fields
-    created_by BIGINT UNSIGNED NULL,
-    updated_by BIGINT UNSIGNED NULL,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-
-    -- Indexes
-    INDEX idx_reference_number(reference_number),
-    INDEX idx_customer(customer_id),
-    INDEX idx_service(service_id),
-    INDEX idx_barber(barber_id),
-    INDEX idx_slot(availability_slot_id),
-    INDEX idx_booking_status(booking_status),
-    INDEX idx_appointment_date(appointment_date),
-
-    -- Foreign Keys
-    CONSTRAINT fk_booking_customer
-        FOREIGN KEY (customer_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_booking_service
-        FOREIGN KEY (service_id)
-        REFERENCES services(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_booking_barber
-        FOREIGN KEY (barber_id)
-        REFERENCES employees(employee_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_booking_slot
-        FOREIGN KEY (availability_slot_id)
-        REFERENCES availability_slots(id)
-        ON DELETE CASCADE
-
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_general_ci;
-
-
--- AVailability slots table.
-CREATE TABLE IF NOT EXISTS `availability_slots` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `barber_id` int(11) NOT NULL,
-  `service_id` int(11) NOT NULL,
-  `available_date` date NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `max_bookings` int(11) NOT NULL DEFAULT 1,
-  `current_bookings` int(11) DEFAULT 0,
-  `slot_status` enum('available','booked','closed','paused') NOT NULL DEFAULT 'available',
-  `notes` text DEFAULT NULL,
-  `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_availability_slots_service_date` (`service_id`,`available_date`),
-  KEY `idx_availability_slots_barber_date` (`barber_id`,`available_date`),
-  KEY `idx_availability_slots_status` (`slot_status`),
-  CONSTRAINT `availability_slots_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `availability_slots_ibfk_2` FOREIGN KEY (`barber_id`) REFERENCES `employees` (`employee_id`) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-CREATE TABLE `roles` (
-  `role_id` int(11) NOT NULL,
-  `role_name` varchar(50) NOT NULL,
-  `status` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
-INSERT IGNORE INTO roles (role_id, role_name,status) VALUES
-(1, 'admin', 1),
-(2, 'barber', 1),
-(3, 'customer', 1);
-
--- Table for the service reviews and rs
-
-CREATE TABLE booking_reviews (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    
-    -- Booking being reviewed
-    booking_id BIGINT UNSIGNED NOT NULL,
-
-    -- Customer who submitted booking
-    customer_id INT NOT NULL,
-
-    -- Service booked
-    service_id INT NOT NULL,
-
-    -- Assigned Barber
-    barber_id INT NOT NULL,
-
-    -- Admin or Barber who reviewed
-    reviewed_by INT  NOT NULL,
-
-    -- Review Decision
-    review_status ENUM(
-        'pending',
-        'approved',
-        'rejected',
-        'returned'
-    ) DEFAULT 'pending',
-
-    -- Review Notes
-    review_comment TEXT NULL,
-
-    -- Internal Notes
-    internal_note TEXT NULL,
-
-    -- Queue Decision
-    moved_to_queue TINYINT(1) DEFAULT 0,
-
-    queue_position INT NULL,
-
-    -- Appointment Confirmation
-    confirmed_date DATE NULL,
-    confirmed_time TIME NULL,
-
-    -- Review Timestamp
-    reviewed_at DATETIME NULL,
-
-    -- Audit Fields
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-
-    -- Indexes
-    INDEX idx_booking (booking_id),
-    INDEX idx_customer (customer_id),
-    INDEX idx_service (service_id),
-    INDEX idx_barber (barber_id),
-    INDEX idx_reviewer (reviewed_by),
-    INDEX idx_review_status (review_status),
-
-    -- Foreign Keys
-    CONSTRAINT fk_review_booking
-        FOREIGN KEY (booking_id)
-        REFERENCES service_bookings(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_review_customer
-        FOREIGN KEY (customer_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_review_service
-        FOREIGN KEY (service_id)
-        REFERENCES services(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_review_barber
-        FOREIGN KEY (barber_id)
-        REFERENCES employees(employee_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_review_reviewer
-        FOREIGN KEY (reviewed_by)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE
-
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_general_ci;
-
---Table structure for the queues table 
-   
-   CREATE TABLE IF NOT EXISTS queues (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    booking_id BIGINT UNSIGNED NOT NULL,
-    reference_number VARCHAR(50) NOT NULL UNIQUE,
-    queue_position INT NOT NULL,
-    estimated_wait_time INT, -- in minutes
-    queue_status ENUM('not_started', 'queued', 'serving', 'completed') DEFAULT 'not_started',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (booking_id) REFERENCES service_bookings(id) ON DELETE CASCADE,
-    INDEX idx_reference_number (reference_number),
-    INDEX idx_queue_status (queue_status),
-    INDEX idx_queue_position (queue_position)
-);
--- Table structure for the table `complaints`
-
-CREATE TABLE complaints (
-    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
-    reference_number VARCHAR(50) UNIQUE NOT NULL,
-
-    -- User Info
-    user_id INT,
-    name VARCHAR(100),
-    email VARCHAR(100),
-    phone_number VARCHAR(20),
-    
-    -- Complaint Details
-    title VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    category_id BIGINT UNSIGNED,
-    subcategory VARCHAR(100),
-
-    -- Status & Workflow
-    status VARCHAR(50) DEFAULT 'Pending',
-    priority VARCHAR(20) DEFAULT 'Medium',
-    assigned_to INT,
-    assignment_comment TEXT,
-    department VARCHAR(100),
-
-    -- Dates
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    -- Attachments
-    attachment_url TEXT,
-    
-    -- Public/Authenticated flag
-    is_public BOOLEAN DEFAULT FALSE,
-
-    -- Foreign Keys  are key from the other entities
-    CONSTRAINT fk_user 
-        FOREIGN KEY (user_id) REFERENCES users(user_id)
-        ON DELETE SET NULL,
-
-    CONSTRAINT fk_category 
-        FOREIGN KEY (category_id) REFERENCES categories(category_id)
-        ON DELETE SET NULL
-
-) ENGINE=InnoDB;
-
--- Table structure for the table `complaint_comments`
-
-CREATE TABLE complaint_comments (
-    comment_id SERIAL PRIMARY KEY,
-    complaint_id INT ,
-    user_id INT,
-    message TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_complaint_comment 
-        FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-
-    CONSTRAINT fk_comment_user 
-        FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
--- Table structure for the table `complaint_comments`
-CREATE TABLE complaint_history (
-    history_id SERIAL PRIMARY KEY,
-    complaint_id INT,
-    status_before VARCHAR(50),
-    status_after VARCHAR(50),
-    changed_by INT,
-    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_history_complaint 
-        FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-
-    CONSTRAINT fk_history_user 
-        FOREIGN KEY (changed_by) REFERENCES users(user_id)
-);
--- Table structure for the table `complaint_feedback`
-CREATE TABLE complaint_feedback (
-    feedback_id SERIAL PRIMARY KEY,
-    complaint_id INT,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
-    feedback_comment TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_feedback_complaint 
-        FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id) ON DELETE CASCADE
-);
-
--- Table structure for the table `complaint_attachments`
-
-CREATE TABLE complaint_attachments (
-    attachment_id SERIAL PRIMARY KEY,
-    complaint_id INT ,
-    file_url TEXT NOT NULL,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_attachment_complaint 
-        FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id) ON DELETE CASCADE
-);
--- ALL the above is database done for complaints module
-
--- Table structure for table `active_sessions`
---
-
-CREATE TABLE `active_sessions` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `jti` varchar(255) NOT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `last_activity` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  -- From: waiting (initial state)
+  ('waiting', 'approved', 'Admin,Manager,Receptionist', 0, 'Approve pending booking'),
+  ('waiting', 'rejected', 'Admin,Manager,Receptionist', 1, 'Reject pending booking (reason required)'),
+  ('waiting', 'changes_requested', 'Admin,Manager,Receptionist', 1, 'Request changes from customer (details required)'),
+  ('waiting', 'cancelled', 'Admin,Manager,Receptionist,Customer', 1, 'Cancel before review'),
+  
+  -- From: changes_requested
+  ('changes_requested', 'waiting', 'Customer', 0, 'Customer resubmits after making changes'),
+  ('changes_requested', 'approved', 'Admin,Manager,Receptionist', 0, 'Approve despite requested changes'),
+  ('changes_requested', 'rejected', 'Admin,Manager,Receptionist', 1, 'Reject after change request'),
+  ('changes_requested', 'cancelled', 'Admin,Manager,Receptionist,Customer', 1, 'Cancel after change request'),
+  
+  -- From: approved
+  ('approved', 'cancelled', 'Admin,Manager,Receptionist,Customer', 1, 'Cancel approved booking'),
+  ('approved', 'rejected', 'Admin,Manager', 1, 'Reverse approval (rare, admin override)'),
+  
+  -- From: rejected
+  ('rejected', 'waiting', 'Admin,Manager', 0, 'Reopen rejected booking for review'),
+  ('rejected', 'approved', 'Admin,Manager', 0, 'Approve previously rejected booking (admin override)'),
+  
+  -- From: cancelled (usually terminal, but allow reopening)
+  ('cancelled', 'waiting', 'Admin,Manager', 0, 'Reopen cancelled booking')
+ON DUPLICATE KEY UPDATE
+  `allowed_roles` = VALUES(`allowed_roles`),
+  `requires_note` = VALUES(`requires_note`),
+  `description` = VALUES(`description`),
+  `updated_at` = CURRENT_TIMESTAMP;
 
 --
--- Dumping data for table `active_sessions`
+-- Dumping data for table `cms_menus`
 --
+INSERT INTO `cms_menus` (`id`, `title`, `path`, `icon`, `color`, `parent_id`, `order_index`, `is_section`, `is_dropdown`, `is_active`) VALUES
+(0, 'Component Library', '/admin/components', '<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z\" /></svg>', 'violet', 7, 83, 0, 0, 1),
+(1, 'App', NULL, NULL, 'blue', NULL, 10, 1, 0, 1),
+(4, 'Interaction', '', '', 'blue', NULL, 40, 1, 0, 1),
+(5, 'Appearance', NULL, NULL, 'blue', NULL, 50, 1, 0, 1),
+(6, 'Users', NULL, NULL, 'blue', NULL, 60, 1, 0, 1),
+(7, 'Settings', '', '', 'blue', NULL, 70, 1, 0, 0),
+(8, 'Dashboard', '/dashboard', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z\" /></svg>', 'blue', 1, 11, 0, 1, 1),
+(9, 'Overview', '/dashboard/overview', NULL, 'blue', 8, 1, 0, 0, 1),
+(10, 'Analytics', '/dashboard/analytics', NULL, 'blue', 8, 2, 0, 0, 1),
+(11, 'Posts', '/content/posts', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z\" /></svg>', 'emerald', 2, 21, 0, 1, 1),
+(12, 'Add Posts', '/content/posts', '', 'blue', 11, 1, 0, 0, 1),
+(13, 'Manage Posts', '/post/managePosts', NULL, 'blue', 11, 2, 0, 0, 1),
+(14, 'Gallery', '/post/gallery', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\" /></svg>', 'amber', 2, 22, 0, 1, 1),
+(15, 'Gallery Managmet', '/post/gallery', '', 'blue', 14, 1, 0, 0, 1),
+(16, 'Manage Gallery', '/post/manageGallery', NULL, 'blue', 14, 2, 0, 0, 0),
+(17, 'Pages', '/content/pages', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z\" /></svg>', 'indigo', 2, 23, 0, 0, 0),
+(18, 'Categories', '/content/categories', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z\" /></svg>', 'orange', 2, 24, 0, 0, 0),
+(19, 'Tags', '/content/tags', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z\" /></svg>', 'pink', 2, 25, 0, 0, 0),
+(20, 'Offices', '/content/offices', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\" /></svg>', 'cyan', 2, 26, 0, 0, 1),
+(21, 'Leased Lands', '/content/leased-lands', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 114 0 2 2 0 002 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>', 'green', 2, 27, 0, 0, 1),
+(22, 'Live Events', '/content/live-events', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'red', 2, 28, 0, 0, 1),
+(23, 'Careers', '/content/careers', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'blue', 2, 29, 0, 0, 1),
+(24, 'Partners & Investors', '/content/partners-investors', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z\" /></svg>', 'violet', 2, 30, 0, 0, 1),
+(25, 'Incubation', '/content/incubation', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 10V3L4 14h7v7l9-11h-7z\" /></svg>', 'blue', 2, 31, 0, 0, 1),
+(26, 'Trainings', '/content/trainings', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253\" /></svg>', 'amber', 2, 32, 0, 0, 1),
+(27, 'Investment Steps', '/content/investment-steps', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z\" /></svg>', 'teal', 2, 33, 0, 0, 1),
+(28, 'Board Members', '/content/board-members', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z\" /></svg>', 'purple', 2, 34, 0, 0, 1),
+(29, 'Who We Are', '/content/who-we-are', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>', 'indigo', 2, 35, 0, 0, 1),
+(30, 'Library', '/media/library', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10\" /></svg>', 'purple', 3, 41, 0, 0, 0),
+(32, 'Contact', '/interaction/contact', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'blue', 4, 51, 0, 1, 0),
+(34, 'Contact Inbox', '/interaction/contact-messages', '', 'blue', 4, 1, 0, 0, 1),
+(36, 'Manage Forms', '/interaction/forms/manage', NULL, 'blue', 33, 1, 0, 0, 1),
+(37, 'Submissions', '/interaction/forms/submissions', NULL, 'blue', 33, 2, 0, 0, 1),
+(39, 'Menus', '/appearance/menus', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M4 6h16M4 12h16M4 18h16\" /></svg>', 'rose', 5, 61, 0, 0, 1),
+(40, 'Theme', '/appearance/theme-settings', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01\" /></svg>', 'violet', 5, 62, 0, 0, 1),
+(41, 'Users', '/users/all', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z\" /></svg>', 'lime', 6, 71, 0, 0, 1),
+(42, 'Add User', '/users/add', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z\" /></svg>', 'sky', 6, 72, 0, 0, 1),
+(43, 'Subscribers', '/users/subscribers', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'fuchsia', 6, 73, 0, 0, 1),
+(44, 'Settings', '/settings/general', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z\" /><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" /></svg>', 'slate', 7, 81, 0, 0, 1),
+(45, 'Audit Logs', '/settings/audit-logs', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\" /></svg>', 'red', 7, 82, 0, 0, 1),
+(46, 'Roles & Permissions', '/users/roles', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\" /></svg>', 'indigo', 6, 74, 0, 0, 1);
 
-INSERT INTO `active_sessions` (`id`, `user_id`, `jti`, `ip_address`, `user_agent`, `created_at`, `last_activity`) VALUES
-(28, 83, 'b808c2e6-1dc0-4db6-b5f6-19a4af2b49f4', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36', '2026-03-30 10:11:41', '2026-03-30 11:04:52');
+INSERT IGNORE INTO cms_menus (id, title, path, icon, color, parent_id, order_index, is_section, is_dropdown, is_active) 
+VALUES (100, 'Services', NULL, NULL, 'blue', NULL, 30, 1, 0, 1);
 
--- --------------------------------------------------------
+INSERT IGNORE INTO cms_menus (id, title, path, icon, color, parent_id, order_index, is_section, is_dropdown, is_active) 
+VALUES 
+(101, 'Categories', '/services/categories', 
+    '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>', 
+    'blue', 100, 31, 0, 0, 1),
+
+(102, 'All Services', '/services', 
+    '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.952-1.172-5.119 0-7.072 1.171-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4m9-1.5a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>', 
+    'emerald', 100, 32, 0, 0, 1),
+
+(103, 'Add Service', '/services/add', 
+    '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>', 
+    'green', 100, 33, 0, 0, 1);
+
+INSERT IGNORE INTO cms_menus (id, title, path, icon, color, parent_id, order_index, is_section, is_dropdown, is_active) 
+VALUES (110, 'Bookings', NULL, NULL, 'purple', NULL, 40, 1, 0, 1);
+
+INSERT IGNORE INTO cms_menus (id, title, path, icon, color, parent_id, order_index, is_section, is_dropdown, is_active) 
+VALUES 
+(111, 'Pending Review', '/bookings/pending', 
+    '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>', 
+    'orange', 110, 41, 0, 0, 1),
+
+(112, 'All Bookings', '/bookings', 
+    '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>', 
+    'blue', 110, 42, 0, 0, 1),
+
+(113, 'Queue Management', '/queue', 
+    '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>', 
+    'purple', 110, 43, 0, 0, 1);
 
 --
--- Table structure for table `approvalhierarchy`
+-- Dumping data for table `role_menu_permissions`
 --
+INSERT INTO `role_menu_permissions` (`role_id`, `menu_id`, `can_view`, `can_create`, `can_edit`, `can_delete`) VALUES
+(0, 8, 1, 0, 0, 0),
+(0, 9, 1, 0, 0, 0),
+(0, 10, 1, 0, 0, 0),
+(0, 20, 1, 0, 0, 0),
+(0, 21, 1, 0, 0, 0),
+(1, 0, 1, 0, 0, 0),
+(1, 1, 1, 0, 0, 0),
+(1, 2, 1, 0, 0, 0),
+(1, 3, 1, 0, 0, 0),
+(1, 4, 1, 0, 0, 0),
+(1, 5, 1, 0, 0, 0),
+(1, 6, 1, 0, 0, 0),
+(1, 7, 1, 0, 0, 0),
+(1, 8, 1, 0, 0, 0),
+(1, 9, 1, 0, 0, 0),
+(1, 10, 1, 0, 0, 0),
+(1, 11, 1, 0, 0, 0),
+(1, 12, 1, 0, 0, 0),
+(1, 13, 1, 0, 0, 0),
+(1, 14, 1, 0, 0, 0),
+(1, 15, 1, 0, 0, 0),
+(1, 16, 1, 0, 0, 0),
+(1, 20, 1, 0, 0, 0),
+(1, 21, 1, 0, 0, 0),
+(1, 22, 1, 0, 0, 0),
+(1, 23, 1, 0, 0, 0),
+(1, 24, 1, 0, 0, 0),
+(1, 25, 1, 0, 0, 0),
+(1, 26, 1, 0, 0, 0),
+(1, 27, 1, 0, 0, 0),
+(1, 28, 1, 0, 0, 0),
+(1, 29, 1, 0, 0, 0),
+(1, 32, 1, 0, 0, 0),
+(1, 34, 1, 0, 0, 0),
+(1, 35, 1, 0, 0, 0),
+(1, 38, 1, 0, 0, 0),
+(1, 39, 1, 0, 0, 0),
+(1, 41, 1, 0, 0, 0),
+(1, 42, 1, 0, 0, 0),
+(1, 43, 1, 0, 0, 0),
+(1, 45, 1, 0, 0, 0),
+(1, 46, 1, 0, 0, 0),
+(1, 47, 1, 0, 0, 0),
+(2, 4, 1, 0, 0, 0),
+(2, 8, 1, 0, 0, 0),
+(2, 9, 1, 0, 0, 0),
+(2, 10, 1, 0, 0, 0),
+(2, 34, 1, 0, 0, 0),
+(2, 35, 1, 0, 0, 0),
+(3, 8, 1, 0, 0, 0),
+(3, 9, 1, 0, 0, 0),
+(3, 10, 1, 0, 0, 0),
+(3, 12, 1, 0, 0, 0),
+(3, 13, 1, 0, 0, 0),
+(3, 14, 1, 0, 0, 0),
+(3, 15, 1, 0, 0, 0),
+(3, 16, 1, 0, 0, 0),
+(4, 0, 1, 0, 0, 0),
+(4, 8, 1, 0, 0, 0),
+(4, 9, 1, 0, 0, 0),
+(4, 10, 1, 0, 0, 0),
+(4, 23, 1, 0, 0, 0),
+(4, 47, 1, 0, 0, 0),
+(5, 8, 1, 0, 0, 0),
+(5, 9, 1, 0, 0, 0),
+(5, 10, 1, 0, 0, 0),
+(5, 22, 1, 0, 0, 0);
 
-CREATE TABLE `approvalhierarchy` (
-  `id` int(11) NOT NULL,
-  `role_id` int(11) DEFAULT NULL,
-  `department_id` int(11) DEFAULT NULL,
-  `next_role_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES
+-- Services Section
+(1, 100, 1, 0, 0, 0),
+(1, 101, 1, 1, 1, 1),
+(1, 102, 1, 1, 1, 1),
+(1, 103, 1, 1, 0, 0),
+-- Bookings Section
+(1, 110, 1, 0, 0, 0),
+(1, 111, 1, 1, 1, 1),
+(1, 112, 1, 1, 1, 1),
+(1, 113, 1, 1, 1, 1);
 
--- --------------------------------------------------------
+INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES
+-- Services Section
+(4, 100, 1, 0, 0, 0),
+(4, 101, 1, 1, 1, 1),
+(4, 102, 1, 1, 1, 1),
+(4, 103, 1, 1, 0, 0),
+-- Bookings Section
+(4, 110, 1, 0, 0, 0),
+(4, 111, 1, 1, 1, 0),
+(4, 112, 1, 1, 1, 0),
+(4, 113, 1, 1, 1, 0);
+
+INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES
+-- Services Section
+(2, 100, 1, 0, 0, 0),
+(2, 101, 1, 0, 0, 0),
+(2, 102, 1, 0, 0, 0),
+-- Bookings Section
+(2, 110, 1, 0, 0, 0),
+(2, 112, 1, 0, 0, 0),
+(2, 113, 1, 0, 0, 0);
+
+INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES
+-- Services Section
+(5, 100, 1, 0, 0, 0),
+(5, 101, 1, 0, 0, 0),
+(5, 102, 1, 0, 0, 0),
+-- Bookings Section
+(5, 110, 1, 0, 0, 0),
+(5, 111, 1, 1, 1, 0),
+(5, 112, 1, 1, 1, 0),
+(5, 113, 1, 1, 1, 0);
+
+INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES
+-- Services Section (view only)
+(3, 100, 1, 0, 0, 0),
+(3, 102, 1, 0, 0, 0);
 
 --
--- Table structure for table `audit_logs`
+-- Dumping data for table `user_menu_permissions`
 --
+INSERT INTO `user_menu_permissions` (`user_id`, `menu_id`, `permission_type`) VALUES
+(0, 4, 'allow'),
+(0, 7, 'allow'),
+(0, 9, 'allow'),
+(0, 10, 'allow'),
+(0, 12, 'allow'),
+(0, 13, 'allow'),
+(0, 15, 'allow'),
+(0, 26, 'allow'),
+(0, 27, 'allow'),
+(0, 28, 'allow'),
+(0, 29, 'allow'),
+(0, 34, 'allow'),
+(0, 36, 'allow'),
+(0, 39, 'allow'),
+(0, 40, 'allow'),
+(0, 41, 'allow'),
+(0, 42, 'allow'),
+(0, 43, 'allow'),
+(0, 44, 'allow'),
+(0, 45, 'allow'),
+(0, 46, 'allow'),
+(34, 1, 'deny'),
+(34, 2, 'deny'),
+(34, 3, 'deny'),
+(34, 4, 'deny'),
+(34, 5, 'deny'),
+(34, 6, 'deny'),
+(34, 7, 'deny'),
+(34, 8, 'deny'),
+(34, 9, 'allow'),
+(34, 10, 'deny'),
+(34, 11, 'deny'),
+(34, 12, 'allow'),
+(34, 13, 'deny'),
+(34, 14, 'deny'),
+(34, 15, 'allow'),
+(34, 16, 'deny'),
+(34, 17, 'deny'),
+(34, 18, 'deny'),
+(34, 19, 'deny'),
+(34, 20, 'deny'),
+(34, 21, 'deny'),
+(34, 22, 'deny'),
+(34, 24, 'deny'),
+(34, 25, 'deny'),
+(34, 26, 'deny'),
+(34, 27, 'deny'),
+(34, 28, 'deny'),
+(34, 29, 'deny'),
+(34, 30, 'deny'),
+(34, 32, 'deny'),
+(34, 33, 'deny'),
+(34, 34, 'allow'),
+(34, 35, 'deny'),
+(34, 36, 'deny'),
+(34, 37, 'deny'),
+(34, 38, 'deny'),
+(34, 39, 'deny'),
+(34, 40, 'deny'),
+(34, 41, 'deny'),
+(34, 42, 'deny'),
+(34, 43, 'deny'),
+(34, 44, 'deny'),
+(34, 45, 'deny'),
+(34, 46, 'deny'),
+(36, 23, 'allow'),
+(81, 12, 'allow'),
+(81, 13, 'allow'),
+(81, 15, 'allow'),
+(81, 16, 'allow'),
+(84, 0, 'allow'),
+(84, 1, 'allow'),
+(84, 2, 'allow'),
+(84, 3, 'allow'),
+(84, 4, 'allow'),
+(84, 5, 'allow'),
+(84, 6, 'allow'),
+(84, 7, 'allow'),
+(84, 8, 'allow'),
+(84, 9, 'allow'),
+(84, 10, 'allow'),
+(84, 11, 'allow'),
+(84, 12, 'allow'),
+(84, 13, 'allow'),
+(84, 14, 'allow'),
+(84, 15, 'allow'),
+(84, 16, 'allow'),
+(84, 17, 'allow'),
+(84, 18, 'allow'),
+(84, 19, 'allow'),
+(84, 20, 'allow'),
+(84, 21, 'allow'),
+(84, 22, 'allow'),
+(84, 23, 'allow'),
+(84, 24, 'allow'),
+(84, 25, 'allow'),
+(84, 26, 'allow'),
+(84, 27, 'allow'),
+(84, 28, 'allow'),
+(84, 29, 'allow'),
+(84, 30, 'allow'),
+(84, 32, 'allow'),
+(84, 33, 'allow'),
+(84, 34, 'allow'),
+(84, 35, 'allow'),
+(84, 36, 'allow'),
+(84, 37, 'allow'),
+(84, 38, 'allow'),
+(84, 39, 'allow'),
+(84, 40, 'allow'),
+(84, 41, 'allow'),
+(84, 42, 'allow'),
+(84, 43, 'allow'),
+(84, 44, 'allow'),
+(84, 45, 'allow'),
+(84, 46, 'allow'),
+(84, 47, 'allow'),
+(89, 10, 'allow'),
+(89, 32, 'allow'),
+(89, 34, 'allow'),
+(89, 35, 'allow'),
+(1002, 47, 'allow');
 
-CREATE TABLE `audit_logs` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `action` varchar(50) DEFAULT NULL,
-  `entity` varchar(50) DEFAULT NULL,
-  `entity_id` varchar(50) DEFAULT NULL,
-  `details` text DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `system_settings`
+--
+INSERT INTO `system_settings` (`setting_key`, `setting_value`, `updated_at`) VALUES
+('density', 'compact', '2026-03-26 13:07:28'),
+('fontFamily', 'system', '2026-03-26 13:07:28'),
+('logoPreview', '', '2026-03-26 13:04:58'),
+('primaryColor', 'blue', '2026-03-26 13:04:58'),
+('themeMode', 'dark', '2026-03-30 07:21:16');
+
+INSERT IGNORE INTO system_settings (setting_key, setting_value, setting_type, description, is_public) VALUES
+('site_name', 'Elite Barber Shop', 'string', 'Name of the barber shop', 1),
+('site_email', 'info@elitebarbershop.com', 'string', 'Contact email address', 1),
+('site_phone', '+251-911-123456', 'string', 'Contact phone number', 1),
+('booking_approval_required', 'true', 'boolean', 'Whether bookings require admin approval', 0),
+('booking_advance_days', '30', 'number', 'How many days in advance customers can book', 1),
+('queue_auto_position', 'true', 'boolean', 'Automatically calculate queue positions', 0),
+('review_min_rating', '1', 'number', 'Minimum rating value', 1),
+('review_max_rating', '5', 'number', 'Maximum rating value', 1),
+('review_requires_booking', 'true', 'boolean', 'Reviews require completed booking', 0),
+('notification_email_enabled', 'true', 'boolean', 'Enable email notifications', 0),
+('notification_sms_enabled', 'false', 'boolean', 'Enable SMS notifications', 0),
+('business_hours_start', '09:00', 'string', 'Business opening time', 1),
+('business_hours_end', '20:00', 'string', 'Business closing time', 1),
+('business_days', '["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]', 'json', 'Working days', 1);
+
+--
+-- Dumping data for table `contact_messages`
+--
+INSERT INTO `contact_messages` (`id`, `name`, `email`, `phone`, `message`, `status`, `created_at`) VALUES
+(1, 'Beki Tame', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2025-12-19 11:32:58'),
+(2, 'Bereket Tamrat', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2026-01-05 07:38:32'),
+(3, 'Beki Tame', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2026-01-05 09:19:18'),
+(4, 'Beki Tame', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2026-01-05 09:31:32'),
+(5, 'Hayal', 'onerrr@gmail.com', '', 'Tets', 'read', '2026-01-10 05:48:42'),
+(6, 'Mesfin Tsegaye', 'mesfin@mevinai.com', '+251911522902', 'Hello, this is Mesfin, Founder of Mevinai PLC. I’m interested in renting a workspace for our company and would appreciate guidance on the next steps. We’re a growing startup and are looking for an environment that can support our team’s expansion and innovation.', 'read', '2026-01-12 13:19:08'),
+(7, 'Mesfin Tsegaye', 'mesfin@mevinai.com', '+251911522902', 'Hello, this is Mesfin, Founder of Mevinai PLC. I’m interested in renting a workspace for our company and would appreciate guidance on the next steps. We’re a growing startup and are looking for an environment that can support our team’s expansion and innovation.', 'read', '2026-01-12 13:19:35'),
+(8, 'Hayal Tamrat Girum', 'hayaltamrat3@gmail.com', '+251976180462', 'this is test from hayal\n', 'replied', '2026-01-19 15:09:36'),
+(9, 'Dagim Mathewos', 'dmathewos529@gmail.com', '+251903918129', 'Subject: Cooperative Training Placement Request – 5 Web Development & Database Students (Teferi Mekonnen Polytechnic College)\n\nTo:  Ethiopian IT Park (ICT Park) Addis Ababa, Ethiopia\n\nDear Sir/Madam,\n\nWe are writing to formally express our keen interest in undertaking our Cooperative Training (Internship) at the Ethiopian IT Park. We are a group of five (5) dedicated students currently completing our Level 3 certification in Web Development and Database Management at Teferi Mekonnen Polytechnic College.\n\nAs students of one of Ethiopia’s most historic technical institutions, we are eager to bridge the gap between our academic studies and the real-world digital ecosystem. We believe that the Ethiopian IT Park, as the nation\'s premier technology hub, offers the ideal environment for us to refine our technical skills while contributing to the Park\'s digital objectives.\n\nDuring our placement, we are prepared to assist resident companies or the Park administration in the following areas:\n\nWeb Development: Assisting in front-end updates, UI/UX maintenance, and basic web programming (HTML, CSS, JavaScript).\n\nDatabase Management: Supporting data entry, SQL queries, database cleaning, and documentation.\n\nTechnical Support: Aiding in IT infrastructure maintenance and general technical troubleshooting within the Special Economic Zone.\n\nWe are highly motivated, disciplined, and ready to adapt to the fast-paced professional environment of the IT Park. We have attached our institutional recommendation letter from Teferi Mekonnen Polytechnic College for your review.\n\nWe would welcome the opportunity to discuss how we can contribute to your organization during our training period. Thank you for considering our request and for your commitment to empowering the next generation of Ethiopian IT professionals.\n\nSincerely,\n\nStudent Representative Name: Dagim Mathewos Phone Number: +251-903-918-129 College: Teferi Mekonnen Polytechnic College', 'read', '2026-01-26 14:34:42'),
+(10, '<script>alert(\'XSS\')</script>', 'test@gmail.com', '<script>alert(\'XSS\')</script>', '<script>alert(\'XSS\')</script>', 'read', '2026-01-29 13:53:36'),
+(11, 'Habtam Habtam', 'hayaltamrat@gmail.com', '+359933499097', 'test', 'new', '2026-01-29 19:35:27'),
+(12, 'John Doe', 'test@example.com', NULL, 'Normal message', 'read', '2026-02-02 13:41:27'),
+(13, 'Contact Tester', 'tester@example.com', '0988776655', 'This is a valid test message', 'new', '2026-02-18 12:08:01'),
+(14, 'Contact Tester', 'tester@example.com', '0988776655', 'This is a valid test message', 'new', '2026-02-18 12:08:57'),
+(15, 'Test', 'test@test.com', NULL, 'Hello', 'new', '2026-02-18 14:00:57'),
+(16, 'Tester', 'test@test.com', NULL, 'text', 'new', '2026-02-18 14:01:46'),
+(17, 'Tester', 'test@test.com', NULL, 'text', 'new', '2026-02-18 14:01:46'),
+(18, 'Tester', 'test@test.com', NULL, 'x', 'new', '2026-02-18 14:01:47'),
+(19, 'Tester', 'test@test.com', NULL, 'text', 'new', '2026-02-18 14:01:47'),
+(20, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(21, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(22, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(23, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(24, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(25, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(26, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(27, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(28, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(29, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(30, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(31, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(32, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(33, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(34, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(35, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(36, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(37, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(38, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
+(39, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:23'),
+(40, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:23'),
+(41, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:56'),
+(42, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:56'),
+(43, 'John Doe', 'john@verified.com', '0912345678', 'Legitimate message.', 'new', '2026-02-21 08:48:39'),
+(44, 'John Doe', 'john@verified.com', '0912345678', 'Legitimate message.', 'new', '2026-02-21 08:49:41'),
+(45, 'John Doe', 'john@verified.com', '0912345678', 'Legitimate message.', 'new', '2026-02-21 08:52:56');
+
+--
+-- Dumping data for table `subscribers`
+--
+INSERT INTO `subscribers` (`id`, `email`, `status`, `subscribed_at`, `unsubscribed_at`) VALUES
+(1, 'hayaltamrat@gmail.com', 'active', '2025-12-19 08:07:31', NULL),
+(4, 'hayaltamrat1@gmail.com', 'active', '2025-12-19 08:13:22', NULL),
+(5, 'hayaltamrat4@gmail.com', 'active', '2026-01-03 11:18:11', NULL),
+(6, 'hayaltamrat5@gmail.com', 'active', '2026-01-05 06:08:14', NULL),
+(7, 'berekettamrat2015@gmail.com', 'active', '2026-01-05 06:19:46', NULL),
+(8, 'hayalt5@gmail.com', 'active', '2026-01-05 07:35:38', NULL),
+(9, 'hayaltamrat6@gmail.com', 'active', '2026-01-05 07:38:04', NULL),
+(10, 'hayaltamrat123@gmail.com', 'active', '2026-01-05 07:39:35', NULL),
+(11, 'astu@nathayblog.com', 'active', '2026-01-05 08:53:24', NULL),
+(12, 'berekettamrat20115@gmail.com', 'active', '2026-01-05 08:55:14', NULL),
+(13, 'astuw@nathayblog.com', 'active', '2026-01-05 09:03:44', NULL),
+(14, 'kidoastu1993@gmail.com', 'active', '2026-01-05 09:11:40', NULL),
+(15, 'kidoastu19293@gmail.com', 'active', '2026-01-05 09:31:45', NULL),
+(16, 'worket2@gmail.com', 'active', '2026-01-05 09:38:34', NULL),
+(17, 'worketh20172@gmail.com', 'active', '2026-01-05 09:39:59', NULL),
+(18, 'hager@temechain.com', 'active', '2026-01-05 10:01:00', NULL),
+(19, 'bereketeab550@gmail.com', 'active', '2026-01-05 10:22:08', NULL),
+(20, 'berekettamrat20154@gmail.com', 'active', '2026-01-06 04:38:05', NULL),
+(21, 'fekadualemu208@gmail.com', 'active', '2026-01-08 07:13:49', NULL),
+(22, 'super@gmail.com', 'active', '2026-01-09 04:56:42', NULL),
+(23, 'somchaibinl@gmail.com', 'active', '2026-01-09 15:27:10', NULL),
+(24, 'natha@gmail.com', 'active', '2026-01-09 18:55:42', NULL),
+(25, 'onertrr@gmail.com', 'active', '2026-01-11 07:04:03', NULL),
+(26, 'alemu.abera@ethiopianitpark.et', 'active', '2026-01-12 11:33:37', NULL),
+(27, 'kedirahmed19963384@gmail.com', 'active', '2026-01-12 12:17:52', NULL),
+(28, 'matthewarop@gmail.com', 'active', '2026-01-13 06:12:35', NULL),
+(29, 'sirajdeldebo96@gmail.com', 'active', '2026-01-14 10:25:37', NULL),
+(30, 'hayaltamrat8@gmail.com', 'active', '2026-01-15 10:31:21', NULL),
+(31, 'mchala04@gmail.com', 'active', '2026-01-18 00:53:59', NULL),
+(32, 'hayaltamrat23@gmail.com', 'active', '2026-01-19 16:24:52', NULL),
+(33, 'hayaltamrat3@gmail.com', 'active', '2026-01-19 16:32:37', NULL),
+(34, 'tsehayutilahun@gmail.com', 'active', '2026-01-20 08:25:12', NULL),
+(35, 'kirubelmulugeta3@gmail.com', 'active', '2026-01-24 05:37:40', NULL),
+(36, 'na@gmail.com', 'active', '2026-01-29 19:48:18', NULL),
+(37, 'na1@gmail.com', 'active', '2026-01-29 19:48:35', NULL);
 
 --
 -- Dumping data for table `audit_logs`
 --
-
 INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity`, `entity_id`, `details`, `ip_address`, `created_at`) VALUES
 (1, 3, 'LOGOUT', 'User', '3', NULL, '127.0.0.1', '2026-01-02 10:15:10'),
 (2, 3, 'LOGIN', 'User', '3', '{\"username\":\"onerrr@gmail.com\"}', '127.0.0.1', '2026-01-02 10:15:11'),
@@ -966,1003 +1954,185 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity`, `entity_id`, `det
 (316, 83, 'LOGIN', 'User', '83', '{\"username\":\"nathan27\"}', '::1', '2026-03-27 14:07:00'),
 (317, 83, 'LOGIN', 'User', '83', '{\"username\":\"nathan27\"}', '::1', '2026-03-30 07:11:41');
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `active_sessions`
+--
+INSERT INTO `active_sessions` (`id`, `user_id`, `jti`, `ip_address`, `user_agent`, `created_at`, `last_activity`) VALUES
+(28, 83, 'b808c2e6-1dc0-4db6-b5f6-19a4af2b49f4', '::1', 'Mozilla/5.0 (Windows NT 10.0;
+
+-- ========================================================
+-- SECTION 3: DATABASE VIEWS
+-- ========================================================
 
 --
--- Table structure for table `blocked_ips`
+-- View: v_booking_workflow_summary
 --
+CREATE OR REPLACE VIEW `v_booking_workflow_summary` AS
+SELECT 
+  sb.id AS booking_id,
+  sb.reference_number,
+  sb.customer_name,
+  sb.service_id,
+  s.service_name,
+  sb.appointment_date,
+  sb.appointment_time,
+  sb.booking_status,
+  sb.approval_status,
+  sb.created_at AS booking_created_at,
+  (SELECT bwh.action 
+   FROM booking_workflow_history bwh 
+   WHERE bwh.booking_id = sb.id 
+   ORDER BY bwh.action_timestamp DESC 
+   LIMIT 1) AS last_action,
+  (SELECT bwh.action_timestamp 
+   FROM booking_workflow_history bwh 
+   WHERE bwh.booking_id = sb.id 
+   ORDER BY bwh.action_timestamp DESC 
+   LIMIT 1) AS last_action_timestamp,
+  (SELECT u.user_name 
+   FROM booking_workflow_history bwh 
+   LEFT JOIN users u ON bwh.action_by = u.user_id
+   WHERE bwh.booking_id = sb.id 
+   ORDER BY bwh.action_timestamp DESC 
+   LIMIT 1) AS last_action_by_name,
+  (SELECT COUNT(*) 
+   FROM booking_workflow_history bwh 
+   WHERE bwh.booking_id = sb.id) AS total_transitions,
+  (SELECT TIMESTAMPDIFF(MINUTE, sb.created_at, MIN(bwh.action_timestamp))
+   FROM booking_workflow_history bwh 
+   WHERE bwh.booking_id = sb.id 
+   AND bwh.action = 'approved') AS minutes_to_approval
+FROM service_bookings sb
+LEFT JOIN services s ON sb.service_id = s.id;
 
-CREATE TABLE `blocked_ips` (
-  `id` int(11) NOT NULL,
-  `ip_address` varchar(45) NOT NULL,
-  `blocked_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `reason` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Complaints menu for Admin and Barber (inserted after Services block)
-INSERT IGNORE INTO cms_menus (id, title, path, icon, color, parent_id, order_index, is_section, is_dropdown, is_active) VALUES
-(51, 'Complaints', NULL, NULL, 'blue', NULL, 90, 1, 0, 1),
-(52, 'Manage Complaints', '/interaction/complaints/manage', '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2" /></svg>', 'blue', 51, 91, 0, 0, 1),
-(53, 'Complaint Analytics', '/complaints/analytics', '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>', 'emerald', 51, 92, 0, 0, 1),
-(54, 'Submit Complaint', '/complaints/internal', '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>', 'violet', 51, 93, 0, 0, 1),
-(55, 'My Assigned', '/complaints/assigned', '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>', 'amber', 51, 94, 0, 0, 1);
-
-INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES
--- Admin (role_id=1)
-(1, 51, 1, 0, 0, 0),
-(1, 52, 1, 1, 1, 1),
-(1, 53, 1, 0, 0, 0),
-(1, 54, 1, 1, 0, 0),
-(1, 55, 1, 0, 0, 0),
--- Barber (role_id=2)
-(2, 51, 1, 0, 0, 0),
-(2, 52, 1, 1, 1, 0),
-(2, 53, 1, 0, 0, 0),
-(2, 54, 1, 1, 0, 0),
-(2, 55, 1, 0, 0, 0);
-
--- --------------------------------------------------------
-
--- Table structure for table `cms_menus`
 --
-INSERT IGNORE INTO employees (
-    employee_id, name, role_id, department_id, supervisor_id,
-    fname, lname, email, phone, sex
+-- View: v_workflow_metrics
+--
+CREATE OR REPLACE VIEW `v_workflow_metrics` AS
+SELECT 
+  DATE(bwh.action_timestamp) AS metric_date,
+  bwh.action,
+  COUNT(*) AS action_count,
+  AVG(TIMESTAMPDIFF(MINUTE, sb.created_at, bwh.action_timestamp)) AS avg_minutes_from_submission,
+  bwh.action_role,
+  SUM(CASE WHEN bwh.to_status = 'approved' THEN 1 ELSE 0 END) AS approvals,
+  SUM(CASE WHEN bwh.to_status = 'rejected' THEN 1 ELSE 0 END) AS rejections,
+  SUM(CASE WHEN bwh.to_status = 'changes_requested' THEN 1 ELSE 0 END) AS change_requests
+FROM booking_workflow_history bwh
+LEFT JOIN service_bookings sb ON bwh.booking_id = sb.id
+GROUP BY metric_date, bwh.action, bwh.action_role
+ORDER BY metric_date DESC, bwh.action;
+
+-- ========================================================
+-- SECTION 4: STORED PROCEDURES
+-- ========================================================
+
+DROP PROCEDURE IF EXISTS `sp_record_workflow_transition`;
+DROP PROCEDURE IF EXISTS `sp_validate_transition`;
+
+DELIMITER //
+
+CREATE PROCEDURE `sp_record_workflow_transition`(
+  IN p_booking_id BIGINT UNSIGNED,
+  IN p_from_status VARCHAR(50),
+  IN p_to_status VARCHAR(50),
+  IN p_action VARCHAR(50),
+  IN p_action_by INT,
+  IN p_notes TEXT,
+  IN p_internal_note TEXT,
+  IN p_ip_address VARCHAR(45),
+  IN p_user_agent VARCHAR(500)
 )
-VALUES
-    (9001, 'Nathan27', 1, NULL, NULL, 'Nathan', 'Tamrat', 'nathan27@example.com', NULL, 'M');
-    
-INSERT INTO users (
-    user_id, employee_id, user_name, password,
-    created_at, status, online_flag, updated_at,
-    role_id, avatar_url, failed_login_attempts,
-    account_locked_until, reset_token, reset_token_expires,
-    redemption_token, redemption_token_expires
+BEGIN
+  DECLARE v_reference_number VARCHAR(50);
+  DECLARE v_role VARCHAR(50);
+  
+  SELECT reference_number INTO v_reference_number
+  FROM service_bookings
+  WHERE id = p_booking_id;
+  
+  SELECT r.role_name INTO v_role
+  FROM users u
+  LEFT JOIN roles r ON u.role_id = r.role_id
+  WHERE u.user_id = p_action_by;
+  
+  INSERT INTO booking_workflow_history (
+    booking_id,
+    reference_number,
+    from_status,
+    to_status,
+    action,
+    action_by,
+    action_role,
+    notes,
+    internal_note,
+    ip_address,
+    user_agent,
+    action_timestamp
+  ) VALUES (
+    p_booking_id,
+    v_reference_number,
+    p_from_status,
+    p_to_status,
+    p_action,
+    p_action_by,
+    v_role,
+    p_notes,
+    p_internal_note,
+    p_ip_address,
+    p_user_agent,
+    NOW()
+  );
+END //
+
+CREATE PROCEDURE `sp_validate_transition`(
+  IN p_from_state VARCHAR(50),
+  IN p_to_state VARCHAR(50),
+  IN p_user_role VARCHAR(50),
+  IN p_has_note TINYINT(1),
+  OUT p_is_valid TINYINT(1),
+  OUT p_error_message VARCHAR(255)
 )
-VALUES
-    (
-        9001, 9001, 'nathan27',
-        '$2a$10$UnLS/LqxPeKfzlQOR6Fi1eHtdb7K9Q64iKo3UYo1r/Qbn0GhOLdW.',
-        NOW(), '1', 0, NOW(),
-        1, NULL, 0,
-        NULL, NULL, NULL,
-        NULL, NULL
-    )
-ON DUPLICATE KEY UPDATE
-    employee_id = VALUES(employee_id),
-    user_name = VALUES(user_name),
-    password = VALUES(password),
-    status = VALUES(status),
-    failed_login_attempts = 0,
-    account_locked_until = NULL;
-
----
-
-CREATE TABLE `cms_menus` (
-  `id` int(11) NOT NULL,
-  `title` varchar(100) NOT NULL,
-  `path` varchar(255) DEFAULT NULL,
-  `icon` text DEFAULT NULL,
-  `color` varchar(50) DEFAULT 'blue',
-  `parent_id` int(11) DEFAULT NULL,
-  `order_index` int(11) DEFAULT 0,
-  `is_section` tinyint(1) DEFAULT 0,
-  `is_dropdown` tinyint(1) DEFAULT 0,
-  `is_active` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cms_menus`
---
-
-INSERT INTO `cms_menus` (`id`, `title`, `path`, `icon`, `color`, `parent_id`, `order_index`, `is_section`, `is_dropdown`, `is_active`) VALUES
-(0, 'Component Library', '/admin/components', '<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z\" /></svg>', 'violet', 7, 83, 0, 0, 1),
-(1, 'App', NULL, NULL, 'blue', NULL, 10, 1, 0, 1),
-(4, 'Interaction', '', '', 'blue', NULL, 40, 1, 0, 1),
-(5, 'Appearance', NULL, NULL, 'blue', NULL, 50, 1, 0, 1),
-(6, 'Users', NULL, NULL, 'blue', NULL, 60, 1, 0, 1),
-(7, 'Settings', '', '', 'blue', NULL, 70, 1, 0, 0),
-(8, 'Dashboard', '/dashboard', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z\" /></svg>', 'blue', 1, 11, 0, 1, 1),
-(9, 'Overview', '/dashboard/overview', NULL, 'blue', 8, 1, 0, 0, 1),
-(10, 'Analytics', '/dashboard/analytics', NULL, 'blue', 8, 2, 0, 0, 1),
-(11, 'Posts', '/content/posts', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z\" /></svg>', 'emerald', 2, 21, 0, 1, 1),
-(12, 'Add Posts', '/content/posts', '', 'blue', 11, 1, 0, 0, 1),
-(13, 'Manage Posts', '/post/managePosts', NULL, 'blue', 11, 2, 0, 0, 1),
-(14, 'Gallery', '/post/gallery', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\" /></svg>', 'amber', 2, 22, 0, 1, 1),
-(15, 'Gallery Managmet', '/post/gallery', '', 'blue', 14, 1, 0, 0, 1),
-(16, 'Manage Gallery', '/post/manageGallery', NULL, 'blue', 14, 2, 0, 0, 0),
-(17, 'Pages', '/content/pages', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z\" /></svg>', 'indigo', 2, 23, 0, 0, 0),
-(18, 'Categories', '/content/categories', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z\" /></svg>', 'orange', 2, 24, 0, 0, 0),
-(19, 'Tags', '/content/tags', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z\" /></svg>', 'pink', 2, 25, 0, 0, 0),
-(20, 'Offices', '/content/offices', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\" /></svg>', 'cyan', 2, 26, 0, 0, 1),
-(21, 'Leased Lands', '/content/leased-lands', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 114 0 2 2 0 002 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>', 'green', 2, 27, 0, 0, 1),
-(22, 'Live Events', '/content/live-events', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'red', 2, 28, 0, 0, 1),
-(23, 'Careers', '/content/careers', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'blue', 2, 29, 0, 0, 1),
-(24, 'Partners & Investors', '/content/partners-investors', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z\" /></svg>', 'violet', 2, 30, 0, 0, 1),
-(25, 'Incubation', '/content/incubation', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 10V3L4 14h7v7l9-11h-7z\" /></svg>', 'blue', 2, 31, 0, 0, 1),
-(26, 'Trainings', '/content/trainings', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253\" /></svg>', 'amber', 2, 32, 0, 0, 1),
-(27, 'Investment Steps', '/content/investment-steps', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z\" /></svg>', 'teal', 2, 33, 0, 0, 1),
-(28, 'Board Members', '/content/board-members', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z\" /></svg>', 'purple', 2, 34, 0, 0, 1),
-(29, 'Who We Are', '/content/who-we-are', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>', 'indigo', 2, 35, 0, 0, 1),
-(30, 'Library', '/media/library', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10\" /></svg>', 'purple', 3, 41, 0, 0, 0),
-(32, 'Contact', '/interaction/contact', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'blue', 4, 51, 0, 1, 0),
-(34, 'Contact Inbox', '/interaction/contact-messages', '', 'blue', 4, 1, 0, 0, 1),
-(36, 'Manage Forms', '/interaction/forms/manage', NULL, 'blue', 33, 1, 0, 0, 1),
-(37, 'Submissions', '/interaction/forms/submissions', NULL, 'blue', 33, 2, 0, 0, 1),
-(39, 'Menus', '/appearance/menus', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M4 6h16M4 12h16M4 18h16\" /></svg>', 'rose', 5, 61, 0, 0, 1),
-(40, 'Theme', '/appearance/theme-settings', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01\" /></svg>', 'violet', 5, 62, 0, 0, 1),
-(41, 'Users', '/users/all', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z\" /></svg>', 'lime', 6, 71, 0, 0, 1),
-(42, 'Add User', '/users/add', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z\" /></svg>', 'sky', 6, 72, 0, 0, 1),
-(43, 'Subscribers', '/users/subscribers', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" /></svg>', 'fuchsia', 6, 73, 0, 0, 1),
-(44, 'Settings', '/settings/general', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z\" /><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" /></svg>', 'slate', 7, 81, 0, 0, 1),
-(45, 'Audit Logs', '/settings/audit-logs', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\" /></svg>', 'red', 7, 82, 0, 0, 1),
-(46, 'Roles & Permissions', '/users/roles', '<svg className=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\" /></svg>', 'indigo', 6, 74, 0, 0, 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `contact_messages`
---
-
-CREATE TABLE `contact_messages` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `phone` varchar(50) DEFAULT NULL,
-  `message` text NOT NULL,
-  `status` enum('new','read','replied') DEFAULT 'new',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `contact_messages`
---
-
-INSERT INTO `contact_messages` (`id`, `name`, `email`, `phone`, `message`, `status`, `created_at`) VALUES
-(1, 'Beki Tame', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2025-12-19 11:32:58'),
-(2, 'Bereket Tamrat', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2026-01-05 07:38:32'),
-(3, 'Beki Tame', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2026-01-05 09:19:18'),
-(4, 'Beki Tame', 'berekettamrat2015@gmail.com', '+251913566735', 'test', 'read', '2026-01-05 09:31:32'),
-(5, 'Hayal', 'onerrr@gmail.com', '', 'Tets', 'read', '2026-01-10 05:48:42'),
-(6, 'Mesfin Tsegaye', 'mesfin@mevinai.com', '+251911522902', 'Hello, this is Mesfin, Founder of Mevinai PLC. I’m interested in renting a workspace for our company and would appreciate guidance on the next steps. We’re a growing startup and are looking for an environment that can support our team’s expansion and innovation.', 'read', '2026-01-12 13:19:08'),
-(7, 'Mesfin Tsegaye', 'mesfin@mevinai.com', '+251911522902', 'Hello, this is Mesfin, Founder of Mevinai PLC. I’m interested in renting a workspace for our company and would appreciate guidance on the next steps. We’re a growing startup and are looking for an environment that can support our team’s expansion and innovation.', 'read', '2026-01-12 13:19:35'),
-(8, 'Hayal Tamrat Girum', 'hayaltamrat3@gmail.com', '+251976180462', 'this is test from hayal\n', 'replied', '2026-01-19 15:09:36'),
-(9, 'Dagim Mathewos', 'dmathewos529@gmail.com', '+251903918129', 'Subject: Cooperative Training Placement Request – 5 Web Development & Database Students (Teferi Mekonnen Polytechnic College)\n\nTo:  Ethiopian IT Park (ICT Park) Addis Ababa, Ethiopia\n\nDear Sir/Madam,\n\nWe are writing to formally express our keen interest in undertaking our Cooperative Training (Internship) at the Ethiopian IT Park. We are a group of five (5) dedicated students currently completing our Level 3 certification in Web Development and Database Management at Teferi Mekonnen Polytechnic College.\n\nAs students of one of Ethiopia’s most historic technical institutions, we are eager to bridge the gap between our academic studies and the real-world digital ecosystem. We believe that the Ethiopian IT Park, as the nation\'s premier technology hub, offers the ideal environment for us to refine our technical skills while contributing to the Park\'s digital objectives.\n\nDuring our placement, we are prepared to assist resident companies or the Park administration in the following areas:\n\nWeb Development: Assisting in front-end updates, UI/UX maintenance, and basic web programming (HTML, CSS, JavaScript).\n\nDatabase Management: Supporting data entry, SQL queries, database cleaning, and documentation.\n\nTechnical Support: Aiding in IT infrastructure maintenance and general technical troubleshooting within the Special Economic Zone.\n\nWe are highly motivated, disciplined, and ready to adapt to the fast-paced professional environment of the IT Park. We have attached our institutional recommendation letter from Teferi Mekonnen Polytechnic College for your review.\n\nWe would welcome the opportunity to discuss how we can contribute to your organization during our training period. Thank you for considering our request and for your commitment to empowering the next generation of Ethiopian IT professionals.\n\nSincerely,\n\nStudent Representative Name: Dagim Mathewos Phone Number: +251-903-918-129 College: Teferi Mekonnen Polytechnic College', 'read', '2026-01-26 14:34:42'),
-(10, '<script>alert(\'XSS\')</script>', 'test@gmail.com', '<script>alert(\'XSS\')</script>', '<script>alert(\'XSS\')</script>', 'read', '2026-01-29 13:53:36'),
-(11, 'Habtam Habtam', 'hayaltamrat@gmail.com', '+359933499097', 'test', 'new', '2026-01-29 19:35:27'),
-(12, 'John Doe', 'test@example.com', NULL, 'Normal message', 'read', '2026-02-02 13:41:27'),
-(13, 'Contact Tester', 'tester@example.com', '0988776655', 'This is a valid test message', 'new', '2026-02-18 12:08:01'),
-(14, 'Contact Tester', 'tester@example.com', '0988776655', 'This is a valid test message', 'new', '2026-02-18 12:08:57'),
-(15, 'Test', 'test@test.com', NULL, 'Hello', 'new', '2026-02-18 14:00:57'),
-(16, 'Tester', 'test@test.com', NULL, 'text', 'new', '2026-02-18 14:01:46'),
-(17, 'Tester', 'test@test.com', NULL, 'text', 'new', '2026-02-18 14:01:46'),
-(18, 'Tester', 'test@test.com', NULL, 'x', 'new', '2026-02-18 14:01:47'),
-(19, 'Tester', 'test@test.com', NULL, 'text', 'new', '2026-02-18 14:01:47'),
-(20, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(21, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(22, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(23, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(24, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(25, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(26, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(27, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(28, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(29, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(30, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(31, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(32, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(33, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(34, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(35, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(36, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(37, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(38, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 07:59:53'),
-(39, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:23'),
-(40, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:23'),
-(41, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:56'),
-(42, 'Spam Bot', 'spam@itpark.com', NULL, 'This is automated spam.', 'new', '2026-02-21 08:06:56'),
-(43, 'John Doe', 'john@verified.com', '0912345678', 'Legitimate message.', 'new', '2026-02-21 08:48:39'),
-(44, 'John Doe', 'john@verified.com', '0912345678', 'Legitimate message.', 'new', '2026-02-21 08:49:41'),
-(45, 'John Doe', 'john@verified.com', '0912345678', 'Legitimate message.', 'new', '2026-02-21 08:52:56');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `departments`
---
-
-CREATE TABLE `departments` (
-  `department_id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `description` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `departments`
---
-
-INSERT INTO `departments` (`department_id`, `name`, `description`, `created_at`) VALUES
-(1, 'IT', 'Information Technology Department', '2026-01-02 10:25:30'),
-(2, 'HR', 'Human Resources', '2026-01-02 10:25:30'),
-(3, 'Finance', 'Finance and Accounts', '2026-01-02 10:25:30'),
-(4, 'Marketing', 'Marketing and Public Relations', '2026-01-02 10:25:30');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `employees`
---
-
-CREATE TABLE `employees` (
-  `employee_id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `role_id` int(11) DEFAULT NULL,
-  `department_id` int(11) DEFAULT NULL,
-  `supervisor_id` int(11) DEFAULT NULL,
-  `fname` varchar(255) DEFAULT NULL,
-  `lname` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `sex` enum('M','F') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `employees`
---
-
-INSERT INTO `employees` (`employee_id`, `name`, `role_id`, `department_id`, `supervisor_id`, `fname`, `lname`, `email`, `phone`, `sex`) VALUES
-(21, 'www www', 1, 1, NULL, 'hayal', 'tamrat', NULL, '0916048977', NULL),
-(34, 'hayaltame', NULL, 2, 21, 'ggg', 'ggg', 'beki@gmail.com', '0934556621', 'F'),
-(36, 'hayaltame', NULL, 2, 0, 'some', 'one', 'bekeei@gmail.com', '0934556621', 'M'),
-(37, 'hayaltame111', 1, NULL, NULL, 'some11', 'tame', 'oneq@gmail.com', '0934556688', 'M'),
-(38, 'hayaltame3333', 1, NULL, NULL, 'aaa', 'a', 'one1a111@gmail.com', '0934556111', 'M'),
-(39, 'hayaltame1114444', 1, NULL, NULL, 'some00', 'one11', 'one222@gmail.com', '0934556688', 'M'),
-(40, 'hayaltame1114444444', 1, NULL, NULL, 'yeab444', 'one4444', 'beki444@gmail.com', '0934556444', 'M'),
-(41, 'hayaltame444', 1, NULL, NULL, 'yeabeee', 'eeee', 'eeeee@gmail.com', '0934556644', 'M'),
-(43, 'rtttttt44', 1, NULL, NULL, 'yeabeee', 'eeee', 'eeee44e@gmail.com', '0934556677', 'M'),
-(45, 'tttttttttttt111', 1, NULL, NULL, 'yeabrrr', 'tamer', 'onerrr@gmail.com', '0934556655', 'M'),
-(46, 'bekele woya', 8, NULL, NULL, 'bekele', 'woya', 'woya@gmail.com', '0933499094', 'M'),
-(47, 'admin admin', 1, 2, 1, 'admin', 'admin', 'admin@email.com', '123-456-7890', 'M'),
-(48, 'hylt', 8, NULL, 0, 'hl', 'tm', 'hl@gmail.com', '0934556644', 'M'),
-(49, 'yonas', 2, NULL, NULL, 'yonas', 'ceo', 'yonas@itp.org', '0933499093', 'M'),
-(50, 'simegn', 5, 2, 49, 'geter', 'geter', 'simegn@itp.org', '0933499094', 'M'),
-(51, 'hayal@itp.org', 8, 2, 50, 'hayal', 'hayal', 'hayal@itp.org', '0933499097', 'M'),
-(54, 'hayalt@itp.org', 8, 2, 0, 'hayalt', 'hayalt', 'hayalt@itp.org', '0933499097', 'M'),
-(55, 'abebe', 4, NULL, 0, 'abebe', 'abe', 'abe@itp.et', '0934556624', 'M'),
-(56, '333333333', 4, 2, 49, 'some00333333', 'one333333', 'beki33333333333@gmail.com', '0934556333', 'M'),
-(57, 'staf', 8, 2, 56, 'staf', 'staf', 'staf@gmail.com', '0934556688', 'M'),
-(58, 'nebyat', 6, 2, 50, 'nebyat', 'nebyat', 'nebyat@itp.et', '093455444', 'F'),
-(59, 'ewunetu', 7, 2, 58, 'ewunetu', 'ewunetu', 'ewunetu@itp.et', '0934556453', 'M'),
-(60, 'general', 3, NULL, 49, 'general', 'manager', 'manager@itp.et', '0933499366', 'M'),
-(62, 'staf1', 8, 2, 66, 'staf1', 'staf1', 'staf1@itp.et', '0934556688', 'M'),
-(63, 'hayalta4444', 6, 2, 50, 'some', 'one', 'berrrrrki@gmail.com', '0934556555', 'M'),
-(64, 'yeabeeeee', 1, NULL, NULL, 'some', 'one', 'eeee@gmail.com', '0934556688', 'M'),
-(65, 'team leader', 7, 2, 58, 'teaml', 'teaml', 'teaml@gmail.com', '09373773333', 'M'),
-(66, 'team leader', 7, 2, 58, 'teamleader', 'teamleader', 'teamleader@gmail.com', '09373773333', 'M'),
-(67, 'hayal', 1, NULL, NULL, 'hayal', 'tamrat', 'hayal@itp.it', '0916048977', 'M'),
-(68, 'hayal', 8, 2, 65, 'hayal', 'tamrat', 'hayalt@itp.it', '0916048977', 'M'),
-(69, 'registrar@gmail.com', 5, NULL, NULL, 'registrar', 'registrar', 'registrar@gmail.com', '0916048977', 'M'),
-(70, 'Nathan', 1, NULL, NULL, 'Hayal', 'Girum', 'nathan@itp.et', '0976180462', 'M'),
-(71, 'Hayal Tamrat Girum', 3, NULL, NULL, 'Hayal', 'Girum', 'hayal@gmai.com', '0976180462', 'M'),
-(72, 'nathay tamrat', 5, NULL, 70, 'hayal', 'tamrat', 'regist@bus.com', '0916048977', 'M'),
-(73, 'hayal tamrat', 1, NULL, NULL, 'nathay', 'tamrat', 'astu@nathayblog.com', '0916048977', 'M'),
-(75, 'hayal tamrat', 4, NULL, 70, 'nathay', 'tamrat', 'hager@temechain.com', '0916048977', 'M'),
-(78, 'hayal tamrat', 4, NULL, 70, 'nathay', 'tamrat', 'hager1@temechain.com', '0916048977', 'M'),
-(82, 'hayal tamrat', 4, 1, 49, 'hayal', 'tamrat', 'hager22@temechain.com', '0916048977', 'M'),
-(83, 'Hayal Tamrat', 5, NULL, NULL, 'Hayal', 'Tamrat', 'Hayalt@hu.edu.et', '0916048977', 'M'),
-(84, 'Hayal ', 1, NULL, NULL, 'Nathay ', 'Nathay ', 'Nathantamrat50@gmail.com', '90188837377', 'M'),
-(85, 'nathay tamrat', 5, NULL, NULL, 'nathay', 'tamrat', 'astu@nathayblog.et', '0916048977', 'M'),
-(86, 'agent', 6, 1, 50, 'test', 'some one', 'agent@lonche.com', 'itp@123', 'M'),
-(87, 'hayal tamrat', 1, 1, NULL, 'hayal', 'tamrat', 'hayaltamrat@gmail.com', '+25191222112', NULL),
-(88, 'yossef knfe', 4, 2, NULL, 'yossef', 'knfe', 'yosef@gmail.com', '0913566735', NULL),
-(89, 'test21 test21', 3, 1, NULL, 'test21', 'test21', 'test21@gmail.com', '', NULL),
-(90, 'Hayal Tamrat', 1, 1, NULL, 'Hayal', 'Tamrat', 'kidoastu1993@gmail.com', '0913566735', NULL),
-(91, 'nathan tame', 1, 1, NULL, 'nathan', 'tame', 'hayaltamrat3@gmail.com', '0909090909', NULL),
-(92, 'test admin', 1, 1, NULL, 'test', 'admin', 'testadmin@gmail.com', '0913566735', NULL),
-(93, 'test hr', 4, 2, NULL, 'test', 'hr', 'testhr@gmail.com', '', NULL),
-(94, 'test Leasing', 0, 1, NULL, 'test', 'Leasing', 'testleasing@gmail.com', '0913566735', NULL),
-(95, 'test conten', 3, 1, NULL, 'test', 'conten', 'testcontent@gmail.com', '0913566735', NULL),
-(96, 'test event', 5, 1, NULL, 'test', 'event', 'testevent@gmail.com', '0913566735', NULL),
-(97, 'test follow_up', 2, 1, NULL, 'test', 'follow_up', 'testfollowup@gmail.com', '0913566735', NULL),
-(98, 'content tets1', 3, 1, NULL, 'content', 'tets1', 'contenttest1@gmail.com', '0917266671', NULL),
-(99, 'test test', 1, 1, NULL, 'test', 'test', 'test@gmail.com', '98893219831298', NULL),
-(100, 'Security Auditor', 1, 1, NULL, 'Security', 'Auditor', 'audit_1771417756741@example.com', '0900000000', NULL),
-(5000, 'Security Auditor', 1, 1, NULL, 'Security', 'Auditor', 'audit_1771418828658@example.com', '0900000000', NULL),
-(5001, 'Security Auditor', 1, 1, NULL, 'Security', 'Auditor', 'audit_1771419160931@example.com', '0900000000', NULL),
-(5002, 'tets tets', 4, 2, NULL, 'tets', 'tets', 'tets113@gmail.com', '0917122712', NULL),
-(5003, 'contet contet', 3, 1, NULL, 'contet', 'contet', 'contet1@gmail.com', '+251913566735', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `employee_positions`
---
-
-CREATE TABLE `employee_positions` (
-  `id` int(11) NOT NULL,
-  `employee_id` int(11) NOT NULL,
-  `org_node_id` int(11) NOT NULL,
-  `is_primary` tinyint(1) DEFAULT 0,
-  `is_delegation` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `employee_positions`
---
-
-INSERT INTO `employee_positions` (`id`, `employee_id`, `org_node_id`, `is_primary`, `is_delegation`, `created_at`) VALUES
-(1, 151, 13, 1, 0, '2026-03-19 11:10:44'),
-(2, 151, 15, 0, 1, '2026-03-19 11:11:39'),
-(3, 151, 16, 0, 1, '2026-03-19 11:11:50'),
-(4, 146, 11, 1, 0, '2026-03-19 11:12:47'),
-(5, 149, 52, 1, 0, '2026-03-19 11:21:25'),
-(6, 109, 55, 1, 0, '2026-03-20 05:31:29'),
-(7, 152, 14, 1, 1, '2026-03-20 05:38:43'),
-(8, 152, 17, 0, 1, '2026-03-20 05:39:19'),
-(9, 152, 18, 0, 1, '2026-03-20 05:39:35'),
-(10, 143, 10, 1, 0, '2026-03-20 05:40:11'),
-(11, 142, 9, 1, 0, '2026-03-20 05:41:17'),
-(12, 139, 52, 1, 0, '2026-03-20 11:47:21'),
-(13, 72, 10, 1, 0, '2026-03-20 14:00:50'),
-(14, 146, 14, 1, 0, '2026-03-23 06:56:06'),
-(15, 117, 19, 1, 0, '2026-03-23 06:56:06'),
-(17, 109, 55, 1, 0, '2026-03-23 08:48:56'),
-(18, 139, 26, 1, 0, '2026-03-23 08:48:56');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `organization_structure`
---
-
-CREATE TABLE `organization_structure` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `name_amharic` varchar(255) NOT NULL,
-  `type` varchar(50) NOT NULL,
-  `parent_id` int(11) DEFAULT NULL,
-  `level` int(11) DEFAULT 1,
-  `description` text DEFAULT NULL,
-  `head_employee_id` int(11) DEFAULT NULL,
-  `status` enum('active','inactive') DEFAULT 'active',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `organization_structure`
---
-
-INSERT INTO `organization_structure` (`id`, `name`, `name_amharic`, `type`, `parent_id`, `level`, `description`, `head_employee_id`, `status`, `created_at`, `updated_at`) VALUES
-(9, 'CEO', 'CEO', 'CEO', NULL, 1, 'CEO', NULL, 'active', '2025-12-16 07:33:36', '2025-12-16 07:33:36'),
-(10, 'Deputy CEO', 'Deputy CEO', 'Deputy CEO', 9, 2, 'Deputy CEO', NULL, 'active', '2025-12-16 07:34:14', '2025-12-16 07:34:14'),
-(11, 'IT Directorate', 'IT Directorate', 'Directorate', 10, 3, 'IT Directorate', NULL, 'active', '2025-12-16 07:35:17', '2025-12-16 07:35:17'),
-(12, 'Constraction  Directorate', 'Constraction  Directorate', 'Directorate', 10, 3, 'Constraction  Directorate', NULL, 'active', '2025-12-16 07:35:45', '2025-12-16 07:35:45'),
-(13, 'Inovation and Encubation Department', 'Inovation and Encubation Department', 'Department', 11, 4, 'Inovation and Encubation Department', NULL, 'active', '2025-12-16 07:39:08', '2025-12-16 07:39:08'),
-(14, 'Digital Service and Infrastructure Devevelopment', 'Digital Service and Infrastructure Devevelopment', 'Department', 11, 4, 'Digital Service and Infrastructure Devevelopment', NULL, 'active', '2025-12-16 07:40:31', '2025-12-16 07:40:31'),
-(15, 'Reaserch Section ', 'Reaserch Section ', 'Section', 13, 5, 'Reaserch Section ', NULL, 'active', '2025-12-16 07:41:09', '2025-12-16 07:41:09'),
-(16, 'Encubation Section ', 'Encubation Section ', 'Section', 13, 5, 'Encubation Section ', NULL, 'active', '2025-12-16 07:41:37', '2025-12-16 07:41:37'),
-(17, 'Network and Infrastructure ', 'Network and Infrastructure ', 'Section', 14, 5, 'Network and Infrastructure ', NULL, 'active', '2025-12-16 07:42:18', '2025-12-16 07:42:18'),
-(18, 'Software development', 'Software development', 'Section', 14, 5, 'Software development', NULL, 'active', '2025-12-16 07:43:06', '2025-12-16 07:43:06'),
-(19, 'Ciyber Security ', 'Ciyber Security ', 'Section', 14, 5, 'Ciyber Security ', NULL, 'active', '2025-12-16 07:43:29', '2025-12-16 07:43:29'),
-(20, 'Construction and Design ', 'Construction and Design ', 'Department', 12, 4, 'Construction and Design ', NULL, 'active', '2025-12-16 07:45:58', '2025-12-16 07:45:58'),
-(21, 'Construction ', 'Construction', 'Section', 20, 5, 'Construction', NULL, 'active', '2025-12-16 07:46:29', '2025-12-16 07:46:29'),
-(22, 'Design ', 'Design', 'Section', 20, 5, 'Design Section ', NULL, 'active', '2025-12-16 07:46:51', '2025-12-16 07:46:51'),
-(24, 'Land and Office Managment', 'Land and Office Managment', 'Department', 12, 4, 'Land and Office Managment', NULL, 'active', '2025-12-16 07:49:24', '2025-12-16 07:49:24'),
-(25, 'Utilities and service ', 'Utilities and service ', 'Department', 12, 4, 'Utilities and service ', NULL, 'active', '2025-12-16 07:50:30', '2025-12-16 07:50:30'),
-(26, 'Enviroment and Greenery ', 'Enviroment and Greenery ', 'Department', 12, 4, 'Enviroment and Greenery ', NULL, 'active', '2025-12-16 07:51:34', '2025-12-16 07:51:34'),
-(27, 'Markating ', 'Markating ', 'Department', 10, 3, 'Markating Department', NULL, 'active', '2025-12-16 07:54:07', '2025-12-16 07:54:07'),
-(28, 'Markating and Sales ', 'Markating and Sales ', 'Section', 27, 4, 'Markating and Sales ', NULL, 'active', '2025-12-16 07:54:49', '2025-12-16 07:54:49'),
-(29, 'Investor Support', 'Investor Support', 'Section', 27, 4, 'Investor Support', NULL, 'active', '2025-12-16 07:55:18', '2025-12-16 07:55:18'),
-(30, 'Bussines Development and Support', 'Bussines Development and Support', 'Section', 27, 4, 'Bussines Development and Support', NULL, 'active', '2025-12-16 07:56:02', '2025-12-16 07:56:02'),
-(31, 'Corporate Adminstration Directorate', 'Corporate Adminstration Directorate', 'Directorate', 9, 2, 'Corporate Adminstration Directorate', NULL, 'active', '2025-12-16 07:57:02', '2025-12-16 07:57:25'),
-(32, 'Finance Department', 'Finance Department', 'Department', 31, 3, 'Finance Department', NULL, 'active', '2025-12-16 07:58:00', '2025-12-16 07:58:00'),
-(33, 'HR Department', 'HR Department', 'Department', 31, 3, 'HR Department', NULL, 'active', '2025-12-16 07:58:22', '2025-12-16 07:58:22'),
-(34, 'Procrument and Resource Admin', 'Procrument and Resource Admin', 'Department', 31, 3, 'Procrument and Resource Admin', NULL, 'active', '2025-12-16 07:59:08', '2025-12-16 07:59:08'),
-(35, 'Income and Cost Section ', 'Income and Cost Section ', 'Section', 32, 4, 'Income and Cost Section ', NULL, 'active', '2025-12-16 08:00:55', '2025-12-16 08:00:55'),
-(36, 'Budget Section ', 'Budget Section ', 'Section', 32, 4, 'Budget Section ', NULL, 'active', '2025-12-16 08:02:21', '2025-12-16 08:02:21'),
-(37, 'Procrument Section ', 'Procrument Section ', 'Section', 34, 4, 'Procrument Section ', NULL, 'active', '2025-12-16 08:02:56', '2025-12-16 08:03:46'),
-(38, 'Inventory Admin', 'Inventory Admin', 'Section', 34, 4, 'Inventory Admin', NULL, 'active', '2025-12-16 08:02:58', '2025-12-16 08:04:30'),
-(39, 'General Service ', 'General Service ', 'Section', 34, 4, 'General Service ', NULL, 'active', '2025-12-16 08:05:25', '2025-12-16 08:05:25'),
-(40, 'HR Admin ', 'HR Admin ', 'Section', 33, 4, 'HR Admin ', NULL, 'active', '2025-12-16 08:06:04', '2025-12-16 08:06:04'),
-(41, 'Training and HR development', 'Training and HR development', 'Section', 33, 4, 'Training and HR development', NULL, 'active', '2025-12-16 08:06:49', '2025-12-16 08:06:49'),
-(42, 'Security ', 'Security ', 'Department', 9, 2, NULL, NULL, 'active', '2025-12-16 08:53:00', '2025-12-16 08:53:00'),
-(43, 'CEO Office Addmistration ', 'CEO Office Addmistration ', 'Department', 9, 2, NULL, NULL, 'active', '2025-12-16 08:53:55', '2025-12-16 08:53:55'),
-(44, 'Law Department', 'Law Department', 'Department', 9, 2, NULL, NULL, 'active', '2025-12-16 08:54:21', '2025-12-16 08:54:35'),
-(45, 'Strategic Advisor', 'Strategic Advisor', 'unit', 9, 2, NULL, NULL, 'active', '2025-12-16 08:56:27', '2025-12-16 08:57:07'),
-(46, 'Law Service ', 'Law Service ', 'Section', 44, 3, NULL, NULL, 'active', '2025-12-16 08:58:26', '2025-12-16 08:58:26'),
-(47, 'Complaice Section ', 'Complaice Section ', 'Section', 44, 3, NULL, NULL, 'active', '2025-12-16 08:58:47', '2025-12-16 08:58:47'),
-(48, 'Auditor', 'Auditor', 'Section', 9, 2, NULL, NULL, 'active', '2025-12-16 08:59:47', '2025-12-16 08:59:47'),
-(49, 'Corporation Communication Section ', 'Corporation Communication Section ', 'Section', 9, 2, NULL, NULL, 'active', '2025-12-16 09:00:36', '2025-12-16 09:00:36'),
-(50, 'Plan and followup ', 'Plan and followup ', 'Section', 9, 2, NULL, NULL, 'active', '2025-12-16 09:01:49', '2025-12-16 09:01:49'),
-(51, 'Senior', 'Senior', 'Senior Software Developer', 18, 6, NULL, NULL, 'active', '2026-03-19 11:18:02', '2026-03-19 11:18:02'),
-(52, 'Specialist', 'Specialist', ' Software Developer Specialist', 18, 6, NULL, NULL, 'active', '2026-03-19 11:18:31', '2026-03-19 11:18:31'),
-(53, 'Assistant', 'Assistant', ' Software Developer Assistant', 18, 6, NULL, NULL, 'active', '2026-03-19 11:18:52', '2026-03-19 11:18:52'),
-(54, 'Senior System admin', 'Senior System admin', 'Senior', 17, 6, NULL, NULL, 'active', '2026-03-20 05:29:38', '2026-03-20 05:29:38'),
-(55, ' System admin Specialist', ' System admin Specialist', 'Specialist', 17, 6, NULL, NULL, 'active', '2026-03-20 05:30:06', '2026-03-20 05:30:06'),
-(56, ' System admin Asistant', ' System admin Asistant', 'Assistant', 17, 6, NULL, NULL, 'active', '2026-03-20 05:30:31', '2026-03-20 05:30:31');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `organization_types`
---
-
-CREATE TABLE `organization_types` (
-  `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `description` text DEFAULT NULL,
-  `color` varchar(50) DEFAULT 'from-gray-600 to-gray-700',
-  `level_order` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `organization_types`
---
-
-INSERT INTO `organization_types` (`id`, `name`, `description`, `color`, `level_order`, `created_at`) VALUES
-(1, 'CEO', 'Top level organization', 'from-purple-600 to-purple-700', 1, '2025-12-15 13:52:30'),
-(2, 'Department', 'Major functional area', 'from-blue-600 to-blue-700', 4, '2025-12-15 13:52:30'),
-(3, 'Directorate', 'Sub-division of department', 'from-teal-600 to-teal-700', 3, '2025-12-15 13:52:30'),
-(4, 'Division', 'Specific Division', 'from-green-600 to-green-700', 5, '2025-12-15 13:52:30'),
-(7, 'Deputy CEO', 'Deputy CEO', 'from-orange-600 to-orange-700', 2, '2025-12-16 07:31:32'),
-(8, 'unit', 'unit', 'linear-gradient(to right, #7c3aed, #5b21b6)', 6, '2025-12-16 08:55:42'),
-(9, 'Senior Software Developer', 'Senior Software Developer', 'linear-gradient(to right, #e11d48, #9f1239)', 7, '2026-03-19 11:15:29'),
-(10, ' Software Developer Specialist', 'Software Developer Specialist', 'from-gray-600 to-gray-700', 8, '2026-03-19 11:16:04'),
-(11, ' Software Developer Assistant', ' Software Developer Assistant', 'from-gray-600 to-gray-700', 9, '2026-03-19 11:16:52'),
-(12, 'Senior', 'Senior', 'linear-gradient(to right, #4f46e5, #3730a3)', 10, '2026-03-20 05:27:27'),
-(13, 'Specialist', 'Specialist', 'linear-gradient(to right, #059669, #065f46)', 11, '2026-03-20 05:27:54'),
-(14, 'Assistant', 'Assistant', 'linear-gradient(to right, #0284c7, #075985)', 12, '2026-03-20 05:28:22');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `revoked_tokens`
---
-
-CREATE TABLE `revoked_tokens` (
-  `id` int(11) NOT NULL,
-  `token` varchar(500) NOT NULL,
-  `expires_at` datetime NOT NULL,
-  `revoked_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `roles`
---
-
-
---
--- Dumping data for table `roles
-
--- --------------------------------------------------------
-
---
--- Table structure for table `role_menu_permissions`
---
-
-CREATE TABLE `role_menu_permissions` (
-  `role_id` int(11) NOT NULL,
-  `menu_id` int(11) NOT NULL,
-  `can_view` tinyint(1) DEFAULT 1,
-  `can_create` tinyint(1) DEFAULT 0,
-  `can_edit` tinyint(1) DEFAULT 0,
-  `can_delete` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `role_menu_permissions`
---
-
-INSERT INTO `role_menu_permissions` (`role_id`, `menu_id`, `can_view`, `can_create`, `can_edit`, `can_delete`) VALUES
-(0, 8, 1, 0, 0, 0),
-(0, 9, 1, 0, 0, 0),
-(0, 10, 1, 0, 0, 0),
-(0, 20, 1, 0, 0, 0),
-(0, 21, 1, 0, 0, 0),
-(1, 0, 1, 0, 0, 0),
-(1, 1, 1, 0, 0, 0),
-(1, 2, 1, 0, 0, 0),
-(1, 3, 1, 0, 0, 0),
-(1, 4, 1, 0, 0, 0),
-(1, 5, 1, 0, 0, 0),
-(1, 6, 1, 0, 0, 0),
-(1, 7, 1, 0, 0, 0),
-(1, 8, 1, 0, 0, 0),
-(1, 9, 1, 0, 0, 0),
-(1, 10, 1, 0, 0, 0),
-(1, 11, 1, 0, 0, 0),
-(1, 12, 1, 0, 0, 0),
-(1, 13, 1, 0, 0, 0),
-(1, 14, 1, 0, 0, 0),
-(1, 15, 1, 0, 0, 0),
-(1, 16, 1, 0, 0, 0),
-(1, 20, 1, 0, 0, 0),
-(1, 21, 1, 0, 0, 0),
-(1, 22, 1, 0, 0, 0),
-(1, 23, 1, 0, 0, 0),
-(1, 24, 1, 0, 0, 0),
-(1, 25, 1, 0, 0, 0),
-(1, 26, 1, 0, 0, 0),
-(1, 27, 1, 0, 0, 0),
-(1, 28, 1, 0, 0, 0),
-(1, 29, 1, 0, 0, 0),
-(1, 32, 1, 0, 0, 0),
-(1, 34, 1, 0, 0, 0),
-(1, 35, 1, 0, 0, 0),
-(1, 38, 1, 0, 0, 0),
-(1, 39, 1, 0, 0, 0),
-(1, 41, 1, 0, 0, 0),
-(1, 42, 1, 0, 0, 0),
-(1, 43, 1, 0, 0, 0),
-(1, 45, 1, 0, 0, 0),
-(1, 46, 1, 0, 0, 0),
-(1, 47, 1, 0, 0, 0),
-(2, 4, 1, 0, 0, 0),
-(2, 8, 1, 0, 0, 0),
-(2, 9, 1, 0, 0, 0),
-(2, 10, 1, 0, 0, 0),
-(2, 34, 1, 0, 0, 0),
-(2, 35, 1, 0, 0, 0),
-(3, 8, 1, 0, 0, 0),
-(3, 9, 1, 0, 0, 0),
-(3, 10, 1, 0, 0, 0),
-(3, 12, 1, 0, 0, 0),
-(3, 13, 1, 0, 0, 0),
-(3, 14, 1, 0, 0, 0),
-(3, 15, 1, 0, 0, 0),
-(3, 16, 1, 0, 0, 0),
-(4, 0, 1, 0, 0, 0),
-(4, 8, 1, 0, 0, 0),
-(4, 9, 1, 0, 0, 0),
-(4, 10, 1, 0, 0, 0),
-(4, 23, 1, 0, 0, 0),
-(4, 47, 1, 0, 0, 0),
-(5, 8, 1, 0, 0, 0),
-(5, 9, 1, 0, 0, 0),
-(5, 10, 1, 0, 0, 0),
-(5, 22, 1, 0, 0, 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `subscribers`
---
-
-CREATE TABLE `subscribers` (
-  `id` int(11) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `status` enum('active','unsubscribed') DEFAULT 'active',
-  `subscribed_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `unsubscribed_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `subscribers`
---
-
-INSERT INTO `subscribers` (`id`, `email`, `status`, `subscribed_at`, `unsubscribed_at`) VALUES
-(1, 'hayaltamrat@gmail.com', 'active', '2025-12-19 08:07:31', NULL),
-(4, 'hayaltamrat1@gmail.com', 'active', '2025-12-19 08:13:22', NULL),
-(5, 'hayaltamrat4@gmail.com', 'active', '2026-01-03 11:18:11', NULL),
-(6, 'hayaltamrat5@gmail.com', 'active', '2026-01-05 06:08:14', NULL),
-(7, 'berekettamrat2015@gmail.com', 'active', '2026-01-05 06:19:46', NULL),
-(8, 'hayalt5@gmail.com', 'active', '2026-01-05 07:35:38', NULL),
-(9, 'hayaltamrat6@gmail.com', 'active', '2026-01-05 07:38:04', NULL),
-(10, 'hayaltamrat123@gmail.com', 'active', '2026-01-05 07:39:35', NULL),
-(11, 'astu@nathayblog.com', 'active', '2026-01-05 08:53:24', NULL),
-(12, 'berekettamrat20115@gmail.com', 'active', '2026-01-05 08:55:14', NULL),
-(13, 'astuw@nathayblog.com', 'active', '2026-01-05 09:03:44', NULL),
-(14, 'kidoastu1993@gmail.com', 'active', '2026-01-05 09:11:40', NULL),
-(15, 'kidoastu19293@gmail.com', 'active', '2026-01-05 09:31:45', NULL),
-(16, 'worket2@gmail.com', 'active', '2026-01-05 09:38:34', NULL),
-(17, 'worketh20172@gmail.com', 'active', '2026-01-05 09:39:59', NULL),
-(18, 'hager@temechain.com', 'active', '2026-01-05 10:01:00', NULL),
-(19, 'bereketeab550@gmail.com', 'active', '2026-01-05 10:22:08', NULL),
-(20, 'berekettamrat20154@gmail.com', 'active', '2026-01-06 04:38:05', NULL),
-(21, 'fekadualemu208@gmail.com', 'active', '2026-01-08 07:13:49', NULL),
-(22, 'super@gmail.com', 'active', '2026-01-09 04:56:42', NULL),
-(23, 'somchaibinl@gmail.com', 'active', '2026-01-09 15:27:10', NULL),
-(24, 'natha@gmail.com', 'active', '2026-01-09 18:55:42', NULL),
-(25, 'onertrr@gmail.com', 'active', '2026-01-11 07:04:03', NULL),
-(26, 'alemu.abera@ethiopianitpark.et', 'active', '2026-01-12 11:33:37', NULL),
-(27, 'kedirahmed19963384@gmail.com', 'active', '2026-01-12 12:17:52', NULL),
-(28, 'matthewarop@gmail.com', 'active', '2026-01-13 06:12:35', NULL),
-(29, 'sirajdeldebo96@gmail.com', 'active', '2026-01-14 10:25:37', NULL),
-(30, 'hayaltamrat8@gmail.com', 'active', '2026-01-15 10:31:21', NULL),
-(31, 'mchala04@gmail.com', 'active', '2026-01-18 00:53:59', NULL),
-(32, 'hayaltamrat23@gmail.com', 'active', '2026-01-19 16:24:52', NULL),
-(33, 'hayaltamrat3@gmail.com', 'active', '2026-01-19 16:32:37', NULL),
-(34, 'tsehayutilahun@gmail.com', 'active', '2026-01-20 08:25:12', NULL),
-(35, 'kirubelmulugeta3@gmail.com', 'active', '2026-01-24 05:37:40', NULL),
-(36, 'na@gmail.com', 'active', '2026-01-29 19:48:18', NULL),
-(37, 'na1@gmail.com', 'active', '2026-01-29 19:48:35', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `system_settings`
---
-
-CREATE TABLE `system_settings` (
-  `setting_key` varchar(50) NOT NULL,
-  `setting_value` longtext DEFAULT NULL,
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `system_settings`
---
-
-INSERT INTO `system_settings` (`setting_key`, `setting_value`, `updated_at`) VALUES
-('density', 'compact', '2026-03-26 13:07:28'),
-('fontFamily', 'system', '2026-03-26 13:07:28'),
-('logoPreview', '', '2026-03-26 13:04:58'),
-('primaryColor', 'blue', '2026-03-26 13:04:58'),
-('themeMode', 'dark', '2026-03-30 07:21:16');
-
--- Table structure for table `user_menu_permissions`
---
-
-CREATE TABLE `user_menu_permissions` (
-  `user_id` int(11) NOT NULL,
-  `menu_id` int(11) NOT NULL,
-  `permission_type` enum('allow','deny') NOT NULL DEFAULT 'allow'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `user_menu_permissions`
---
-
-INSERT INTO `user_menu_permissions` (`user_id`, `menu_id`, `permission_type`) VALUES
-(0, 4, 'allow'),
-(0, 7, 'allow'),
-(0, 9, 'allow'),
-(0, 10, 'allow'),
-(0, 12, 'allow'),
-(0, 13, 'allow'),
-(0, 15, 'allow'),
-(0, 26, 'allow'),
-(0, 27, 'allow'),
-(0, 28, 'allow'),
-(0, 29, 'allow'),
-(0, 34, 'allow'),
-(0, 36, 'allow'),
-(0, 39, 'allow'),
-(0, 40, 'allow'),
-(0, 41, 'allow'),
-(0, 42, 'allow'),
-(0, 43, 'allow'),
-(0, 44, 'allow'),
-(0, 45, 'allow'),
-(0, 46, 'allow'),
-(34, 1, 'deny'),
-(34, 2, 'deny'),
-(34, 3, 'deny'),
-(34, 4, 'deny'),
-(34, 5, 'deny'),
-(34, 6, 'deny'),
-(34, 7, 'deny'),
-(34, 8, 'deny'),
-(34, 9, 'allow'),
-(34, 10, 'deny'),
-(34, 11, 'deny'),
-(34, 12, 'allow'),
-(34, 13, 'deny'),
-(34, 14, 'deny'),
-(34, 15, 'allow'),
-(34, 16, 'deny'),
-(34, 17, 'deny'),
-(34, 18, 'deny'),
-(34, 19, 'deny'),
-(34, 20, 'deny'),
-(34, 21, 'deny'),
-(34, 22, 'deny'),
-(34, 24, 'deny'),
-(34, 25, 'deny'),
-(34, 26, 'deny'),
-(34, 27, 'deny'),
-(34, 28, 'deny'),
-(34, 29, 'deny'),
-(34, 30, 'deny'),
-(34, 32, 'deny'),
-(34, 33, 'deny'),
-(34, 34, 'allow'),
-(34, 35, 'deny'),
-(34, 36, 'deny'),
-(34, 37, 'deny'),
-(34, 38, 'deny'),
-(34, 39, 'deny'),
-(34, 40, 'deny'),
-(34, 41, 'deny'),
-(34, 42, 'deny'),
-(34, 43, 'deny'),
-(34, 44, 'deny'),
-(34, 45, 'deny'),
-(34, 46, 'deny'),
-(36, 23, 'allow'),
-(81, 12, 'allow'),
-(81, 13, 'allow'),
-(81, 15, 'allow'),
-(81, 16, 'allow'),
-(84, 0, 'allow'),
-(84, 1, 'allow'),
-(84, 2, 'allow'),
-(84, 3, 'allow'),
-(84, 4, 'allow'),
-(84, 5, 'allow'),
-(84, 6, 'allow'),
-(84, 7, 'allow'),
-(84, 8, 'allow'),
-(84, 9, 'allow'),
-(84, 10, 'allow'),
-(84, 11, 'allow'),
-(84, 12, 'allow'),
-(84, 13, 'allow'),
-(84, 14, 'allow'),
-(84, 15, 'allow'),
-(84, 16, 'allow'),
-(84, 17, 'allow'),
-(84, 18, 'allow'),
-(84, 19, 'allow'),
-(84, 20, 'allow'),
-(84, 21, 'allow'),
-(84, 22, 'allow'),
-(84, 23, 'allow'),
-(84, 24, 'allow'),
-(84, 25, 'allow'),
-(84, 26, 'allow'),
-(84, 27, 'allow'),
-(84, 28, 'allow'),
-(84, 29, 'allow'),
-(84, 30, 'allow'),
-(84, 32, 'allow'),
-(84, 33, 'allow'),
-(84, 34, 'allow'),
-(84, 35, 'allow'),
-(84, 36, 'allow'),
-(84, 37, 'allow'),
-(84, 38, 'allow'),
-(84, 39, 'allow'),
-(84, 40, 'allow'),
-(84, 41, 'allow'),
-(84, 42, 'allow'),
-(84, 43, 'allow'),
-(84, 44, 'allow'),
-(84, 45, 'allow'),
-(84, 46, 'allow'),
-(84, 47, 'allow'),
-(89, 10, 'allow'),
-(89, 32, 'allow'),
-(89, 34, 'allow'),
-(89, 35, 'allow'),
-(1002, 47, 'allow');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `active_sessions`
---
-ALTER TABLE `active_sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_user` (`user_id`),
-  ADD KEY `idx_jti` (`jti`);
-
---
--- Indexes for table `approvalhierarchy`
---
-ALTER TABLE `approvalhierarchy`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `audit_logs`
---
-ALTER TABLE `audit_logs`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `blocked_ips`
---
-ALTER TABLE `blocked_ips`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_ip` (`ip_address`);
-
---
--- Indexes for table `cms_menus`
---
-ALTER TABLE `cms_menus`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_parent_menu` (`parent_id`);
-
---
--- Indexes for table `contact_messages`
---
-ALTER TABLE `contact_messages`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `departments`
---
-ALTER TABLE `departments`
-  ADD PRIMARY KEY (`department_id`);
-
---
--- Indexes for table `employees`
---
-ALTER TABLE `employees`
-  ADD PRIMARY KEY (`employee_id`),
-  ADD KEY `idx_employees_email` (`email`),
-  ADD KEY `idx_employees_phone` (`phone`);
-
---
--- Indexes for table `employee_positions`
---
-ALTER TABLE `employee_positions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `employee_id` (`employee_id`),
-  ADD KEY `org_node_id` (`org_node_id`);
-
---
--- Indexes for table `organization_structure`
---
-ALTER TABLE `organization_structure`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `parent_id` (`parent_id`);
-
---
--- Indexes for table `organization_types`
---
-ALTER TABLE `organization_types`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexes for table `revoked_tokens`
---
-ALTER TABLE `revoked_tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `token` (`token`),
-  ADD KEY `expires_at` (`expires_at`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`role_id`);
-
---
--- Indexes for table `role_menu_permissions`
---
-ALTER TABLE `role_menu_permissions`
-  ADD PRIMARY KEY (`role_id`,`menu_id`);
-
---
--- Indexes for table `subscribers`
---
-ALTER TABLE `subscribers`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `system_settings`
---
-ALTER TABLE `system_settings`
-  ADD PRIMARY KEY (`setting_key`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`user_id`);
-
---
--- Indexes for table `user_menu_permissions`
---
-ALTER TABLE `user_menu_permissions`
-  ADD PRIMARY KEY (`user_id`,`menu_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `active_sessions`
---
-ALTER TABLE `active_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
-
---
--- AUTO_INCREMENT for table `approvalhierarchy`
---
-ALTER TABLE `approvalhierarchy`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `audit_logs`
---
-ALTER TABLE `audit_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=318;
-
---
--- AUTO_INCREMENT for table `blocked_ips`
---
-ALTER TABLE `blocked_ips`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `contact_messages`
---
-ALTER TABLE `contact_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
-
---
--- AUTO_INCREMENT for table `departments`
---
-ALTER TABLE `departments`
-  MODIFY `department_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `employees`
---
-ALTER TABLE `employees`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5004;
-
---
--- AUTO_INCREMENT for table `employee_positions`
---
-ALTER TABLE `employee_positions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
-
---
--- AUTO_INCREMENT for table `organization_structure`
---
-ALTER TABLE `organization_structure`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
-
---
--- AUTO_INCREMENT for table `organization_types`
---
-ALTER TABLE `organization_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT for table `revoked_tokens`
---
-ALTER TABLE `revoked_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
-
---
--- AUTO_INCREMENT for table `subscribers`
---
-ALTER TABLE `subscribers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1004;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `organization_structure`
---
-ALTER TABLE `organization_structure`
-  ADD CONSTRAINT `organization_structure_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `organization_structure` (`id`) ON DELETE CASCADE;
-
-SET FOREIGN_KEY_CHECKS=1;
-
+BEGIN
+  DECLARE v_allowed_roles VARCHAR(255);
+  DECLARE v_requires_note TINYINT(1);
+  DECLARE v_is_active TINYINT(1);
+  
+  SET p_is_valid = 0;
+  SET p_error_message = 'Unknown validation error';
+  
+  SELECT allowed_roles, requires_note, is_active
+  INTO v_allowed_roles, v_requires_note, v_is_active
+  FROM workflow_state_rules
+  WHERE from_state = p_from_state
+    AND to_state = p_to_state
+  LIMIT 1;
+  
+  IF v_allowed_roles IS NULL THEN
+    SET p_error_message = CONCAT('Invalid transition: ', p_from_state, ' -> ', p_to_state);
+    SET p_is_valid = 0;
+  ELSEIF v_is_active = 0 THEN
+    SET p_error_message = 'This transition is currently disabled';
+    SET p_is_valid = 0;
+  ELSEIF FIND_IN_SET(p_user_role, v_allowed_roles) = 0 THEN
+    SET p_error_message = CONCAT('Role ', p_user_role, ' not authorized for this transition');
+    SET p_is_valid = 0;
+  ELSEIF v_requires_note = 1 AND p_has_note = 0 THEN
+    SET p_error_message = 'A note/reason is required for this action';
+    SET p_is_valid = 0;
+  ELSE
+    SET p_is_valid = 1;
+    SET p_error_message = 'Valid transition';
+  END IF;
+END //
+
+DELIMITER ;
+
+SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- End of unified db_barber script

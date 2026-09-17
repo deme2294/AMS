@@ -70,3 +70,11 @@ Thumbs.db
 # TYPESCRIPT BUILD CACHE
 # ==========================================
 *.tsbuildinfo
+# Sensitive and temporary files
+**/cookies.txt
+**/cookie-jar=cookies.txt
+**/*_log.txt
+**/*_dump.txt
+**/*_out.txt
+TEMP_KEEP.txt
+*.tsbuildinfo
