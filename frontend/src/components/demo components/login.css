@@ -1,0 +1,327 @@
+
+/* LoginPage.styles.css */
+
+/* --- Global Variables & Base --- */
+:root {
+    --primary-color: #6a11cb; /* Deep purple */
+    --secondary-color: #2575fc; /* Vibrant blue */
+    --accent-color: #00c6ff; /* Light blue accent */
+    --text-color: #333;
+    --text-color-light: #f8f9fa;
+    --input-bg: #f0f2f5;
+    --input-border: #ced4da;
+    --input-focus-border: var(--primary-color);
+    --card-bg: #ffffff;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --error-color: #dc3545;
+    --success-color: #28a745;
+    --font-family: 'Poppins', sans-serif; /* Modern, clean font */
+}
+
+/* Import Google Font (add this to your HTML or a global CSS if not already present) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+.login-page-wrapper {
+    font-family: var(--font-family);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    overflow: hidden; /* For animations */
+    min-height: 100vh; /* Ensure it takes full viewport height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* --- Card Styling --- */
+.login-page-wrapper .card {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 15px; /* Softer corners */
+    box-shadow: var(--card-shadow);
+    overflow: hidden; /* For header shape */
+    animation: fadeInCard 0.8s ease-out forwards;
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+@keyframes fadeInCard {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.login-page-wrapper .card-header.modal-shape-header {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+    color: var(--text-color-light);
+    border-bottom: none;
+    padding: 2rem 1.5rem !important; /* Override Bootstrap if needed */
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%); /* Angled bottom */
+    transition: background 0.3s ease;
+}
+
+.login-page-wrapper .card-header h4 {
+    font-weight: 600;
+    font-size: 1.75rem;
+    animation: slideDownText 0.6s ease-out 0.2s forwards;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.login-page-wrapper .card-header p {
+    font-size: 0.9rem !important; /* Override Bootstrap */
+    animation: slideDownText 0.6s ease-out 0.4s forwards;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+@keyframes slideDownText {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-page-wrapper .card-body {
+    padding: 2rem 1.5rem !important; /* Override Bootstrap */
+    animation: fadeInContent 0.8s ease-out 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInContent {
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- Form Elements --- */
+.login-page-wrapper .form-label {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.login-page-wrapper .form-control {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.login-page-wrapper .form-control:focus {
+    background-color: var(--card-bg);
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color), 0.25);
+    outline: none;
+    transform: translateY(-2px); /* Slight lift on focus */
+}
+
+.login-page-wrapper .form-control::placeholder {
+    color: #999;
+}
+
+/* Input field animations */
+.login-page-wrapper .mb-3 { /* Target the div wrapping label and input */
+    animation: fadeInUpInput 0.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(15px);
+}
+.login-page-wrapper .mb-3:nth-child(1) { animation-delay: 0.6s; } /* Username */
+.login-page-wrapper .mb-3:nth-child(2) { animation-delay: 0.7s; } /* Password */
+.login-page-wrapper .mb-3:nth-child(3) { animation-delay: 0.8s; } /* Button */
+
+
+@keyframes fadeInUpInput {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Button Styling --- */
+.login-page-wrapper .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color-light);
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px rgba(var(--primary-color), 0.3);
+}
+
+.login-page-wrapper .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(var(--secondary-color), 0.4);
+}
+
+.login-page-wrapper .btn-primary:active:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(var(--secondary-color), 0.3);
+}
+
+.login-page-wrapper .btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.login-page-wrapper .btn-primary .spinner-border {
+    width: 1em;
+    height: 1em;
+    border-width: 0.15em;
+}
+
+/* --- Error Message --- */
+.login-page-wrapper .alert-danger {
+    background-color: rgba(var(--error-color), 0.1);
+    border: 1px solid rgba(var(--error-color), 0.3);
+    color: var(--error-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem !important; /* Override Bootstrap */
+    font-size: 0.85rem !important; /* Override Bootstrap */
+    animation: shakeError 0.5s ease-in-out;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* --- Divider --- */
+.login-page-wrapper .divider-content-center {
+    background-color: var(--card-bg);
+    color: #888;
+    font-size: 0.85rem;
+    padding: 0 10px;
+}
+
+.login-page-wrapper hr {
+    border-top: 1px solid #eee;
+}
+
+/* --- Social Login Buttons --- */
+.login-page-wrapper .btn-outline-google-plus,
+.login-page-wrapper .btn-outline-facebook {
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border-width: 1px;
+}
+
+.login-page-wrapper .btn-outline-google-plus {
+    color: #db4437;
+    border-color: #db4437;
+}
+.login-page-wrapper .btn-outline-google-plus:hover:not(:disabled) {
+    background-color: #db4437;
+    color: var(--text-color-light);
+    transform: translateY(-2px);
+}
+
+.login-page-wrapper .btn-outline-facebook {
+    color: #3b5998;
+    border-color: #3b5998;
+}
+.login-page-wrapper .btn-outline-facebook:hover:not(:disabled) {
+    background-color: #3b5998;
+    color: var(--text-color-light);
+    transform: translateY(-2px);
+}
+
+.login-page-wrapper .btn-outline-google-plus:disabled,
+.login-page-wrapper .btn-outline-facebook:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Link to Register Page --- */
+.login-page-wrapper .fs-10 a { /* Targeting the link specifically */
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.login-page-wrapper .fs-10 a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 768px) {
+    .login-page-wrapper .card-header.modal-shape-header {
+        padding: 1.5rem 1rem !important;
+        clip-path: polygon(0 0, 100% 0, 100% 90%, 0% 100%); /* Adjust clip-path for smaller screens */
+    }
+    .login-page-wrapper .card-header h4 {
+        font-size: 1.5rem;
+    }
+    .login-page-wrapper .card-body {
+        padding: 1.5rem 1rem !important;
+    }
+    .login-page-wrapper .btn-primary,
+    .login-page-wrapper .form-control {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-page-wrapper {
+        padding: 0.5rem; /* Less padding on very small screens */
+    }
+    .login-page-wrapper .card {
+        margin: 0.5rem; /* Add some margin if col-xx doesn't provide enough */
+    }
+    .login-page-wrapper .card-header.modal-shape-header {
+        clip-path: polygon(0 0, 100% 0, 100% 92%, 0% 100%);
+    }
+    .login-page-wrapper .card-header h4 {
+        font-size: 1.3rem;
+    }
+    .login-page-wrapper .card-header p {
+        font-size: 0.8rem !important;
+    }
+    .login-page-wrapper .social-login-buttons .col-sm-6 {
+        flex: 0 0 100%; /* Stack social buttons */
+        max-width: 100%;
+    }
+    .login-page-wrapper .btn-outline-google-plus,
+    .login-page-wrapper .btn-outline-facebook {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* --- Optional: Add a subtle background animation to the page wrapper --- */
+.login-page-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent);
+    background-size: 60px 60px;
+    animation: moveBg 20s linear infinite;
+    z-index: 0; /* Ensure it's behind the card */
+    opacity: 0.5;
+}
+
+@keyframes moveBg {
+    0% { background-position: 0 0; }
+    100% { background-position: 120px 60px; } /* Adjust for seamless loop */
+}
+
+/* Ensure card content is above the pseudo-element background */
+.login-page-wrapper .col-11 { /* Or whatever your main column class is */
+    position: relative;
+    z-index: 1;
+}
+

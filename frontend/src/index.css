@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  html,
+  body {
+    @apply min-h-screen overflow-y-auto scroll-smooth;
+  }
+
+  body {
+    @apply antialiased text-slate-800 dark:text-slate-100 bg-slate-100/70 dark:bg-slate-950 transition-all duration-[800ms];
+  }
+
+  /* Global Dark Mode Overrides for Bootstrap Components */
+  html[data-bs-theme="dark"] body,
+  .dark body {
+    @apply bg-slate-950 text-slate-100 !important;
+  }
+
+  .dark .card,
+  html[data-bs-theme="dark"] .card {
+    @apply bg-slate-900 border-gray-800 text-gray-100 !important;
+  }
+
+  .dark .card-header,
+  html[data-bs-theme="dark"] .card-header {
+    @apply bg-slate-800/50 border-gray-800 text-white !important;
+  }
+
+  .dark .text-gray-800,
+  html[data-bs-theme="dark"] .text-gray-800 {
+    @apply text-white !important;
+  }
+
+  .dark .text-gray-500 {
+    @apply text-gray-400 !important;
+  }
+
+  .dark .bg-white,
+  html[data-bs-theme="dark"] .bg-white {
+    @apply bg-slate-900 !important;
+  }
+
+  .dark .bg-gray-50,
+  html[data-bs-theme="dark"] .bg-gray-50 {
+    @apply bg-slate-950 !important;
+  }
+
+  .dark .border {
+    @apply border-gray-800 !important;
+  }
+
+  .dark .shadow-sm,
+  .dark .shadow {
+    @apply shadow-none !important;
+  }
+}
+
+/* Elite Component UI Tokens */
+.elite-card {
+  @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-[0_8px_40px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-500;
+}
+
+.elite-content-boundary {
+  @apply border border-slate-200 dark:border-slate-800;
+}
+
+/* Custom Layout Styles */
+
+
+/* Ensure the main sidebar toggle button in the TopNavbar is always visible */
+/* Target using a combination of classes specific to the button */
+.navbar-top button.navbar-toggler.navbar-toggler-humburger-icon {
+  display: inline-flex !important;
+  /* Use inline-flex or block, important to override */
+  visibility: visible !important;
+  /* Ensure it's not hidden by visibility */
+  opacity: 1 !important;
+  /* Ensure it's not hidden by opacity */
+  /* Add any necessary positioning adjustments if needed */
+  /* e.g., z-index: 1050; */
+}
+
+/* Optional: Adjust layout when sidebar is closed */
+/* These are examples, adjust based on your theme's structure */
+.content-wrapper {
+  transition: margin-left 0.3s ease-in-out;
+  /* Adjust margin based on your sidebar width */
+  margin-left: 250px;
+  /* Example sidebar width */
+  padding-top: 60px;
+  /* Example: Add padding if TopNavbar is fixed */
+  flex-grow: 1;
+  /* Ensure it takes remaining space */
+}
+
+.sidebar-closed .content-wrapper {
+  margin-left: 0;
+  /* Or a smaller margin for a mini-sidebar */
+}
+
+/* Ensure vertical navbar itself transitions smoothly if needed */
+.navbar-vertical {
+  transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 1030;
+  width: 250px;
+  @apply bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-sm !important;
+}
+
+/* Style for when navbar is collapsed */
+.navbar-vertical:not(.show) {
+  width: 0;
+  overflow: hidden;
+  transform: translateX(-100%);
+  /* Slide out */
+}
+
+/* Adjust main content area */
+.content {
+  padding: 1.5rem;
+  /* Example padding */
+  width: 100%;
+}
+
+.footer-1 {
+  padding-right: 170%;
+  margin-left: 50%;
+}
+
+.footer-2 {
+  position: fixed;
+  top: 84%;
+  padding-left: 70%;
+}

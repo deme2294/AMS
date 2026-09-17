@@ -1,0 +1,166 @@
+
+.col-auto{
+    padding-left: 10%;
+    /* Add transition for a smooth hover effect */
+    transition: transform 0.3s ease-in-out; 
+}
+
+.col-auto:hover {
+    /* Move the element 5px to the right on hover */
+    transform: translateX(2px); 
+}
+
+
+
+/* src/components/nav/sidebar.css */
+
+/* --- Existing Styles (Keep all of these) --- */
+/* Add all your current .css content here */
+
+
+
+
+/* Style for when the sidebar is collapsed (adjust based on your logic) */
+.navbar-vertical:not(.show) {
+    transform: translateX(-100%);
+    /* Or adjust width if you prefer a shrinking effect */
+    /* width: 0; */
+    /* overflow: hidden; */ /* Hide content when collapsed */
+}
+
+
+
+
+
+
+
+.navbar-vertical-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #6c757d; /* Example color */
+}
+
+
+
+
+.navbar-nav .nav-link:hover {
+    background-color: #7c8996; /* Hover background */
+    color: #007bff; /* Hover text color */
+    padding-left: 1.7rem; /* Slight indent on hover */
+    border-left-color: #cfe2ff; /* Subtle indicator on hover */
+}
+
+.navbar-nav .nav-link.active {
+    color: #0d6efd; /* Active link color */
+    font-weight: 600; /* Make active link bold */
+    background-color: #e7f1ff; /* Active background */
+    border-left-color: #0d6efd; /* Stronger indicator for active */
+}
+
+.navbar-nav .nav-link .nav-link-icon {
+    margin-right: 1rem;
+    width: 20px; /* Ensure icons align */
+    text-align: center;
+    transition: transform 0.2s ease; /* Add transition to icon */
+}
+
+.navbar-nav .nav-link:hover .nav-link-icon {
+    transform: scale(1.1); /* Slightly enlarge icon on hover */
+}
+
+.navbar-nav .nav-link.active .nav-link-icon {
+     color: #0d6efd; /* Match active link color */
+}
+
+
+/* --- Dropdown Menu Styles --- */
+.nav.collapse {
+    /* Smooth transition for dropdown visibility */
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s ease-out; /* Animation for expand/collapse */
+    padding-left: 1.5rem; /* Indent submenu items */
+    background-color: rgba(0, 0, 0, 0.03); /* Slightly different background for submenus */
+}
+
+.nav.collapse.show {
+    /* Set max-height to a value larger than the expected content height */
+    max-height: 500px; /* Adjust as needed for your longest dropdown */
+}
+
+/* Style sub-menu links */
+.nav.collapse .nav-item .nav-link {
+    padding: 0.5rem 1.5rem 0.5rem 1rem; /* Adjust padding for sub-items */
+    font-size: 0.9em; /* Slightly smaller font */
+    border-left: none; /* Remove main border */
+    position: relative;
+}
+.nav.collapse .nav-item .nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    /* top: 50%; */
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #adb5bd; /* Dot indicator */
+    /* border-radius: 50%; */
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.nav.collapse .nav-item .nav-link:hover::before,
+.nav.collapse .nav-item .nav-link.active::before {
+    opacity: 1;
+}
+
+.nav.collapse .nav-item .nav-link.active {
+    background-color: transparent; /* Override parent active background */
+    color: #0d6efd; /* Keep active color */
+    font-weight: 500; /* Slightly less bold than parent active */
+}
+.nav.collapse .nav-item .nav-link.active::before {
+     background-color: #0d6efd; /* Active dot color */
+}
+
+
+/* Dropdown Indicator Arrow */
+.nav-link.dropdown-indicator::after {
+    content: '\f078'; /* FontAwesome chevron-down */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    display: inline-block;
+    margin-left: auto; /* Push arrow to the right */
+    transition: transform 0.3s ease;
+    font-size: 0.7em;
+}
+
+/* Rotate arrow when dropdown is open (aria-expanded="true") */
+.nav-link.dropdown-indicator[aria-expanded="true"]::after {
+    transform: rotate(-180deg);
+}
+
+
+
+
+.scrollbar::-webkit-scrollbar {
+  width: 6px; /* Width of the scrollbar */
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: #3f4246; /* Track color */
+  border-radius: 1px;
+}
+
+
+.collapse{
+position: relative;
+top: 20px;
+
+
+
+}
+
+
+

@@ -1,0 +1,28 @@
+# Simple .htaccess to avoid redirect loops
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # If the file exists, serve it. Otherwise, let Passenger handle the path.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . - [L]
+</IfModule>
+
+
+Options -Indexes
+RewriteEngine On
+
+# Serve existing files and directories normally
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . - [L]
+
+
+# Send missing pages to 404
+ErrorDocument 404 /404.html
+RewriteRule ^ - [R=404,L]
+
+
+

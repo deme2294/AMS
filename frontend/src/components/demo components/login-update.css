@@ -1,0 +1,288 @@
+
+/* --- Import Fonts (Optional but recommended for a polished look) --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* --- Global Styles & Animated Background --- */
+
+
+.login-page-wrapper {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Add some padding around the card on small screens */
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    position: relative; 
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* --- Login Card --- */
+.login-page-wrapper .card {
+    background: rgba(255, 255, 255, 0.1); /* Glassmorphism base */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Safari */
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    animation: fadeInCard 0.8s ease-out forwards;
+    overflow: hidden; /* Ensure content respects border radius */
+    color: #c0baba; /* Default text color for the card */
+    width: 100%; /* Ensure card takes full width of its Bootstrap column */
+}
+
+@keyframes fadeInCard {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* --- Card Header --- */
+/* The classes .modal-shape-header and .bg-shape might have existing styles.
+   These styles aim to enhance or override them for the new look. */
+.login-page-wrapper .card-header {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 2rem 1.5rem; /* Adjust padding */
+}
+
+.login-page-wrapper .card-header h4 {
+    color: #142351;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.login-page-wrapper .card-header p {
+    color: #a08f8f; /* Lighter than pure white for subtlety */
+    font-size: 0.9rem; /* Adjusted from fs-10 for consistency */
+}
+
+/* --- Card Body --- */
+.login-page-wrapper .card-body {
+    padding: 2rem 1.5rem; /* Adjust padding */
+}
+
+/* --- Form Elements --- */
+.login-page-wrapper .form-label {
+    color: #7b5353;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.login-page-wrapper .form-control {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-page-wrapper .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.login-page-wrapper .form-control:focus {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25); /* Softer focus ring */
+    color: #ffffff;
+}
+
+/* --- Submit Button --- */
+.login-page-wrapper .btn-primary {
+    background: linear-gradient(90deg, #31487a, #207887);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    color: white;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, filter 0.2s ease-out;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.login-page-wrapper .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    filter: brightness(1.1);
+}
+
+.login-page-wrapper .btn-primary:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.login-page-wrapper .btn-primary:disabled {
+    background: rgba(255, 255, 255, 0.2);
+    cursor: not-allowed;
+    color: rgba(255,255,255,0.7);
+    box-shadow: none;
+    transform: none;
+}
+
+.login-page-wrapper .btn-primary .spinner-border {
+    color: white;
+}
+
+/* --- Error Alert --- */
+.login-page-wrapper .alert-danger {
+    background-color: rgba(220, 53, 69, 0.3); /* More transparent */
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #f8d7da; /* Lighter text for dark bg */
+    border-radius: 8px;
+    animation: shakeError 0.5s ease-in-out;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* --- Divider --- */
+.login-page-wrapper .divider-content-center {
+    background: rgba(0,0,0,0.2); /* Darker, semi-transparent background for the text */
+    color: #e0e0e0;
+    padding: 0 10px;
+    font-size: 0.9rem;
+    border-radius: 4px; /* Slightly rounded edges for the text background */
+}
+
+.login-page-wrapper hr {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* --- Social Login Buttons --- */
+.login-page-wrapper .btn-outline-google-plus,
+.login-page-wrapper .btn-outline-facebook {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #f0f0f0;
+    border-radius: 8px;
+    transition: background 0.3s ease, transform 0.2s ease, color 0.3s ease;
+}
+
+.login-page-wrapper .btn-outline-google-plus:hover:not(:disabled),
+.login-page-wrapper .btn-outline-facebook:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.login-page-wrapper .btn-outline-google-plus:disabled,
+.login-page-wrapper .btn-outline-facebook:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255,255,255,0.5);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- Link to Register Page --- */
+.login-page-wrapper .fs-10 { /* Targeting existing fs-10 class */
+    font-size: 0.9rem; 
+    color: #e0e0e0;
+}
+
+.login-page-wrapper .fs-10 a {
+    color: #87CEFA; /* Light Sky Blue - stands out on dark bg */
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.login-page-wrapper .fs-10 a:hover {
+    color: #ADD8E6; /* Lighter blue */
+    text-decoration: underline;
+    text-shadow: 0 0 5px rgba(173, 216, 230, 0.5);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) { /* Medium devices (tablets, less than 768px) */
+    .login-page-wrapper .card-header,
+    .login-page-wrapper .card-body {
+        padding: 1.5rem 1rem;
+    }
+
+    .login-page-wrapper .card-header h4 {
+        font-size: 1.5rem; /* Slightly smaller heading on tablets */
+    
+    }
+}
+
+@media (max-width: 576px) { /* Small devices (landscape phones, less than 576px) */
+    .login-page-wrapper .col-11 { /* Target the Bootstrap column used */
+        padding-left: 5px;  /* Reduce padding to maximize card space */
+        padding-right: 5px;
+    }
+    .login-page-wrapper .card {
+        /* Card already takes 100% width of its column.
+           The column itself provides spacing via login-page-wrapper padding. */
+    }
+    .login-page-wrapper .btn-primary,
+    .login-page-wrapper .btn-outline-google-plus,
+    .login-page-wrapper .btn-outline-facebook {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    /* Stack social buttons if they are in .social-buttons-container */
+    .login-page-wrapper .social-buttons-container .col-sm-6 {
+        flex: 0 0 100%; 
+        max-width: 100%;
+    }
+    .login-page-wrapper .social-buttons-container .col-sm-6:first-child .btn {
+        margin-bottom: 0.5rem; /* Add space between stacked buttons */
+    }
+}
+
+
+.login-page-wrapper {
+    /* Set the background image size */
+    /* Option 1: Fixed width, height adjusts automatically */
+    background-size: 300px auto; /* Adjust 300px to your desired logo width */
+  
+    /* Option 2: Percentage of the container */
+    /* background-size: 50% auto; */ /* e.g., 50% width, height auto */
+  
+    /* Option 3: Cover or Contain (as you had, but 'cover' might make it too large if you want to "reduce" it) */
+    /* background-size: cover; */
+    /* background-size: contain; */ /* This will ensure the whole logo is visible, but might leave empty space */
+  
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: transparent; /* Ensure no background color is applied */
+  
+    /* Ensure the wrapper takes at least the full viewport height and centers the content */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem; /* Add some padding if needed */
+  }
+  
+  /* If you want to ensure the card itself doesn't have an conflicting background */
+  .login-page-wrapper .card {
+    /* Add other card specific styles if they were removed or are needed */
+  }
+  
+  /* Styles for the card header, if you want to ensure text is visible over potentially complex backgrounds */
+  .login-page-wrapper .card-header.modal-shape-header.bg-shape .position-relative.z-1 h4,
+  .login-page-wrapper .card-header.modal-shape-header.bg-shape .position-relative.z-1 p {
+    /* Example: add a subtle text shadow if text readability is an issue over the background */
+    /* text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5); */
+    /* Or ensure color is explicitly set if not inheriting correctly */
+    /* color: #333; */ /* Adjust as needed */
+  }
+  
+
+  .login-page-wrapper .btn-outline-google-plus, .login-page-wrapper .btn-outline-facebook{
+    color: chocolate;
+  }
+.text-center.fs-10 p{
+    color: red;
+}

@@ -1,0 +1,149 @@
+import { request } from './apiService';
+
+export interface ThemeSettings {
+  themeMode?: 'light' | 'dark' | 'system';
+  primaryColor?: string;
+  fontFamily?: string;
+  density?: 'compact' | 'comfortable' | 'spacious';
+  logoPreview?: string;
+}
+
+export interface SystemSettings extends ThemeSettings {
+  id?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Get system settings from backend
+export const getSystemSettings = async (): Promise<SystemSettings> => {
+  try {
+    const response = await request<{ success: boolean; data: SystemSettings }>('/settings', {
+      method: 'GET',
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching system settings:', error);
+    return {};
+  }
+};
+
+// Get user theme preferences
+export const getUserThemeSettings = async (): Promise<ThemeSettings> => {
+  try {
+    const response = await request<{ success: boolean; settings: ThemeSettings }>('/settings/user-theme', {
+      method: 'GET',
+    });
+    return response.settings;
+  } catch (error) {
+    console.error('Error fetching user theme settings:', error);
+    return {};
+  }
+};
+
+// Save user theme preferences to backend
+export const saveUserThemeSettings = async (settings: ThemeSettings): Promise<boolean> => {
+  try {
+    await request('/settings/user-theme', {
+      method: 'POST',
+      data: settings,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error saving user theme settings:', error);
+    return false;
+  }
+};
+
+// Update system settings (admin only)
+export const updateSystemSettings = async (settings: SystemSettings): Promise<boolean> => {
+  try {
+    await request('/settings', {
+      method: 'PUT',
+      data: settings,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating system settings:', error);
+    return false;
+  }
+};
+
+// Apply theme to DOM
+export const applyTheme = (settings: ThemeSettings) => {
+  const root = document.documentElement;
+  const body = document.body;
+
+  // Apply theme mode
+  if (settings.themeMode) {
+    const isDark = settings.themeMode === 'dark' || 
+                   (settings.themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    
+    if (isDark) {
+      root.classList.add('dark');
+      body.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+      body.classList.remove('dark');
+    }
+    
+    root.setAttribute('data-bs-theme', settings.themeMode);
+    localStorage.setItem('lms_theme', settings.themeMode);
+  }
+
+  // Apply primary color
+  if (settings.primaryColor) {
+    root.style.setProperty('--primary-color', settings.primaryColor);
+    localStorage.setItem('lms_color', settings.primaryColor);
+  }
+
+  // Apply font family
+  if (settings.fontFamily) {
+    root.style.setProperty('--font-family', settings.fontFamily);
+    localStorage.setItem('lms_font', settings.fontFamily);
+  }
+
+  // Apply density
+  if (settings.density) {
+    root.setAttribute('data-density', settings.density);
+    localStorage.setItem('lms_density', settings.density);
+  }
+
+  // Apply logo preview
+  if (settings.logoPreview) {
+    localStorage.setItem('lms_logo_preview', settings.logoPreview);
+  }
+};
+
+// Get current theme from localStorage
+export const getCurrentTheme = (): ThemeSettings => {
+  return {
+    themeMode: (localStorage.getItem('lms_theme') as 'light' | 'dark' | 'system') || 'system',
+    primaryColor: localStorage.getItem('lms_color') || undefined,
+    fontFamily: localStorage.getItem('lms_font') || undefined,
+    density: (localStorage.getItem('lms_density') as 'compact' | 'comfortable' | 'spacious') || undefined,
+    logoPreview: localStorage.getItem('lms_logo_preview') || undefined,
+  };
+};
+
+// Initialize theme from backend and localStorage
+export const initializeTheme = async () => {
+  try {
+    // First apply saved local theme for immediate feedback
+    const localTheme = getCurrentTheme();
+    applyTheme(localTheme);
+
+    // Then fetch and apply backend settings
+    const systemSettings = await getSystemSettings();
+    if (systemSettings) {
+      applyTheme(systemSettings);
+    }
+
+    // Finally apply user-specific settings if they exist
+    const userSettings = await getUserThemeSettings();
+    if (userSettings && Object.keys(userSettings).length > 0) {
+      applyTheme(userSettings);
+    }
+  } catch (error) {
+    console.error('Error initializing theme:', error);
+  }
+};
