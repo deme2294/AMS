@@ -15,7 +15,7 @@ export default defineConfig({
     proxy: {
       // Proxy all /api requests to the backend (now on port 5006)
       '/api': {
-        target: 'http://localhost:5006',
+        target: 'http://localhost:5005',
         changeOrigin: true,
         secure: true,
         // Forward cookies back to browser properly
@@ -35,10 +35,12 @@ export default defineConfig({
       },
       // Proxy /uploads so images load correctly
       '/uploads': {
-        target: 'http://localhost:5006',
+        target: 'http://localhost:5005',
         changeOrigin: true,
         secure: true,
       },
     },
   }
+
 })
+

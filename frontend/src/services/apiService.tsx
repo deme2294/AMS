@@ -1,4 +1,9 @@
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosRequestConfig, AxiosError, AxiosInstance } from 'axios';
+
+const apiClient: AxiosInstance = axios.create({
+  baseURL: '',
+  withCredentials: true,
+});
 
 const getBaseUrl = (url: string, fallback: string): string => {
   let cleanUrl = (url || '').trim();
@@ -1802,5 +1807,7 @@ export const updateComplaintStatusSimple = async (complaintId: number, status: s
   });
   return response;
 };
+
+export default apiClient;
 
 
