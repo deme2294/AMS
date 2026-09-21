@@ -389,7 +389,11 @@ const initializeDatabase = async () => {
         \`available_date\` date NOT NULL,
         \`start_time\` time NOT NULL,
         \`end_time\` time NOT NULL,
-        \`slot_status\` enum('available','booked','blocked') DEFAULT 'available',
+        \`max_bookings\` int(11) NOT NULL DEFAULT 1,
+        \`current_bookings\` int(11) DEFAULT 0,
+        \`slot_status\` varchar(50) DEFAULT 'available',
+        \`notes\` text DEFAULT NULL,
+        \`created_by\` int(11) DEFAULT NULL,
         \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
         \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
@@ -400,7 +404,11 @@ const initializeDatabase = async () => {
         { name: 'available_date', definition: 'date NOT NULL' },
         { name: 'start_time', definition: 'time NOT NULL' },
         { name: 'end_time', definition: 'time NOT NULL' },
-        { name: 'slot_status', definition: "enum('available','booked','blocked') DEFAULT 'available'" },
+        { name: 'max_bookings', definition: 'int(11) NOT NULL DEFAULT 1' },
+        { name: 'current_bookings', definition: 'int(11) DEFAULT 0' },
+        { name: 'slot_status', definition: "varchar(50) DEFAULT 'available'" },
+        { name: 'notes', definition: 'text DEFAULT NULL' },
+        { name: 'created_by', definition: 'int(11) DEFAULT NULL' },
         { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
         { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
       ]
@@ -425,6 +433,8 @@ const initializeDatabase = async () => {
       create: `CREATE TABLE IF NOT EXISTS \`active_sessions\` (
         \`user_id\` int(11) NOT NULL PRIMARY KEY,
         \`jti\` varchar(255) NOT NULL,
+        \`ip_address\` varchar(100) DEFAULT NULL,
+        \`user_agent\` text DEFAULT NULL,
         \`last_activity\` datetime NOT NULL,
         \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
         \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -432,9 +442,30 @@ const initializeDatabase = async () => {
       columns: [
         { name: 'user_id', definition: 'int(11) NOT NULL PRIMARY KEY' },
         { name: 'jti', definition: 'varchar(255) NOT NULL' },
+        { name: 'ip_address', definition: 'varchar(100) DEFAULT NULL' },
+        { name: 'user_agent', definition: 'text DEFAULT NULL' },
         { name: 'last_activity', definition: 'datetime NOT NULL' },
         { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
         { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
+      ]
+    },
+    {
+      name: 'blocked_ips',
+      create: `CREATE TABLE IF NOT EXISTS \`blocked_ips\` (
+        \`id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`ip_address\` varchar(100) NOT NULL,
+        \`reason\` varchar(255) DEFAULT NULL,
+        \`blocked_at\` datetime DEFAULT current_timestamp(),
+        \`blocked_until\` datetime DEFAULT NULL,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'ip_address', definition: 'varchar(100) NOT NULL' },
+        { name: 'reason', definition: 'varchar(255) DEFAULT NULL' },
+        { name: 'blocked_at', definition: 'datetime DEFAULT current_timestamp()' },
+        { name: 'blocked_until', definition: 'datetime DEFAULT NULL' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' }
       ]
     }
   ];

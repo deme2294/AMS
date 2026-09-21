@@ -61,8 +61,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         onMouseEnter={() => !isSidebarOpen && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`
-          flex-shrink-0 z-30 transition-all duration-[800ms] ease-in-out
-          bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800
+          flex-shrink-0 z-30 transition-all duration-300 ease-out
+          bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800/80
           ${isMobile
             ? (isSidebarOpen ? 'fixed inset-y-0 left-0 shadow-xl w-64' : 'fixed inset-y-0 left-0 w-0 -translate-x-full')
             : (isExpanded ? 'w-64' : 'w-20')
@@ -82,7 +82,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth relative">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth relative bg-mesh">
           <div className="animate-fade-in min-h-[calc(100%-80px)] w-full">
             {children}
           </div>

@@ -59,6 +59,19 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
     return () => clearInterval(interval);
   }, [user]);
 
+  // Sync theme changes across tabs / components
+  useEffect(() => {
+    const handleThemeSync = () => {
+      setTheme(getCurrentTheme());
+    };
+    window.addEventListener('ams-theme-change', handleThemeSync);
+    window.addEventListener('storage', handleThemeSync);
+    return () => {
+      window.removeEventListener('ams-theme-change', handleThemeSync);
+      window.removeEventListener('storage', handleThemeSync);
+    };
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!openDropdown) return;
@@ -148,39 +161,37 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
 
   return (
     <>
-      <div className="w-full flex items-center justify-between px-4 lg:px-6 py-1">
+      <div className="w-full flex items-center justify-between px-4 lg:px-6 py-2 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl transition-colors">
         {/* Left Side: Toggle & Brand */}
         <div className="flex items-center gap-3">
           <button
             onClick={toggleSidebar}
-            className="p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-all focus:outline-none group active:scale-95"
-            title={isSidebarOpen ? "Compact Mode" : "Expand Mode"}
+            className="p-2 -ml-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-all focus:outline-none group active:scale-95 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+            title={isSidebarOpen ? "Compact Sidebar" : "Expand Sidebar"}
           >
-            <div className="flex items-center gap-2">
-              <div className="flex flex-col gap-1 w-5">
-                <span className={`h-0.5 bg-current transition-all duration-300 ${isSidebarOpen ? 'w-2' : 'w-5'}`}></span>
-                <span className="h-0.5 bg-current w-5"></span>
-                <span className={`h-0.5 bg-current transition-all duration-300 ${isSidebarOpen ? 'w-3' : 'w-5'}`}></span>
-              </div>
-              <span className="hidden sm:block text-xs font-bold uppercase tracking-widest text-gray-400 group-hover:text-blue-600 transition-colors">
-                Compact
-              </span>
+            <div className="flex flex-col gap-1 w-4.5">
+              <span className={`h-0.5 bg-current rounded-full transition-all duration-300 ${isSidebarOpen ? 'w-2.5' : 'w-4.5'}`}></span>
+              <span className="h-0.5 bg-current rounded-full w-4.5"></span>
+              <span className={`h-0.5 bg-current rounded-full transition-all duration-300 ${isSidebarOpen ? 'w-3.5' : 'w-4.5'}`}></span>
             </div>
           </button>
 
-          <div className="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-gray-700 h-6">
-            <span className="text-sm font-black text-gray-800 dark:text-white tracking-tighter uppercase whitespace-nowrap">
-              BMS <span className="text-blue-600">WEBSITE</span>
+          <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800 h-6">
+            <span className="text-sm font-heading font-black text-slate-900 dark:text-white tracking-tight uppercase">
+              AMS <span className="text-indigo-600 dark:text-indigo-400">HQ</span>
+            </span>
+            <span className="hidden sm:inline-flex badge-indigo text-[10px] py-0.5 px-2">
+              Operational
             </span>
           </div>
         </div>
 
         {/* Right Side: Icons & Profile */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Full Screen Toggle */}
           <button
             onClick={toggleFullScreen}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors focus:outline-none active:scale-95"
+            className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none active:scale-95"
             title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullScreen ? (
@@ -194,76 +205,93 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
             )}
           </button>
 
-          {/* Theme Settings */}
+          {/* Direct Quick Theme Toggle Button */}
+          <button
+            onClick={() => {
+              const isCurrentlyDark = document.documentElement.classList.contains('dark');
+              handleThemeChange({ themeMode: isCurrentlyDark ? 'light' : 'dark' });
+            }}
+            className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80 transition-all focus:outline-none relative active:scale-95 border border-slate-200/50 dark:border-slate-700/60 shadow-sm"
+            title={theme.themeMode === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label="Toggle theme mode"
+          >
+            {document.documentElement.classList.contains('dark') || theme.themeMode === 'dark' ? (
+              <SunIcon className="w-5 h-5 text-amber-400 hover:text-amber-300 transition-transform duration-300 hover:rotate-45" />
+            ) : (
+              <MoonIcon className="w-5 h-5 text-indigo-600 hover:text-indigo-500 transition-transform duration-300 hover:-rotate-12" />
+            )}
+          </button>
+
+          {/* Theme Settings Customizer */}
           <div className="relative" ref={themeRef}>
             <button
               onClick={() => setOpenDropdown(openDropdown === 'theme' ? null : 'theme')}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors focus:outline-none relative"
+              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none relative active:scale-95"
               title="Theme Settings"
             >
               <Cog6ToothIcon className="w-5 h-5" />
               {theme.themeMode && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500"></div>
+                <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-500"></div>
               )}
             </button>
 
             {openDropdown === 'theme' && (
-              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Theme Settings</h3>
+              <div className="absolute right-0 mt-2 w-72 glass-card p-0 shadow-2xl z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs font-heading font-bold uppercase tracking-wider text-slate-800 dark:text-white">Theme Customizer</h3>
                 </div>
                 
                 <div className="p-4 space-y-4">
                   {/* Theme Mode */}
                   <div>
-                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">Theme Mode</label>
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 block">Appearance</label>
                     <div className="grid grid-cols-3 gap-2">
                       <button
                         onClick={() => handleThemeChange({ themeMode: 'light' })}
-                        className={`flex flex-col items-center p-2 rounded-lg border transition-all ${
+                        className={`flex flex-col items-center p-2 rounded-xl border text-xs font-medium transition-all ${
                           theme.themeMode === 'light' 
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                            : 'border-gray-200 dark:border-gray-600'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300' 
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                         }`}
                       >
                         <SunIcon className="w-4 h-4 mb-1" />
-                        <span className="text-xs">Light</span>
+                        <span>Light</span>
                       </button>
                       <button
                         onClick={() => handleThemeChange({ themeMode: 'dark' })}
-                        className={`flex flex-col items-center p-2 rounded-lg border transition-all ${
+                        className={`flex flex-col items-center p-2 rounded-xl border text-xs font-medium transition-all ${
                           theme.themeMode === 'dark' 
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                            : 'border-gray-200 dark:border-gray-600'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300' 
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                         }`}
                       >
                         <MoonIcon className="w-4 h-4 mb-1" />
-                        <span className="text-xs">Dark</span>
+                        <span>Dark</span>
                       </button>
                       <button
                         onClick={() => handleThemeChange({ themeMode: 'system' })}
-                        className={`flex flex-col items-center p-2 rounded-lg border transition-all ${
+                        className={`flex flex-col items-center p-2 rounded-xl border text-xs font-medium transition-all ${
                           theme.themeMode === 'system' 
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                            : 'border-gray-200 dark:border-gray-600'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300' 
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                         }`}
                       >
                         <ComputerDesktopIcon className="w-4 h-4 mb-1" />
-                        <span className="text-xs">System</span>
+                        <span>Auto</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Primary Color */}
                   <div>
-                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">Primary Color</label>
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 block">Brand Accent</label>
                     <div className="flex gap-2">
-                      {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map((color) => (
+                      {['#4F46E5', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'].map((color) => (
                         <button
                           key={color}
                           onClick={() => handleThemeChange({ primaryColor: color })}
-                          className={`w-8 h-8 rounded-lg border-2 transition-all ${
-                            theme.primaryColor === color ? 'border-gray-900 dark:border-white' : 'border-gray-200 dark:border-gray-600'
+                          className={`w-7 h-7 rounded-lg transition-all ${
+                            theme.primaryColor === color ? 'ring-2 ring-offset-2 ring-indigo-500 scale-110' : 'opacity-80 hover:opacity-100'
                           }`}
                           style={{ backgroundColor: color }}
                         />
@@ -271,25 +299,11 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
                     </div>
                   </div>
 
-                  {/* Density */}
-                  <div>
-                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">Density</label>
-                    <select
-                      value={theme.density || 'comfortable'}
-                      onChange={(e) => handleThemeChange({ density: e.target.value as any })}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-                    >
-                      <option value="compact">Compact</option>
-                      <option value="comfortable">Comfortable</option>
-                      <option value="spacious">Spacious</option>
-                    </select>
-                  </div>
-
                   <button
                     onClick={() => setShowThemeSettings(true)}
-                    className="w-full px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full btn-modern-secondary text-xs py-2 font-semibold"
                   >
-                    Advanced Settings
+                    Advanced Preferences
                   </button>
                 </div>
               </div>
@@ -300,22 +314,22 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
           <div className="relative" ref={notificationsRef}>
             <button
               onClick={() => setOpenDropdown(openDropdown === 'notifications' ? null : 'notifications')}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors focus:outline-none relative"
+              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none relative active:scale-95"
             >
               <BellAlertIcon className="w-5 h-5" />
               {notificationStats?.unread && notificationStats.unread > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center border-2 border-white dark:border-gray-800">
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-sm">
                   {notificationStats.unread > 9 ? '9+' : notificationStats.unread}
                 </span>
               )}
             </button>
 
             {openDropdown === 'notifications' && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Notifications</h3>
+              <div className="absolute right-0 mt-2 w-80 glass-card p-0 shadow-2xl z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                  <h3 className="text-xs font-heading font-bold uppercase tracking-wider text-slate-800 dark:text-white">Activity Notifications</h3>
                   {notificationStats && (
-                    <span className="text-xs text-gray-500">{notificationStats.unread} New</span>
+                    <span className="badge-indigo text-[10px] py-0.5 px-2">{notificationStats.unread} New</span>
                   )}
                 </div>
                 
@@ -326,32 +340,32 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
                         key={note.id}
                         to={note.link}
                         onClick={() => setOpenDropdown(null)}
-                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0"
+                        className="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800/50 last:border-0"
                       >
                         <div className="flex gap-3">
-                          <div className="mt-1">
+                          <div className="mt-0.5">
                             {getNotificationIcon(note.type)}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-start justify-between gap-2">
-                              <p className="text-sm text-gray-800 dark:text-gray-200 font-medium leading-snug flex-1">
+                              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-tight flex-1">
                                 {note.title}
                               </p>
                               {note.actionRequired && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${getPriorityColor(note.priority)}`}>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${getPriorityColor(note.priority)}`}>
                                   Action
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{note.message}</p>
-                            <p className="text-[10px] text-gray-400 mt-1">{note.time}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">{note.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-1">{note.time}</p>
                           </div>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">
-                      No new notifications
+                    <div className="p-8 text-center text-slate-400 text-xs font-medium">
+                      No new notifications right now
                     </div>
                   )}
                 </div>
@@ -360,42 +374,44 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
           </div>
 
           {/* Profile */}
-          <div className="relative pl-2 ml-2 border-l border-gray-200 dark:border-gray-700" ref={profileRef}>
+          <div className="relative pl-2 ml-1 border-l border-slate-200 dark:border-slate-800" ref={profileRef}>
             <button
               onClick={() => setOpenDropdown(openDropdown === 'profile' ? null : 'profile')}
-              className="flex items-center gap-2 focus:outline-none"
+              className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none active:scale-95"
             >
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-600 ring-2 ring-transparent hover:ring-blue-100 dark:hover:ring-blue-900 transition-all flex items-center justify-center bg-gray-100">
-                {user?.name ? (
-                  <span className="text-sm font-bold text-gray-600">{user.name.charAt(0).toUpperCase()}</span>
-                ) : (
-                  <img src="/assets/img/team/3-thumb.jpg" alt="User" className="w-full h-full object-cover" />
-                )}
+              <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-heading font-black text-xs flex items-center justify-center shadow-sm">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-tight">{user?.name || 'User'}</p>
-                <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium leading-tight mt-0.5">{user?.role_name || 'Role'}</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">{user?.name || 'User'}</p>
+                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold leading-tight mt-0.5">{user?.role_name || 'Staff'}</p>
               </div>
-              <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'profile' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className={`w-3.5 h-3.5 text-slate-400 transition-transform ${openDropdown === 'profile' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
             {openDropdown === 'profile' && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 py-2">
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 mb-2">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name || 'User'}</p>
-                  <p className="text-xs text-gray-500 truncate mb-1.5">{user?.email || 'user@example.com'}</p>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                    {user?.role_name || 'Role'}
+              <div className="absolute right-0 mt-2 w-56 glass-card p-0 shadow-2xl z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{user?.name || 'User'}</p>
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">{user?.email || 'user@example.com'}</p>
+                  <span className="badge-indigo text-[9px] mt-2 inline-block">
+                    {user?.role_name || 'Staff'}
                   </span>
                 </div>
 
-                <div className="border-t border-gray-100 dark:border-gray-700 my-2"></div>
-
-                <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 font-medium">
-                  Sign out
-                </button>
+                <div className="p-1.5">
+                  <button 
+                    onClick={handleLogout} 
+                    className="w-full text-left px-3 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign out
+                  </button>
+                </div>
               </div>
             )}
           </div>

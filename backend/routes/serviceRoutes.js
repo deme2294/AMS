@@ -21,7 +21,7 @@ const requiredHandlers = [
     'deleteBooking', 'getServicesPublic', 'getCategoriesForPublic',
     'getServiceByIdForPublic', 'getServiceRatingsSummary', 'getServiceRatings',
     'submitServiceRating', 'getMyServiceRating', 'getServiceById', 'updateService',
-    'deleteService', 'toggleServiceAvailability',
+    'deleteService', 'toggleServiceAvailability', 'approveService',
 ];
 for (const name of requiredHandlers) {
     if (!serviceController || typeof serviceController[name] !== 'function') {
@@ -234,6 +234,22 @@ router.put('/:id/toggle-availability',
     hasMenuPermission('/services'),
     auditMiddleware('UPDATE', 'Service'),
     serviceController.toggleServiceAvailability
+);
+
+router.put('/:id/approve',
+    verifyToken,
+    restrictTo(SERVICE_MANAGERS),
+    hasMenuPermission('/services'),
+    auditMiddleware('UPDATE', 'Service'),
+    serviceController.approveService
+);
+
+router.patch('/:id/approve',
+    verifyToken,
+    restrictTo(SERVICE_MANAGERS),
+    hasMenuPermission('/services'),
+    auditMiddleware('UPDATE', 'Service'),
+    serviceController.approveService
 );
 
 // Helper to avoid undefined handler reference above

@@ -200,364 +200,365 @@ const ReviewBookingsPage: React.FC = () => {
   });
 
   return (
-    <div className="p-6 md:p-8 min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <div className="max-w-6xl mx-auto space-y-8">
-        
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+    <div className="max-w-6xl mx-auto space-y-8 py-2">
+      
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2 h-5 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></span>
+            <h1 className="text-3xl font-heading font-black tracking-tight text-slate-900 dark:text-white">
               Review Bookings
             </h1>
-            <p className="text-sm text-slate-400 mt-1">
-              Approve pending service appointments and send them straight into the active salon queue.
-            </p>
           </div>
-          
-          {/* Search bar */}
-          <div className="relative w-full md:w-80">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Approve pending client appointments and send them directly into the live salon queue.
+          </p>
+        </div>
+        
+        {/* Search bar */}
+        <div className="relative w-full md:w-80">
+          <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by customer name, ref..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input-modern pl-10"
+          />
+        </div>
+      </div>
+
+      {/* Quick Accept Widget */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card p-5 border-l-4 border-l-emerald-500"
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
+            <FaCheck className="text-sm" />
+          </div>
+          <div>
+            <h3 className="font-heading font-bold text-slate-900 dark:text-white text-sm">Quick Accept by Reference Number</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Scan or enter the customer's reference code to instantly admit them into the live queue.</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleQuickAccept} className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
             <input
               type="text"
-              placeholder="Search by customer name, ref..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-200 placeholder-slate-500 text-sm"
+              placeholder="e.g. BRB-2026-0001"
+              value={quickRef}
+              onChange={(e) => {
+                setQuickRef(e.target.value);
+                if (quickError) setQuickError(null);
+              }}
+              className="input-modern font-mono"
+              required
             />
           </div>
-        </div>
+          <button
+            type="submit"
+            disabled={quickLoading}
+            className="btn-modern-primary text-xs font-bold py-2.5 px-6 shrink-0 flex items-center justify-center gap-2"
+          >
+            {quickLoading ? (
+              <>
+                <FaSpinner className="animate-spin" /> Accepting...
+              </>
+            ) : (
+              <>
+                <FaCheck /> Accept into Queue
+              </>
+            )}
+          </button>
+        </form>
 
-        {/* Quick Accept Widget */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-900/40 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-5 shadow-xl"
+        {quickSuccess && (
+          <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-emerald-700 dark:text-emerald-400 text-xs font-semibold leading-relaxed">
+            {quickSuccess}
+          </div>
+        )}
+        {quickError && (
+          <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-xl text-rose-700 dark:text-rose-400 text-xs font-semibold leading-relaxed">
+            {quickError}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Tab Filters */}
+      <div className="flex flex-wrap gap-2 p-1.5 glass-panel w-fit">
+        <button
+          onClick={() => setActiveTab('waiting')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-200 ${
+            activeTab === 'waiting'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
         >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-655 rounded-lg flex items-center justify-center text-white">
-              <FaCheck className="text-sm" />
-            </div>
-            <div>
-              <h3 className="font-extrabold text-slate-100 text-sm">Quick Accept by Reference Number</h3>
-              <p className="text-[10px] text-slate-500 font-light">Scan or enter the customer's reference code to instantly review and admit them into the live queue board.</p>
-            </div>
-          </div>
+          Pending ({bookings.filter(b => b.approval_status === 'waiting').length})
+        </button>
+        
+        <button
+          onClick={() => setActiveTab('approved')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-200 ${
+            activeTab === 'approved'
+              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          Approved ({bookings.filter(b => b.approval_status === 'approved').length})
+        </button>
+        
+        <button
+          onClick={() => setActiveTab('rejected')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-200 ${
+            activeTab === 'rejected'
+              ? 'bg-rose-600 text-white shadow-md shadow-rose-500/25'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          Rejected ({bookings.filter(b => b.approval_status === 'rejected').length})
+        </button>
+        
+        <button
+          onClick={() => setActiveTab('changes_requested')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-200 ${
+            activeTab === 'changes_requested'
+              ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          Changes ({bookings.filter(b => b.approval_status === 'changes_requested').length})
+        </button>
+      </div>
 
-          <form onSubmit={handleQuickAccept} className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="e.g. BRB-2026-0001"
-                value={quickRef}
-                onChange={(e) => {
-                  setQuickRef(e.target.value);
-                  if (quickError) setQuickError(null);
-                }}
-                className="w-full pl-4 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-200 placeholder-slate-700 text-xs font-mono tracking-wider"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={quickLoading}
-              className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-slate-800 disabled:to-slate-850 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 active:scale-[0.98] transition-all cursor-pointer"
-            >
-              {quickLoading ? (
-                <>
-                  <FaSpinner className="animate-spin" /> Accepting...
-                </>
-              ) : (
-                <>
-                  <FaCheck /> Accept into Queue
-                </>
-              )}
-            </button>
-          </form>
-
-          {quickSuccess && (
-            <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-semibold leading-relaxed">
-              {quickSuccess}
-            </div>
-          )}
-          {quickError && (
-            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-semibold leading-relaxed">
-              {quickError}
-            </div>
-          )}
-        </motion.div>
-
-        {/* Tab Filters */}
-        <div className="flex gap-2 p-1.5 bg-slate-900/40 backdrop-blur-sm rounded-xl border border-slate-800/60 w-fit">
-          <button
-            onClick={() => setActiveTab('waiting')}
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === 'waiting'
-                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                : 'text-slate-400 hover:text-slate-200 border border-transparent'
-            }`}
+      {/* Loading / Error States */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 glass-card">
+          <FaSpinner className="animate-spin text-4xl text-indigo-600 mb-4" />
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Fetching active bookings list...</p>
+        </div>
+      ) : error ? (
+        <div className="p-8 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 rounded-2xl text-center">
+          <p className="text-rose-600 dark:text-rose-400 font-semibold text-sm">{error}</p>
+          <button 
+            onClick={fetchBookings}
+            className="btn-modern-secondary mt-4 text-xs"
           >
-            Pending Review ({bookings.filter(b => b.approval_status === 'waiting').length})
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('approved')}
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === 'approved'
-                ? 'bg-green-600/20 text-green-400 border border-green-500/30'
-                : 'text-slate-400 hover:text-slate-200 border border-transparent'
-            }`}
-          >
-            Approved ({bookings.filter(b => b.approval_status === 'approved').length})
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('rejected')}
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === 'rejected'
-                ? 'bg-red-600/20 text-red-400 border border-red-500/30'
-                : 'text-slate-400 hover:text-slate-200 border border-transparent'
-            }`}
-          >
-            Rejected ({bookings.filter(b => b.approval_status === 'rejected').length})
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('changes_requested')}
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === 'changes_requested'
-                ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30'
-                : 'text-slate-400 hover:text-slate-200 border border-transparent'
-            }`}
-          >
-            Changes Requested ({bookings.filter(b => b.approval_status === 'changes_requested').length})
+            Retry
           </button>
         </div>
-
-        {/* Loading / Error States */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <FaSpinner className="animate-spin text-4xl text-blue-500 mb-4" />
-            <p className="text-slate-400 font-medium">Fetching active bookings list...</p>
-          </div>
-        ) : error ? (
-          <div className="p-6 bg-red-950/20 border border-red-900/30 rounded-2xl text-center">
-            <p className="text-red-400 font-semibold">{error}</p>
-            <button 
-              onClick={fetchBookings}
-              className="mt-4 px-6 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 rounded-xl font-semibold"
-            >
-              Retry
-            </button>
-          </div>
-        ) : filteredBookings.length === 0 ? (
-          <div className="py-20 text-center bg-slate-900/20 border border-slate-900/60 rounded-2xl">
-            <p className="text-slate-400 text-lg">No appointments found matching this tab.</p>
-            <p className="text-slate-600 text-sm mt-1">Sit back, relax, or try searching for another name!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AnimatePresence>
-              {filteredBookings.map((booking) => (
-                <motion.div
-                  key={booking.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-slate-900/60 backdrop-blur-md border border-slate-850/80 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700/60 transition-all duration-200 shadow-xl"
-                >
-                  <div className="space-y-4">
-                    {/* Header: Service Name & Reference */}
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <span className="px-2 py-0.5 bg-slate-800 text-slate-400 text-xs font-semibold rounded uppercase tracking-wider">
-                          {booking.category_name}
-                        </span>
-                        <h3 className="text-lg font-bold text-slate-100 mt-1">
-                          {booking.service_name}
-                        </h3>
-                      </div>
-                      
-                      <div className="text-right">
-                        <span className="text-sm font-extrabold text-blue-400 block">${booking.price}</span>
-                        {booking.reference_number && (
-                          <span className="text-xs font-mono font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-400 mt-1 block">
-                            {booking.reference_number}
-                          </span>
-                        )}
-                      </div>
+      ) : filteredBookings.length === 0 ? (
+        <div className="py-20 text-center glass-card">
+          <p className="text-slate-800 dark:text-slate-200 font-heading font-bold text-base">No appointments found matching this tab.</p>
+          <p className="text-slate-400 text-xs mt-1">Select another tab or try searching for another name!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AnimatePresence>
+            {filteredBookings.map((booking) => (
+              <motion.div
+                key={booking.id}
+                layout
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.2 }}
+                className="glass-card-hover p-6 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  {/* Header: Service Name & Reference */}
+                  <div className="flex justify-between items-start gap-4">
+                    <div>
+                      <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded-md border border-slate-200 dark:border-slate-700">
+                        {booking.category_name}
+                      </span>
+                      <h3 className="text-lg font-heading font-bold text-slate-900 dark:text-white mt-1.5">
+                        {booking.service_name}
+                      </h3>
                     </div>
-
-                    {/* Customer Info */}
-                    <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-900 space-y-2">
-                      <div className="flex items-center gap-2.5 text-sm">
-                        <FaUser className="text-slate-500 w-3.5" />
-                        <span className="font-semibold text-slate-200">{booking.customer_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2.5 text-sm text-slate-400">
-                        <FaPhone className="text-slate-500 w-3.5" />
-                        <span>{booking.customer_phone}</span>
-                      </div>
-                      {booking.customer_email && (
-                        <div className="flex items-center gap-2.5 text-sm text-slate-400 overflow-hidden text-ellipsis">
-                          <FaEnvelope className="text-slate-500 w-3.5" />
-                          <span className="truncate">{booking.customer_email}</span>
-                        </div>
+                    
+                    <div className="text-right">
+                      <span className="text-base font-heading font-black text-indigo-600 dark:text-indigo-400 block">{booking.price} ETB</span>
+                      {booking.reference_number && (
+                        <span className="text-[11px] font-mono font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500 dark:text-slate-400 mt-1 block border border-slate-200 dark:border-slate-700">
+                          {booking.reference_number}
+                        </span>
                       )}
                     </div>
+                  </div>
 
-                    {/* Date / Time / Barber Details */}
-                    <div className="grid grid-cols-2 gap-4 text-sm text-slate-300">
-                      <div className="flex items-center gap-2">
-                        <FaCalendarAlt className="text-blue-500" />
-                        <span>{new Date(booking.booking_date).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FaClock className="text-indigo-500" />
-                        <span>{formatTime(booking.time_slot)}</span>
-                      </div>
+                  {/* Customer Info */}
+                  <div className="p-3.5 bg-slate-50/80 dark:bg-slate-850/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center gap-2.5 text-xs">
+                      <FaUser className="text-indigo-500 w-3.5 shrink-0" />
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{booking.customer_name}</span>
                     </div>
-
-                    {/* Notes if present */}
-                    {booking.notes && (
-                      <div className="text-xs text-slate-400 bg-slate-950/20 p-2.5 rounded-lg border border-slate-900/50 flex gap-2">
-                        <FaCommentAlt className="text-slate-500 mt-0.5" />
-                        <p className="italic">"{booking.notes}"</p>
-                      </div>
-                    )}
-
-                    {/* Show rejection reason if tab is rejected */}
-                    {activeTab === 'rejected' && booking.rejection_reason && (
-                      <div className="text-xs text-red-400 bg-red-950/15 p-2.5 rounded-lg border border-red-900/20 flex gap-2">
-                        <FaTimes className="text-red-500 mt-0.5" />
-                        <p><span className="font-semibold">Reason:</span> {booking.rejection_reason}</p>
-                      </div>
-                    )}
-
-                    {/* Show change requests if tab is changes_requested */}
-                    {activeTab === 'changes_requested' && booking.approval_note && (
-                      <div className="text-xs text-amber-400 bg-amber-950/15 p-2.5 rounded-lg border border-amber-900/20 flex gap-2">
-                        <FaEdit className="text-amber-500 mt-0.5" />
-                        <p><span className="font-semibold">Requested Changes:</span> {booking.approval_note}</p>
+                    <div className="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-400">
+                      <FaPhone className="text-slate-400 w-3.5 shrink-0" />
+                      <span>{booking.customer_phone}</span>
+                    </div>
+                    {booking.customer_email && (
+                      <div className="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-400 overflow-hidden text-ellipsis">
+                        <FaEnvelope className="text-slate-400 w-3.5 shrink-0" />
+                        <span className="truncate">{booking.customer_email}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions Section */}
-                  <div className="mt-6 pt-4 border-t border-slate-800/40">
-                    {activeTab === 'waiting' ? (
-                      rejectingId === booking.id ? (
-                        <div className="space-y-3">
-                          <input
-                            type="text"
-                            placeholder="Rejection reason..."
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-1 focus:ring-red-500 focus:border-transparent text-sm text-slate-200"
-                            required
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleReject(booking.id)}
-                              disabled={actionLoadingId === booking.id}
-                              className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-                            >
-                              {actionLoadingId === booking.id ? (
-                                <FaSpinner className="animate-spin" />
-                              ) : (
-                                <>Confirm Reject</>
-                              )}
-                            </button>
-                            <button
-                              onClick={() => setRejectingId(null)}
-                              className="px-3 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 font-semibold text-xs rounded-xl transition-colors"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      ) : requestingChangesId === booking.id ? (
-                        <div className="space-y-3">
-                          <textarea
-                            placeholder="What changes are needed? (visible to customer)"
-                            value={changeRequests}
-                            onChange={(e) => setChangeRequests(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-1 focus:ring-amber-500 focus:border-transparent text-sm text-slate-200 min-h-[80px]"
-                            required
-                          />
-                          <textarea
-                            placeholder="Internal note (optional, staff only)"
-                            value={internalNote}
-                            onChange={(e) => setInternalNote(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:ring-1 focus:ring-amber-500 focus:border-transparent text-sm text-slate-200"
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleRequestChanges(booking.id)}
-                              disabled={actionLoadingId === booking.id}
-                              className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-                            >
-                              {actionLoadingId === booking.id ? (
-                                <FaSpinner className="animate-spin" />
-                              ) : (
-                                <>Send Request</>
-                              )}
-                            </button>
-                            <button
-                              onClick={() => setRequestingChangesId(null)}
-                              className="px-3 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 font-semibold text-xs rounded-xl transition-colors"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
+                  {/* Date / Time / Barber Details */}
+                  <div className="grid grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                    <div className="flex items-center gap-2">
+                      <FaCalendarAlt className="text-indigo-500" />
+                      <span>{new Date(booking.booking_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FaClock className="text-purple-500" />
+                      <span>{formatTime(booking.time_slot)}</span>
+                    </div>
+                  </div>
+
+                  {/* Notes if present */}
+                  {booking.notes && (
+                    <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-850/40 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800/60 flex gap-2">
+                      <FaCommentAlt className="text-slate-400 mt-0.5 shrink-0" />
+                      <p className="italic">"{booking.notes}"</p>
+                    </div>
+                  )}
+
+                  {/* Show rejection reason if tab is rejected */}
+                  {activeTab === 'rejected' && booking.rejection_reason && (
+                    <div className="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/40 flex gap-2">
+                      <FaTimes className="text-rose-500 mt-0.5 shrink-0" />
+                      <p><span className="font-bold">Reason:</span> {booking.rejection_reason}</p>
+                    </div>
+                  )}
+
+                  {/* Show change requests if tab is changes_requested */}
+                  {activeTab === 'changes_requested' && booking.approval_note && (
+                    <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/40 flex gap-2">
+                      <FaEdit className="text-amber-500 mt-0.5 shrink-0" />
+                      <p><span className="font-bold">Requested:</span> {booking.approval_note}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions Section */}
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  {activeTab === 'waiting' ? (
+                    rejectingId === booking.id ? (
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Rejection reason..."
+                          value={rejectionReason}
+                          onChange={(e) => setRejectionReason(e.target.value)}
+                          className="input-modern text-xs"
+                          required
+                        />
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleApprove(booking.id)}
-                            disabled={actionLoadingId !== null}
-                            className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/20 transition-all duration-200"
+                            onClick={() => handleReject(booking.id)}
+                            disabled={actionLoadingId === booking.id}
+                            className="btn-modern-danger flex-1 py-2 text-xs"
                           >
                             {actionLoadingId === booking.id ? (
                               <FaSpinner className="animate-spin" />
                             ) : (
-                              <>
-                                <FaCheck /> Approve
-                              </>
+                              <>Confirm Reject</>
                             )}
                           </button>
-                          
                           <button
-                            onClick={() => handleOpenRequestChanges(booking.id)}
-                            disabled={actionLoadingId !== null}
-                            className="py-2.5 px-3 bg-slate-800/80 hover:bg-slate-800 text-amber-400 hover:text-amber-300 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                            onClick={() => setRejectingId(null)}
+                            className="btn-modern-secondary px-3 py-2 text-xs"
                           >
-                            <FaEdit /> Changes
-                          </button>
-                          
-                          <button
-                            onClick={() => handleOpenReject(booking.id)}
-                            disabled={actionLoadingId !== null}
-                            className="py-2.5 px-3 bg-slate-800/80 hover:bg-slate-800 text-red-400 hover:text-red-300 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all"
-                          >
-                            <FaTimes /> Reject
+                            Cancel
                           </button>
                         </div>
-                      )
-                    ) : (
-                      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                        <FaTags />
-                        <span>Status marked as: <span className="font-bold text-slate-400 capitalize">{booking.approval_status}</span></span>
                       </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
+                    ) : requestingChangesId === booking.id ? (
+                      <div className="space-y-3">
+                        <textarea
+                          placeholder="What changes are needed? (visible to customer)"
+                          value={changeRequests}
+                          onChange={(e) => setChangeRequests(e.target.value)}
+                          className="input-modern text-xs min-h-[70px]"
+                          required
+                        />
+                        <textarea
+                          placeholder="Internal note (optional, staff only)"
+                          value={internalNote}
+                          onChange={(e) => setInternalNote(e.target.value)}
+                          className="input-modern text-xs"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleRequestChanges(booking.id)}
+                            disabled={actionLoadingId === booking.id}
+                            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl flex-1 flex items-center justify-center gap-1.5 transition-all shadow-md shadow-amber-500/20"
+                          >
+                            {actionLoadingId === booking.id ? (
+                              <FaSpinner className="animate-spin" />
+                            ) : (
+                              <>Send Request</>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => setRequestingChangesId(null)}
+                            className="btn-modern-secondary px-3 py-2 text-xs"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(booking.id)}
+                          disabled={actionLoadingId !== null}
+                          className="flex-1 py-2 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-95 transition-all"
+                        >
+                          {actionLoadingId === booking.id ? (
+                            <FaSpinner className="animate-spin" />
+                          ) : (
+                            <>
+                              <FaCheck /> Approve
+                            </>
+                          )}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleOpenRequestChanges(booking.id)}
+                          disabled={actionLoadingId !== null}
+                          className="btn-modern-secondary py-2 px-3 text-xs"
+                        >
+                          <FaEdit className="text-amber-500" /> Changes
+                        </button>
+                        
+                        <button
+                          onClick={() => handleOpenReject(booking.id)}
+                          disabled={actionLoadingId !== null}
+                          className="btn-modern-secondary py-2 px-3 text-xs hover:border-rose-300 dark:hover:border-rose-800"
+                        >
+                          <FaTimes className="text-rose-500" /> Reject
+                        </button>
+                      </div>
+                    )
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      <FaTags />
+                      <span>Status marked as: <span className="font-bold text-slate-800 dark:text-slate-200 capitalize">{booking.approval_status}</span></span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };

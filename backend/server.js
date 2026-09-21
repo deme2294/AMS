@@ -183,7 +183,7 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'ams_default_session_secret_change_in_production',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -358,11 +358,11 @@ app.get("/api/complaints/analytics", verifyToken, restrictTo([ROLES.ADMIN, ROLES
         { priority: 'Critical', count: 0 }
       ],
       typeDistribution: [
-        { type: 'Service Quality', count: 0 },
-        { type: 'Staff Behavior', count: 0 },
-        { type: 'Facility', count: 0 },
-        { type: 'Booking Issue', count: 0 },
-        { type: 'Other', count: 0 }
+        { complaint_type: 'Service Quality', type: 'Service Quality', count: 0 },
+        { complaint_type: 'Staff Behavior', type: 'Staff Behavior', count: 0 },
+        { complaint_type: 'Facility', type: 'Facility', count: 0 },
+        { complaint_type: 'Booking Issue', type: 'Booking Issue', count: 0 },
+        { complaint_type: 'Other', type: 'Other', count: 0 }
       ],
       recentComplaints: []
     }

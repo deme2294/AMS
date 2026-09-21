@@ -77,6 +77,7 @@ export const applyTheme = (settings: ThemeSettings) => {
   if (settings.themeMode) {
     const isDark = settings.themeMode === 'dark' || 
                    (settings.themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const effectiveTheme = isDark ? 'dark' : 'light';
     
     if (isDark) {
       root.classList.add('dark');
@@ -86,8 +87,38 @@ export const applyTheme = (settings: ThemeSettings) => {
       body.classList.remove('dark');
     }
     
-    root.setAttribute('data-bs-theme', settings.themeMode);
+    root.setAttribute('data-bs-theme', effectiveTheme);
+    root.setAttribute('data-theme', effectiveTheme);
+    root.setAttribute('data-theme-mode', settings.themeMode);
+    body.setAttribute('data-bs-theme', effectiveTheme);
+    body.setAttribute('data-theme', effectiveTheme);
     localStorage.setItem('lms_theme', settings.themeMode);
+
+    // Broadcast theme change to active React components and listeners
+    try {
+      window.dispatchEvent(new CustomEvent('ams-theme-change', {
+        detail: { isDark, effectiveTheme, themeMode: settings.themeMode, settings }
+      }));
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {
+      // Ignore if event dispatch is unsupported
+    }
+  }
+
+  // Register system color-scheme change listener once
+  if (typeof window !== 'undefined' && !(window as any)._ams_theme_media_listener) {
+    (window as any)._ams_theme_media_listener = true;
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', () => {
+        const current = getCurrentTheme();
+        if (current.themeMode === 'system') {
+          applyTheme(current);
+        }
+      });
+    } catch (e) {
+      // Legacy fallback
+    }
   }
 
   // Apply primary color

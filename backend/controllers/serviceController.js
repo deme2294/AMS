@@ -645,24 +645,22 @@ const createService = async (req, res) => {
         // Fallback: copy category_image into service image when service_image is not uploaded
         if (!imagePath) {
             const [categoryRows] = await con.promise().query(
-                "SELECT category_image FROM service_categories WHERE id = ? AND status = 'active'",
+                "SELECT COALESCE(image, category_image, image_url) as cat_image FROM service_categories WHERE id = ?",
                 [category_id]
             );
-            if (categoryRows && categoryRows.length > 0 && categoryRows[0].category_image) {
-                imagePath = categoryRows[0].category_image;
+            if (categoryRows && categoryRows.length > 0 && categoryRows[0].cat_image) {
+                imagePath = categoryRows[0].cat_image;
             }
         }
-
-
 
         // Insert
         const [result] = await con.promise().query(
             `INSERT INTO services (
                 category_id, barber_id, service_name, service_slug, description, 
-                price, discount_price, duration_minutes, service_image, service_icon,
+                price, discount_price, duration, duration_minutes, service_image, image_url, service_icon,
                 is_featured, is_available, max_customers_per_slot, preparation_time,
                 cleanup_time, booking_buffer_time, service_type, status, created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 category_id,
                 barber_id || null,
@@ -671,7 +669,9 @@ const createService = async (req, res) => {
                 description || null,
                 parseFloat(price),
                 discount_price ? parseFloat(discount_price) : null,
-                parseInt(duration_minutes),
+                parseInt(duration_minutes) || 30,
+                parseInt(duration_minutes) || 30,
+                imagePath,
                 imagePath,
                 service_icon || null,
                 featured ? 1 : 0,
@@ -892,14 +892,17 @@ const deleteService = async (req, res) => {
 };
 
 // Toggle service availability (quick action)
+// Toggle service availability (quick action)
 const toggleServiceAvailability = async (req, res) => {
     try {
         const { id } = req.params;
         const { is_available } = req.body;
+        const isAvailableBool = is_available === 1 || is_available === '1' || is_available === true;
+        const newStatus = isAvailableBool ? 'active' : 'inactive';
 
         const [result] = await con.promise().query(
-            "UPDATE services SET is_available = ?, updated_at = NOW() WHERE id = ?",
-            [is_available ? 1 : 0, id]
+            "UPDATE services SET is_available = ?, status = ?, updated_at = NOW() WHERE id = ?",
+            [isAvailableBool ? 1 : 0, newStatus, id]
         );
 
         if (result.affectedRows === 0) {
@@ -909,11 +912,17 @@ const toggleServiceAvailability = async (req, res) => {
             });
         }
 
-        const [updated] = await con.promise().query("SELECT * FROM services WHERE id = ?", [id]);
+        const [updated] = await con.promise().query(
+            `SELECT s.*, sc.category_name 
+             FROM services s 
+             LEFT JOIN service_categories sc ON s.category_id = sc.id 
+             WHERE s.id = ?`,
+            [id]
+        );
 
         return res.status(200).json({
             success: true,
-            message: `Service ${is_available ? 'activated' : 'deactivated'} successfully`,
+            message: `Service ${isAvailableBool ? 'activated' : 'deactivated'} successfully`,
             data: updated[0]
         });
     } catch (error) {
@@ -921,6 +930,46 @@ const toggleServiceAvailability = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to toggle service availability",
+            error: error.message
+        });
+    }
+};
+
+// Approve a service (Admin / Manager action) - explicitly activates and approves for public display
+const approveService = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [result] = await con.promise().query(
+            "UPDATE services SET status = 'active', is_available = 1, updated_at = NOW() WHERE id = ?",
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Service not found"
+            });
+        }
+
+        const [updated] = await con.promise().query(
+            `SELECT s.*, sc.category_name 
+             FROM services s 
+             LEFT JOIN service_categories sc ON s.category_id = sc.id 
+             WHERE s.id = ?`,
+            [id]
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Service approved and activated for public services display successfully",
+            data: updated[0]
+        });
+    } catch (error) {
+        console.error("Error approving service:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to approve service",
             error: error.message
         });
     }
@@ -2293,6 +2342,7 @@ module.exports = {
     updateService,
     deleteService,
     toggleServiceAvailability,
+    approveService,
 
     // Service Packages
     getServicePackages,

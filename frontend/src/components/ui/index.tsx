@@ -12,41 +12,41 @@ export type SizeVariant = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 // THEME TOKENS (both modes)
 // ─────────────────────────────────────────────────────────────
 const variantClasses: Record<ColorVariant, string> = {
-  primary:   'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-500/20',
-  secondary: 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-slate-200/50 dark:shadow-slate-700/30',
-  success:   'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-emerald-500/20',
-  danger:    'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-red-500/20',
-  warning:   'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-amber-500/20',
-  info:      'bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-white shadow-cyan-500/20',
-  ghost:     'bg-transparent border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700/50 text-gray-700 dark:text-slate-300 shadow-none',
-  dark:      'bg-gray-900 dark:bg-slate-900 hover:bg-gray-800 dark:hover:bg-slate-800 text-white border border-gray-700 dark:border-slate-700 shadow-gray-900/20',
+  primary:   'bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/35 hover:-translate-y-0.5 active:translate-y-0',
+  secondary: 'bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm hover:-translate-y-0.5 active:translate-y-0',
+  success:   'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0',
+  danger:    'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white shadow-md shadow-rose-500/25 hover:-translate-y-0.5 active:translate-y-0',
+  warning:   'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-md shadow-amber-500/25 hover:-translate-y-0.5 active:translate-y-0',
+  info:      'bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 text-white shadow-md shadow-sky-500/25 hover:-translate-y-0.5 active:translate-y-0',
+  ghost:     'bg-transparent border border-slate-200/80 dark:border-slate-700/80 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-none',
+  dark:      'bg-slate-900 hover:bg-slate-850 text-white border border-slate-800 shadow-md shadow-slate-950/30 hover:-translate-y-0.5 active:translate-y-0',
 };
 
 const outlineVariantClasses: Record<ColorVariant, string> = {
-  primary:   'border border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10',
-  secondary: 'border border-gray-400 dark:border-slate-500 text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-500/10',
-  success:   'border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10',
-  danger:    'border border-red-500 text-red-600 dark:text-red-400 hover:bg-red-500/10',
-  warning:   'border border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10',
-  info:      'border border-cyan-500 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10',
-  ghost:     'border border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-600/10',
-  dark:      'border border-gray-700 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700/10',
+  primary:   'border border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 hover:border-indigo-600',
+  secondary: 'border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60',
+  success:   'border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-600',
+  danger:    'border border-rose-500 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 hover:border-rose-600',
+  warning:   'border border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:border-amber-600',
+  info:      'border border-sky-500 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 hover:border-sky-600',
+  ghost:     'border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50',
+  dark:      'border border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-800/20',
 };
 
 const badgeVariantClasses: Record<ColorVariant, string> = {
-  primary:   'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30',
-  secondary: 'bg-gray-100 dark:bg-slate-500/20 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-500/30',
-  success:   'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30',
-  danger:    'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/30',
-  warning:   'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30',
-  info:      'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-500/30',
-  ghost:     'bg-gray-50 dark:bg-slate-700/30 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-600/30',
-  dark:      'bg-gray-200 dark:bg-slate-800 text-gray-800 dark:text-slate-300 border border-gray-300 dark:border-slate-700',
+  primary:   'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/30',
+  secondary: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
+  success:   'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30',
+  danger:    'bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-500/30',
+  warning:   'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-500/30',
+  info:      'bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30',
+  ghost:     'bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/40',
+  dark:      'bg-slate-900 text-white border border-slate-800',
 };
 
 const sizeClasses: Record<SizeVariant, string> = {
-  xs: 'text-xs px-2 py-1',
-  sm: 'text-sm px-3 py-1.5',
+  xs: 'text-xs px-2.5 py-1',
+  sm: 'text-xs px-3 py-1.5',
   md: 'text-sm px-4 py-2',
   lg: 'text-base px-5 py-2.5',
   xl: 'text-base px-6 py-3',
@@ -63,7 +63,7 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary', size = 'md', outline = false, loading = false,
   leftIcon, rightIcon, fullWidth, pill, children, className = '', disabled, ...rest
 }) => {
-  const base = 'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md';
+  const base = 'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
   const radius = pill ? 'rounded-full' : 'rounded-xl';
   const width = fullWidth ? 'w-full' : '';
   const colorClass = outline ? outlineVariantClasses[variant] : variantClasses[variant];
@@ -186,18 +186,18 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label, error, hint, leftIcon, rightIcon, wrapperClass = '', className = '', ...rest
 }, ref) => (
   <div className={`flex flex-col gap-1.5 ${wrapperClass}`}>
-    {label && <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">{label}</label>}
+    {label && <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</label>}
     <div className="relative">
-      {leftIcon && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400">{leftIcon}</span>}
+      {leftIcon && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-400">{leftIcon}</span>}
       <input
         ref={ref}
-        className={`w-full bg-white dark:bg-slate-900/60 border ${error ? 'border-red-400 dark:border-red-500/70 focus:ring-red-200 dark:focus:ring-red-500/30' : 'border-gray-300 dark:border-slate-700/70 focus:border-blue-500 dark:focus:border-blue-500/70 focus:ring-blue-100 dark:focus:ring-blue-500/20'} rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 py-2.5 ${leftIcon ? 'pl-10' : 'pl-4'} ${rightIcon ? 'pr-10' : 'pr-4'} disabled:bg-gray-50 dark:disabled:bg-slate-800/40 disabled:cursor-not-allowed ${className}`}
+        className={`w-full bg-white dark:bg-slate-900/70 border ${error ? 'border-red-400 dark:border-red-500/70 focus:ring-red-200 dark:focus:ring-red-500/30' : 'border-slate-300 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-100 dark:focus:ring-indigo-500/25'} rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 py-2.5 ${leftIcon ? 'pl-10' : 'pl-4'} ${rightIcon ? 'pr-10' : 'pr-4'} disabled:bg-slate-50 dark:disabled:bg-slate-800/40 disabled:cursor-not-allowed ${className}`}
         {...rest}
       />
-      {rightIcon && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400">{rightIcon}</span>}
+      {rightIcon && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-400">{rightIcon}</span>}
     </div>
-    {error && <p className="text-xs text-red-500 dark:text-red-400 flex items-center gap-1">⚠ {error}</p>}
-    {hint && !error && <p className="text-xs text-gray-400 dark:text-slate-500">{hint}</p>}
+    {error && <p className="text-xs text-rose-500 dark:text-rose-400 flex items-center gap-1">⚠ {error}</p>}
+    {hint && !error && <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>}
   </div>
 ));
 Input.displayName = 'Input';
@@ -208,13 +208,13 @@ Input.displayName = 'Input';
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> { label?: string; error?: string; hint?: string; wrapperClass?: string; }
 export const Textarea: React.FC<TextareaProps> = ({ label, error, hint, wrapperClass = '', className = '', ...rest }) => (
   <div className={`flex flex-col gap-1.5 ${wrapperClass}`}>
-    {label && <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">{label}</label>}
+    {label && <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</label>}
     <textarea
-      className={`w-full bg-white dark:bg-slate-900/60 border ${error ? 'border-red-400 dark:border-red-500/70' : 'border-gray-300 dark:border-slate-700/70 focus:border-blue-500 dark:focus:border-blue-500/70 focus:ring-blue-100 dark:focus:ring-blue-500/20'} rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 py-2.5 px-4 resize-none ${className}`}
+      className={`w-full bg-white dark:bg-slate-900/70 border ${error ? 'border-red-400 dark:border-red-500/70' : 'border-slate-300 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-100 dark:focus:ring-indigo-500/25'} rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 py-2.5 px-4 resize-none ${className}`}
       rows={4} {...rest}
     />
-    {error && <p className="text-xs text-red-500 dark:text-red-400">⚠ {error}</p>}
-    {hint && !error && <p className="text-xs text-gray-400 dark:text-slate-500">{hint}</p>}
+    {error && <p className="text-xs text-rose-500 dark:text-rose-400">⚠ {error}</p>}
+    {hint && !error && <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>}
   </div>
 );
 
@@ -226,16 +226,16 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 export const Select: React.FC<SelectProps> = ({ label, error, hint, options, placeholder, wrapperClass = '', className = '', ...rest }) => (
   <div className={`flex flex-col gap-1.5 ${wrapperClass}`}>
-    {label && <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">{label}</label>}
+    {label && <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</label>}
     <select
-      className={`w-full bg-white dark:bg-slate-900/60 border ${error ? 'border-red-400 dark:border-red-500/70' : 'border-gray-300 dark:border-slate-700/70 focus:border-blue-500 dark:focus:border-blue-500/70 focus:ring-blue-100 dark:focus:ring-blue-500/20'} rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 transition-all duration-200 py-2.5 px-4 appearance-none cursor-pointer ${className}`}
+      className={`w-full bg-white dark:bg-slate-900/70 border ${error ? 'border-red-400 dark:border-red-500/70' : 'border-slate-300 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-100 dark:focus:ring-indigo-500/25'} rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-all duration-200 py-2.5 px-4 appearance-none cursor-pointer ${className}`}
       {...rest}
     >
       {placeholder && <option value="">{placeholder}</option>}
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
-    {error && <p className="text-xs text-red-500 dark:text-red-400">⚠ {error}</p>}
-    {hint && !error && <p className="text-xs text-gray-400 dark:text-slate-500">{hint}</p>}
+    {error && <p className="text-xs text-rose-500 dark:text-rose-400">⚠ {error}</p>}
+    {hint && !error && <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>}
   </div>
 );
 

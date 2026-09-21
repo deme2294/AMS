@@ -165,39 +165,40 @@ const CategoriesManagement: React.FC = () => {
       title: 'Image',
       dataIndex: 'image',
       key: 'image',
-      width: 100,
-      render: (image: string, record: ServiceCategory) => (
-        <div className="category-image-cell">
-          {image ? (
-            <img
-              src={`${import.meta.env.VITE_API_BASE_URL}${image}`}
-              alt={record.category_name}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: 'cover',
-                borderRadius: 8,
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 60,
-                height: 60,
-                backgroundColor: record.color || '#6366f1',
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '24px',
-              }}
-            >
-              {record.icon || record.category_name.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
-      ),
+      width: 90,
+      render: (image: string, record: ServiceCategory) => {
+        const imageSrc = image
+          ? (image.startsWith('http') ? image : `${import.meta.env.VITE_API_BASE_URL || ''}${image}`)
+          : null;
+
+        const isFaIcon = record.icon && (record.icon.startsWith('fa-') || record.icon.includes('fa '));
+
+        return (
+          <div className="flex items-center justify-center">
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={record.category_name}
+                className="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700/80"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg shadow-sm"
+                style={{ backgroundColor: record.color || '#6366f1' }}
+              >
+                {isFaIcon ? (
+                  <i className={record.icon}></i>
+                ) : (
+                  <span>{record.icon || record.category_name.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: 'Category Name',
@@ -205,20 +206,31 @@ const CategoriesManagement: React.FC = () => {
       key: 'category_name',
       sorter: (a: ServiceCategory, b: ServiceCategory) =>
         a.category_name.localeCompare(b.category_name),
+      render: (text: string, record: ServiceCategory) => (
+        <div>
+          <div className="font-semibold text-slate-900 dark:text-white">{text}</div>
+          <div className="text-xs text-slate-400">ID #{record.id}</div>
+        </div>
+      ),
     },
     {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
-      render: (desc: string) => desc || '-',
+      render: (desc: string) => <span className="text-slate-600 dark:text-slate-300 text-sm">{desc || '—'}</span>,
     },
     {
       title: 'Sort Order',
       dataIndex: 'sort_order',
       key: 'sort_order',
-      width: 120,
+      width: 110,
       sorter: (a: ServiceCategory, b: ServiceCategory) => a.sort_order - b.sort_order,
+      render: (order: number) => (
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          {order}
+        </span>
+      ),
     },
     {
       title: 'Status',
@@ -226,34 +238,39 @@ const CategoriesManagement: React.FC = () => {
       key: 'status',
       width: 120,
       render: (status: string, record: ServiceCategory) => (
-        <Tag
-          color={status === 'active' ? 'success' : 'default'}
-          style={{ cursor: 'pointer' }}
+        <span
           onClick={() => handleToggleStatus(record.id)}
+          className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-all active:scale-95 ${
+            status === 'active'
+              ? 'badge-emerald text-emerald-700 dark:text-emerald-300'
+              : 'badge-rose text-rose-700 dark:text-rose-300'
+          }`}
+          title="Click to toggle status"
         >
           {status === 'active' ? (
             <>
-              <CheckCircleOutlined /> Active
+              <CheckCircleOutlined className="text-xs" /> Active
             </>
           ) : (
             <>
-              <CloseCircleOutlined /> Inactive
+              <CloseCircleOutlined className="text-xs" /> Inactive
             </>
           )}
-        </Tag>
+        </span>
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      width: 150,
+      width: 130,
       render: (_: any, record: ServiceCategory) => (
         <Space size="small">
-          <Tooltip title="Edit">
+          <Tooltip title="Edit Category">
             <Button
-              type="link"
-              icon={<EditOutlined />}
+              type="text"
+              icon={<EditOutlined className="text-indigo-600 dark:text-indigo-400" />}
               onClick={() => handleOpenModal(record)}
+              className="hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg"
             />
           </Tooltip>
           <Popconfirm
@@ -263,8 +280,8 @@ const CategoriesManagement: React.FC = () => {
             okText="Yes"
             cancelText="No"
           >
-            <Tooltip title="Delete">
-              <Button type="link" danger icon={<DeleteOutlined />} />
+            <Tooltip title="Delete Category">
+              <Button type="text" danger icon={<DeleteOutlined />} className="rounded-lg" />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -273,31 +290,48 @@ const CategoriesManagement: React.FC = () => {
   ];
 
   return (
-    <div className="categories-management">
-      <Card>
-        <Row gutter={[16, 16]} align="middle" style={{ marginBottom: 20 }}>
-          <Col xs={24} sm={12} md={8}>
-            <h2 style={{ margin: 0 }}>Service Categories</h2>
-          </Col>
-          <Col xs={24} sm={12} md={8}>
+    <div className="categories-management space-y-6">
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-heading font-black text-slate-900 dark:text-white tracking-tight">
+              Service Categories
+            </h1>
+            <span className="badge-indigo text-xs py-1 px-3">
+              {categories.length} Categories
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Organize and manage catalog categories, icons, brand colors, and display sequence.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => handleOpenModal()}
+            className="btn-modern-primary !h-10 !px-5 !rounded-xl !border-0 flex items-center gap-1.5"
+          >
+            Add Category
+          </Button>
+        </div>
+      </div>
+
+      <Card className="glass-card !border-slate-200/80 dark:!border-slate-800/80 !shadow-sm overflow-hidden">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div className="max-w-md w-full">
             <Input
-              placeholder="Search categories..."
-              prefix={<SearchOutlined />}
+              placeholder="Search categories by name or description..."
+              prefix={<SearchOutlined className="text-slate-400" />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               allowClear
+              className="input-modern"
             />
-          </Col>
-          <Col xs={24} sm={12} md={8} style={{ textAlign: 'right' }}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => handleOpenModal()}
-            >
-              Add Category
-            </Button>
-          </Col>
-        </Row>
+          </div>
+        </div>
 
         <Spin spinning={loading}>
           {filteredCategories.length === 0 ? (

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { getSystemSettings } from './services/apiService';
+import { initializeTheme } from './services/themeService';
 import { useTranslation } from 'react-i18next';
 
 // Auth Context
@@ -54,33 +55,11 @@ const AppContent: React.FC = () => {
         document.documentElement.lang = i18n.language;
     }, [i18n.language]);
 
-    // Initialize global aesthetic settings from the database
+    // Initialize global aesthetic settings from the database & localStorage
     useEffect(() => {
         const initializeSystemSettings = async () => {
             try {
-                const localMode = localStorage.getItem('lms_theme') || 'system';
-                const root = document.documentElement;
-                
-                if (localMode === 'dark' || (localMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    root.classList.add('dark');
-                }
-
-                const sysSettings = await getSystemSettings();
-                if (sysSettings) {
-                    const dbMode = sysSettings.themeMode || 'system';
-                    
-                    if (sysSettings.primaryColor) localStorage.setItem('lms_color', sysSettings.primaryColor);
-                    if (sysSettings.density) localStorage.setItem('lms_density', sysSettings.density);
-                    if (sysSettings.fontFamily) localStorage.setItem('lms_font', sysSettings.fontFamily);
-                    if (sysSettings.themeMode) localStorage.setItem('lms_theme', sysSettings.themeMode);
-                    if (sysSettings.logoPreview) localStorage.setItem('lms_logo_preview', sysSettings.logoPreview);
-
-                    if (dbMode === 'dark' || (dbMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                        root.classList.add('dark');
-                    } else {
-                        root.classList.remove('dark');
-                    }
-                }
+                await initializeTheme();
             } catch (err) {
                 console.error("Non-critical: Global appearance sync failed", err);
             } finally {

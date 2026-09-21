@@ -385,19 +385,19 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="h-screen relative overflow-hidden flex items-center justify-center p-4 lg:p-6" style={{ background: 'linear-gradient(180deg, #16284F 0%, #0C7C92 100%)' }}>
+        <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 lg:p-6 bg-slate-950">
             {/* Premium Animated Background with Tech Particles */}
             <div className="absolute inset-0 z-0">
                 {/* Advanced Tech Particles (tsparticles) */}
                 <ParticleBackground className="absolute inset-0" id="login-particles" />
 
                 {/* Atmospheric Glows */}
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-                <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-cyan-500/5 rounded-full blur-[100px] animate-bounce duration-[10s]"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] bg-indigo-600/15 rounded-full blur-[140px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-purple-600/15 rounded-full blur-[140px] animate-pulse delay-1000"></div>
+                <div className="absolute top-[30%] right-[20%] w-[25%] h-[25%] bg-cyan-500/10 rounded-full blur-[100px]"></div>
 
                 {/* Mesh Grid */}
-                <div className="absolute inset-0 opacity-[0.03]" style={{
+                <div className="absolute inset-0 opacity-[0.04]" style={{
                     backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
                     backgroundSize: '40px 40px'
                 }}></div>
@@ -406,7 +406,7 @@ const LoginPage: React.FC = () => {
             {/* Main Content */}
             <div className="relative z-10 w-full max-w-[1600px] h-full flex flex-col lg:flex-row items-center justify-center py-4 lg:py-8">
                 {/* Left Side - Branding & Info */}
-                <div className="hidden lg:flex lg:w-[60%] flex-col justify-center pl-4 xl:pl-12 pr-4 h-full">
+                <div className="hidden lg:flex lg:w-[58%] flex-col justify-center pl-4 xl:pl-12 pr-6 h-full">
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -414,37 +414,20 @@ const LoginPage: React.FC = () => {
                         className="mb-4 text-left"
                     >
                         <div className="flex flex-col mb-4">
-                            <motion.div
-                                animate={{
-                                    scale: [1, 1.05, 1],
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                                className="mb-3"
-                            >
-                                {/* <img
-                                    src="assets/img/logo/ITP_logo - 1.jpg"
-                                    alt="ITP Logo"
-                                    className="w-20 xl:w-24 h-auto object-contain bg-transparent mix-blend-lighten"
-                                /> */}
-                            </motion.div>
                             <div>
-                                <h1 className="text-4xl xl:text-6xl font-black tracking-tighter text-white mb-1 uppercase leading-[0.9]">
-                                    BARBER
-                                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-                                        MANAGEMENT SYSTEM
+                                <h1 className="text-4xl xl:text-5xl font-black tracking-tight text-white mb-2 leading-[1.05] font-display">
+                                    ADVANCED
+                                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-teal-300">
+                                        SALON MANAGEMENT
                                     </span>
                                 </h1>
-                                <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-2"></div>
-                                <p className="text-slate-400 font-medium text-xs xl:text-sm uppercase tracking-[0.2em]">Enterprise CMS v1.0</p>
+                                <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-sky-400 rounded-full mb-3"></div>
+                                <p className="text-indigo-200/70 font-semibold text-xs uppercase tracking-[0.25em]">AMS Enterprise Operational Suite</p>
                             </div>
                         </div>
 
-                        <p className="text-sm xl:text-base text-slate-300 mb-4 leading-relaxed max-w-md">
-                            The ultimate solution for modern barber shops. Streamline appointments, manage customers queue, and services in the modern way.
+                        <p className="text-sm xl:text-base text-slate-300 mb-6 leading-relaxed max-w-md">
+                            Streamline bookings, optimize customer queues, manage staff schedules, and deliver high-precision salon services with effortless control.
                         </p>
                     </motion.div>
 
@@ -522,48 +505,30 @@ const LoginPage: React.FC = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
-                            className={`bg-white/[0.04] backdrop-blur-[40px] rounded-[2rem] shadow-[0_12px_40px_0_rgba(0,0,0,0.7)] p-8 transition-all duration-500 ${isFormFocused ? 'bg-white/[0.06]' : ''}`}
+                            className={`bg-slate-900/85 backdrop-blur-2xl border border-slate-800/90 rounded-3xl shadow-2xl p-8 transition-all duration-300 ${isFormFocused ? 'border-indigo-500/50 shadow-indigo-500/10' : ''}`}
                         >
                             {/* Header */}
-                            <div className="text-center mb-8">
-                                <motion.div
-                                    animate={{
-                                        scale: [1, 1.1, 1],
-                                    }}
-                                    transition={{
-                                        duration: 1.5,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                    className="inline-block mb-4"
-                                >
-                                    {/* <img
-                                        src="assets/img/logo/ITP_logo - 1.jpg"
-                                        alt="Logo"
-                                        className="w-16 h-16 object-contain bg-transparent"
-                                    /> */}
-                                </motion.div>
-                                <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
+                            <div className="text-center mb-7">
+                                <h1 className="text-2xl xl:text-3xl font-bold text-white tracking-tight mb-1">
                                     Welcome Back
-                                    <span className="block text-xs font-normal text-blue-400 mt-1">Single Session Is allowd to login here logout other sessions </span>
                                 </h1>
-                                <p className="text-slate-400 text-sm mt-1">My Salon Management System</p>
-                                <div className="mt-3 py-1 px-3 bg-blue-500/10 rounded-full inline-block border border-blue-500/20">
-                                    <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest flex items-center">
-                                        <SparklesIcon className="w-3 h-3 mr-1" />
-                                        Secure Gateway
+                                <p className="text-slate-400 text-sm">Sign in to your AMS management account</p>
+                                <div className="mt-3 py-1 px-3.5 bg-indigo-500/10 rounded-full inline-flex items-center border border-indigo-500/25">
+                                    <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest flex items-center">
+                                        <SparklesIcon className="w-3 h-3 mr-1.5 text-indigo-400" />
+                                        AMS Secure Gateway
                                     </span>
                                 </div>
                             </div>
 
                             {/* Success Message from Registration */}
                             {successMessage && (
-                                <div className="mb-6 p-4 bg-green-900/30 border border-green-500/50 rounded-xl backdrop-blur-sm">
+                                <div className="mb-6 p-4 bg-emerald-950/40 border border-emerald-500/40 rounded-2xl backdrop-blur-sm">
                                     <div className="flex items-center space-x-3">
-                                        <CheckSolidIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
+                                        <CheckSolidIcon className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                                         <div>
-                                            <p className="text-green-300 font-medium">Success</p>
-                                            <p className="text-green-200 text-sm">{successMessage}</p>
+                                            <p className="text-emerald-300 font-semibold text-sm">Success</p>
+                                            <p className="text-emerald-200/90 text-xs mt-0.5">{successMessage}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -571,12 +536,12 @@ const LoginPage: React.FC = () => {
 
                             {/* Error Messages */}
                             {error && (
-                                <div className="mb-6 p-4 bg-red-900/30 border border-red-500/50 rounded-xl backdrop-blur-sm">
+                                <div className="mb-6 p-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl backdrop-blur-sm">
                                     <div className="flex items-center space-x-3">
-                                        <WarningSolidIcon className="w-5 h-5 text-red-400 flex-shrink-0" />
+                                        <WarningSolidIcon className="w-5 h-5 text-rose-400 flex-shrink-0" />
                                         <div>
-                                            <p className="text-red-300 font-medium">Login Failed</p>
-                                            <p className="text-red-200 text-sm">{error}</p>
+                                            <p className="text-rose-300 font-semibold text-sm">Login Failed</p>
+                                            <p className="text-rose-200/90 text-xs mt-0.5">{error}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -584,28 +549,28 @@ const LoginPage: React.FC = () => {
 
                             {/* Lock Warning */}
                             {lockMessage && (
-                                <div className={`mb-6 p-4 rounded-xl backdrop-blur-sm border ${lockMessage.toLowerCase().includes("locked") ||
+                                <div className={`mb-6 p-4 rounded-2xl backdrop-blur-sm border ${lockMessage.toLowerCase().includes("locked") ||
                                     lockMessage.toLowerCase().includes("maximum") ||
                                     isAccountLocked
-                                    ? "bg-red-900/30 border-red-500/50"
-                                    : "bg-yellow-900/30 border-yellow-500/50"
+                                    ? "bg-rose-950/40 border-rose-500/40"
+                                    : "bg-amber-950/40 border-amber-500/40"
                                     }`}>
                                     <div className="flex items-center space-x-3">
                                         {isAccountLocked ? (
-                                            <LockSolidIcon className="w-5 h-5 text-red-400 flex-shrink-0" />
+                                            <LockSolidIcon className="w-5 h-5 text-rose-400 flex-shrink-0" />
                                         ) : (
-                                            <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                                            <ExclamationTriangleIcon className="w-5 h-5 text-amber-400 flex-shrink-0" />
                                         )}
                                         <div>
-                                            <p className={`font-medium ${isAccountLocked ? 'text-red-300' : 'text-yellow-300'}`}>
+                                            <p className={`font-semibold text-sm ${isAccountLocked ? 'text-rose-300' : 'text-amber-300'}`}>
                                                 {isAccountLocked ? "Account Locked" : "Security Warning"}
                                             </p>
-                                            <p className={`text-sm ${isAccountLocked ? 'text-red-200' : 'text-yellow-200'}`}>
+                                            <p className={`text-xs mt-0.5 ${isAccountLocked ? 'text-rose-200/90' : 'text-amber-200/90'}`}>
                                                 {lockMessage}
                                             </p>
                                             {isAccountLocked && (
-                                                <div className="mt-4 pt-4 border-t border-red-500/20">
-                                                    <p className="text-[11px] text-red-300 mb-3 font-semibold uppercase tracking-wider">
+                                                <div className="mt-4 pt-4 border-t border-rose-500/20">
+                                                    <p className="text-[11px] text-rose-300 mb-3 font-semibold uppercase tracking-wider">
                                                         Redemption Required
                                                     </p>
                                                     <div className="flex flex-col space-y-2">
@@ -618,7 +583,7 @@ const LoginPage: React.FC = () => {
                                                                 setForgotEmail(userName);
                                                                 setForgotMsg(null);
                                                             }}
-                                                            className="w-full py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white text-xs font-bold rounded-lg shadow-lg hover:shadow-red-500/20 transition-all duration-300 flex items-center justify-center space-x-2"
+                                                            className="w-full py-2.5 bg-gradient-to-r from-rose-600 to-orange-600 text-white text-xs font-bold rounded-xl shadow-lg hover:shadow-rose-500/20 transition-all flex items-center justify-center space-x-2"
                                                         >
                                                             <EnvelopeIcon className="w-4 h-4" />
                                                             <span>Request New Redemption Code</span>
@@ -633,7 +598,7 @@ const LoginPage: React.FC = () => {
                                                                 setForgotEmail(userName);
                                                                 setForgotMsg("Enter the 6-digit redemption code from your email.");
                                                             }}
-                                                            className="w-full py-2 bg-slate-800/50 border border-red-500/30 text-red-300 text-xs font-bold rounded-lg hover:bg-slate-800 transition-all duration-300 flex items-center justify-center space-x-2"
+                                                            className="w-full py-2.5 bg-slate-800/60 border border-rose-500/30 text-rose-300 text-xs font-bold rounded-xl hover:bg-slate-800 transition-all flex items-center justify-center space-x-2"
                                                         >
                                                             <CheckSolidIcon className="w-4 h-4" />
                                                             <span>Already Have a Code? Unlock Now</span>
@@ -650,11 +615,11 @@ const LoginPage: React.FC = () => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {/* Username Field */}
                                 <div>
-                                    <label htmlFor="username" className="block text-xs font-semibold text-slate-200 mb-1">
+                                    <label htmlFor="username" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                         Username or Email Address
                                     </label>
                                     <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                             <UserIcon className="h-4 w-4 text-slate-400" />
                                         </div>
                                         <input
@@ -669,19 +634,19 @@ const LoginPage: React.FC = () => {
                                             onBlur={() => setIsFormFocused(false)}
                                             required
                                             disabled={isLoading || isAccountLocked}
-                                            className="w-full pl-10 pr-3 py-3 bg-slate-800/50 border border-slate-600/50 focus:border-blue-500/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                            placeholder="Enter your username or email address"
+                                            className="w-full pl-10 pr-3.5 py-3 bg-slate-950/70 border border-slate-700/80 focus:border-indigo-500 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                            placeholder="Enter your username or email"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Password Field */}
                                 <div>
-                                    <label htmlFor="password" className="block text-xs font-semibold text-slate-200 mb-1">
+                                    <label htmlFor="password" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                         Password
                                     </label>
                                     <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                             <LockClosedIcon className="h-4 w-4 text-slate-400" />
                                         </div>
                                         <input
@@ -696,13 +661,13 @@ const LoginPage: React.FC = () => {
                                             onBlur={() => setIsFormFocused(false)}
                                             required
                                             disabled={isLoading || isAccountLocked}
-                                            className="w-full pl-10 pr-10 py-3 bg-slate-800/50 border border-slate-600/50 focus:border-blue-500/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                            className="w-full pl-10 pr-10 py-3 bg-slate-950/70 border border-slate-700/80 focus:border-indigo-500 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                                             placeholder="Enter your password"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors duration-200"
+                                            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white transition-colors duration-200"
                                             disabled={isLoading || isAccountLocked}
                                         >
                                             {showPassword ? (
@@ -715,14 +680,14 @@ const LoginPage: React.FC = () => {
                                 </div>
 
                                 {/* Remember Me & Forgot Password */}
-                                <div className="flex items-center justify-between">
-                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                <div className="flex items-center justify-between pt-1">
+                                    <label className="flex items-center space-x-2 cursor-pointer select-none">
                                         <input
                                             type="checkbox"
                                             checked={rememberMe}
                                             onChange={(e) => setRememberMe(e.target.checked)}
                                             disabled={isLoading || isAccountLocked}
-                                            className="w-3 h-3 text-blue-600 bg-slate-800/50 border-slate-600/50 rounded focus:ring-blue-500/20 focus:ring-2 disabled:opacity-50"
+                                            className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-700 rounded focus:ring-indigo-500/20 focus:ring-2 disabled:opacity-50 accent-indigo-600 cursor-pointer"
                                         />
                                         <span className="text-xs text-slate-300">Remember me</span>
                                     </label>
@@ -732,7 +697,7 @@ const LoginPage: React.FC = () => {
                                             setIsRedeemingOnly(false);
                                             setShowForgotModal(true);
                                         }}
-                                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200 font-medium"
+                                        className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-semibold"
                                     >
                                         Forgot password?
                                     </button>
@@ -742,9 +707,9 @@ const LoginPage: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading || isAccountLocked}
-                                    className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm ${isAccountLocked
-                                        ? 'bg-gradient-to-r from-red-600 to-red-700'
-                                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                                    className={`w-full py-3.5 px-6 rounded-xl font-semibold text-white transition-all duration-200 active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm flex items-center justify-center space-x-2 ${isAccountLocked
+                                        ? 'bg-gradient-to-r from-rose-600 to-red-700 shadow-rose-600/30'
+                                        : 'bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 shadow-indigo-600/30 hover:shadow-indigo-600/40 hover:-translate-y-0.5'
                                         }`}
                                 >
                                     {isLoading ? (
@@ -759,7 +724,7 @@ const LoginPage: React.FC = () => {
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-center space-x-2">
-                                            <span>Sign In</span>
+                                            <span>Sign In to AMS</span>
                                             <ArrowRightIcon className="w-4 h-4" />
                                         </div>
                                     )}
@@ -787,20 +752,20 @@ const LoginPage: React.FC = () => {
                     {/* Forgot Password Modal */}
                     {
                         showForgotModal && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                                <div className="w-full max-w-md bg-slate-800/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-600/50 overflow-hidden">
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+                                <div className="w-full max-w-md bg-slate-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-800 overflow-hidden">
                                     {/* Modal Header */}
-                                    <div className="p-4 border-b border-slate-700/50">
-                                        <div className="flex items-center justify-between mb-6">
+                                    <div className="p-6 border-b border-slate-800">
+                                        <div className="flex items-center justify-between mb-5">
                                             <div className="flex items-center space-x-3">
-                                                <div className={`p-2 rounded-lg ${isRedeemingOnly ? 'bg-orange-500/20' : 'bg-blue-500/20'}`}>
-                                                    {isRedeemingOnly ? <ShieldCheckIcon className="w-5 h-5 text-orange-400" /> : <KeyIcon className="w-5 h-5 text-blue-400" />}
+                                                <div className={`p-2.5 rounded-xl ${isRedeemingOnly ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20'}`}>
+                                                    {isRedeemingOnly ? <ShieldCheckIcon className="w-5 h-5 text-amber-400" /> : <KeyIcon className="w-5 h-5 text-indigo-400" />}
                                                 </div>
                                                 <div>
                                                     <h3 className="text-lg font-bold text-white">
                                                         {isRedeemingOnly ? 'Account Redemption' : 'Password Recovery'}
                                                     </h3>
-                                                    <p className="text-[10px] text-slate-400">
+                                                    <p className="text-xs text-slate-400">
                                                         {isRedeemingOnly ? 'Secure account unlocking process' : 'Secure account recovery process'}
                                                     </p>
                                                 </div>
@@ -812,17 +777,14 @@ const LoginPage: React.FC = () => {
                                                     setForgotMsg(null);
                                                     setIsRedeemingOnly(false);
                                                 }}
-                                                className="text-slate-400 hover:text-white transition-colors duration-200"
+                                                className="w-8 h-8 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
                                             >
-                                                <ArrowRightIcon className="w-5 h-5 rotate-180" />
+                                                ✕
                                             </button>
                                         </div>
 
-                                        <div className={`mb-6 p-4 rounded-xl border ${isRedeemingOnly ? 'bg-orange-900/10 border-orange-500/20' : 'bg-blue-900/10 border-blue-500/20'} relative overflow-hidden group`}>
-                                            <div className={`absolute top-0 right-0 p-2 opacity-5 scale-150 rotate-12 transition-transform duration-500 group-hover:scale-110`}>
-                                                {isRedeemingOnly ? <ShieldCheckIcon className="w-12 h-12 text-orange-400" /> : <KeyIcon className="w-12 h-12 text-blue-400" />}
-                                            </div>
-                                            <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isRedeemingOnly ? 'text-orange-400' : 'text-blue-400'}`}>
+                                        <div className={`p-4 rounded-2xl border ${isRedeemingOnly ? 'bg-amber-950/20 border-amber-500/20' : 'bg-indigo-950/20 border-indigo-500/20'} relative overflow-hidden group`}>
+                                            <h4 className={`text-xs font-bold uppercase tracking-wider mb-1.5 ${isRedeemingOnly ? 'text-amber-400' : 'text-indigo-400'}`}>
                                                 {isRedeemingOnly ? 'UNLOCK ACCOUNT' : 'RECOVER ACCOUNT'}
                                             </h4>
                                             <p className="text-xs text-slate-300 leading-relaxed relative z-10">
@@ -837,18 +799,17 @@ const LoginPage: React.FC = () => {
                                     <div className="p-6">
 
                                         {forgotMsg && (
-                                            <div className={`mb-4 p-3 rounded-xl border ${forgotMsg.toLowerCase().includes('successful')
-                                                ? 'bg-green-900/30 border-green-500/50'
-                                                : 'bg-blue-900/30 border-blue-500/50'
+                                            <div className={`mb-4 p-3.5 rounded-xl border ${forgotMsg.toLowerCase().includes('successful')
+                                                ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                                                : 'bg-indigo-950/40 border-indigo-500/40 text-indigo-300'
                                                 }`}>
-                                                <div className="flex items-center space-x-2">
+                                                <div className="flex items-center space-x-2.5">
                                                     {(forgotMsg as string).toLowerCase().includes('successful') ? (
-                                                        <CheckSolidIcon className="w-4 h-4 text-green-400 flex-shrink-0" />
+                                                        <CheckSolidIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                                                     ) : (
-                                                        <EnvelopeIcon className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                                                        <EnvelopeIcon className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                                                     )}
-                                                    <p className={`text-xs ${(forgotMsg as string).toLowerCase().includes('successful') ? 'text-green-300' : 'text-blue-300'
-                                                        }`}>
+                                                    <p className="text-xs">
                                                         {forgotMsg}
                                                     </p>
                                                 </div>
@@ -858,11 +819,11 @@ const LoginPage: React.FC = () => {
                                         {forgotStep === 'email' && (
                                             <form onSubmit={handleForgotRequest} className="space-y-4">
                                                 <div>
-                                                    <label htmlFor="forgot-email" className="block text-xs font-semibold text-slate-200 mb-1">
+                                                    <label htmlFor="forgot-email" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                         Email Address
                                                     </label>
                                                     <div className="relative">
-                                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                                             <EnvelopeIcon className="h-4 w-4 text-slate-400" />
                                                         </div>
                                                         <input
@@ -872,16 +833,16 @@ const LoginPage: React.FC = () => {
                                                             onChange={(e) => setForgotEmail(e.target.value)}
                                                             required
                                                             disabled={forgotLoading}
-                                                            className="w-full pl-10 pr-3 py-2.5 bg-slate-700/50 border border-slate-600/50 focus:border-blue-500/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 disabled:opacity-50 text-sm"
+                                                            className="w-full pl-10 pr-3.5 py-3 bg-slate-950/70 border border-slate-700/80 focus:border-indigo-500 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 transition-all disabled:opacity-50 text-sm"
                                                             placeholder="Enter your registered email"
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col space-y-3">
+                                                <div className="flex flex-col space-y-3 pt-1">
                                                     <button
                                                         type="submit"
                                                         disabled={forgotLoading}
-                                                        className={`w-full py-2.5 px-6 bg-gradient-to-r ${isRedeemingOnly ? 'from-orange-600 to-red-600' : 'from-blue-600 to-indigo-600'} hover:opacity-90 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm`}
+                                                        className={`w-full py-3 px-6 bg-gradient-to-r ${isRedeemingOnly ? 'from-amber-600 to-orange-600 shadow-amber-600/30' : 'from-indigo-600 via-indigo-600 to-blue-600 shadow-indigo-600/30'} hover:opacity-95 text-white font-semibold rounded-xl transition-all duration-200 active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm`}
                                                     >
                                                         {forgotLoading ? (
                                                             <div className="flex items-center justify-center space-x-2">
@@ -902,7 +863,7 @@ const LoginPage: React.FC = () => {
                                                             setForgotStep('otp');
                                                             setForgotMsg("Use the code from the security alert email.");
                                                         }}
-                                                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                                        className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors py-1 text-center font-medium"
                                                     >
                                                         Already have a code from system alert?
                                                     </button>
@@ -913,11 +874,11 @@ const LoginPage: React.FC = () => {
                                         {forgotStep === 'otp' && (
                                             <form onSubmit={isRedeemingOnly ? handleRedeemOnly : handleForgotReset} className="space-y-4">
                                                 <div>
-                                                    <label htmlFor="otp" className="block text-xs font-semibold text-slate-200 mb-1">
+                                                    <label htmlFor="otp" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                         {isRedeemingOnly ? 'Redemption Code' : 'Verification Code'}
                                                     </label>
                                                     <div className="relative">
-                                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                                             <DevicePhoneMobileIcon className="h-4 w-4 text-slate-400" />
                                                         </div>
                                                         <input
@@ -927,7 +888,7 @@ const LoginPage: React.FC = () => {
                                                             onChange={(e) => setOtp(e.target.value)}
                                                             required
                                                             disabled={forgotLoading}
-                                                            className="w-full pl-10 pr-3 py-2.5 bg-slate-700/50 border border-slate-600/50 focus:border-blue-500/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 disabled:opacity-50 text-sm"
+                                                            className="w-full pl-10 pr-3.5 py-3 bg-slate-950/70 border border-slate-700/80 focus:border-indigo-500 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 transition-all disabled:opacity-50 text-sm tracking-widest font-mono text-center"
                                                             placeholder="Enter 6-digit code"
                                                             maxLength={6}
                                                         />
@@ -936,11 +897,11 @@ const LoginPage: React.FC = () => {
 
                                                 {!isRedeemingOnly && (
                                                     <div>
-                                                        <label htmlFor="new-password" className="block text-xs font-semibold text-slate-200 mb-1">
+                                                        <label htmlFor="new-password" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                             New Password
                                                         </label>
                                                         <div className="relative">
-                                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                                                 <LockClosedIcon className="h-4 w-4 text-slate-400" />
                                                             </div>
                                                             <input
@@ -950,7 +911,7 @@ const LoginPage: React.FC = () => {
                                                                 onChange={(e) => setNewPassword(e.target.value)}
                                                                 required
                                                                 disabled={forgotLoading}
-                                                                className="w-full pl-10 pr-3 py-2.5 bg-slate-700/50 border border-slate-600/50 focus:border-blue-500/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 disabled:opacity-50 text-sm"
+                                                                className="w-full pl-10 pr-3.5 py-3 bg-slate-950/70 border border-slate-700/80 focus:border-indigo-500 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 transition-all disabled:opacity-50 text-sm"
                                                                 placeholder="Enter new secure password"
                                                             />
                                                         </div>
@@ -960,7 +921,7 @@ const LoginPage: React.FC = () => {
                                                 <button
                                                     type="submit"
                                                     disabled={forgotLoading}
-                                                    className={`w-full py-2.5 px-6 bg-gradient-to-r ${isRedeemingOnly ? 'from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700' : 'from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm`}
+                                                    className={`w-full py-3 px-6 bg-gradient-to-r ${isRedeemingOnly ? 'from-amber-600 to-orange-600' : 'from-emerald-600 to-teal-600'} text-white font-semibold rounded-xl transition-all duration-200 active:scale-[0.98] shadow-lg shadow-black/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm`}
                                                 >
                                                     {forgotLoading ? (
                                                         <div className="flex items-center justify-center space-x-2">

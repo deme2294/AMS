@@ -45,18 +45,18 @@ const upload = multer({
 // Public routes (no auth required)
 router.get('/public', serviceCategoryController.getAllCategories);
 
-// Protected routes (Admin/Manager only)
+// Protected routes (Admin, Manager, Barber, Receptionist can view)
 router.get(
     '/',
     verifyToken,
-    restrictTo([ROLES.ADMIN, ROLES.MANAGER]),
+    restrictTo([ROLES.ADMIN, ROLES.MANAGER, ROLES.BARBER, ROLES.RECEPTIONIST]),
     serviceCategoryController.getAllCategories
 );
 
 router.get(
     '/:id',
     verifyToken,
-    restrictTo([ROLES.ADMIN, ROLES.MANAGER]),
+    restrictTo([ROLES.ADMIN, ROLES.MANAGER, ROLES.BARBER, ROLES.RECEPTIONIST]),
     serviceCategoryController.getCategoryById
 );
 

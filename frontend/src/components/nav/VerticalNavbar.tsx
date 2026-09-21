@@ -56,11 +56,11 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = ({ isSidebarOpen, toggleSi
   // Helper for NavLink class
   const getNavLinkClass = ({ isActive }: { isActive: boolean }, colorClass: string) => {
     const color = colorClass || activeColor;
-    const base = `flex items-center ${isSidebarOpen ? 'px-4' : 'justify-center px-2'} py-3 text-sm font-medium transition-all duration-[800ms] rounded-xl mx-2 my-1 group relative text-slate-200`;
+    const base = `flex items-center ${isSidebarOpen ? 'px-3.5' : 'justify-center px-2'} py-2.5 text-sm font-medium transition-all duration-200 rounded-xl mx-2 my-0.5 group relative`;
     if (isActive) {
-      return `${base} bg-${color}-500 bg-opacity-30 text-white`;
+      return `${base} bg-indigo-600/30 text-white font-semibold shadow-sm border border-indigo-500/30 backdrop-blur-sm`;
     }
-    return `${base} hover:bg-white/10`;
+    return `${base} text-slate-300 hover:text-white hover:bg-white/10`;
   };
   
   // Reusable Icon Renderer
@@ -75,13 +75,13 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = ({ isSidebarOpen, toggleSi
   };
 
   const SectionDivider = ({ title }: { title: string }) => (
-    <div className={`px-6 mt-6 mb-2 transition-opacity duration-[800ms] ${!isSidebarOpen ? 'hidden' : 'block'}`}>
-       <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{translateTitle(title)}</p>
+    <div className={`px-5 mt-5 mb-2 transition-opacity duration-300 ${!isSidebarOpen ? 'hidden' : 'block'}`}>
+       <p className="text-[11px] font-bold text-slate-400/90 uppercase tracking-wider font-heading">{translateTitle(title)}</p>
     </div>
   );
 
   const NavItem = ({ to, title, icon, color }: { to: string, title: string, icon?: string, color: string }) => (
-    <li className="mb-1 px-2">
+    <li className="mb-0.5 px-2">
       <NavLink
         to={to}
         className={({ isActive }) => getNavLinkClass({ isActive }, color)}
@@ -89,12 +89,12 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = ({ isSidebarOpen, toggleSi
       >
         {({ isActive }) => (
           <>
-            <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-[800ms] ${isActive ? `bg-${color}-500 text-white shadow-lg shadow-${color}-500/30` : `bg-white/10 text-${color}-500 group-hover:bg-${color}-500 group-hover:text-white`}`}>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${isActive ? `bg-indigo-600 text-white shadow-md shadow-indigo-500/40` : `bg-white/10 text-slate-300 group-hover:bg-indigo-600 group-hover:text-white`}`}>
               {renderIcon(icon)}
             </div>
-            <span className={`ml-3 transition-opacity duration-[800ms] ${!isSidebarOpen ? 'hidden w-0 opacity-0' : 'block opacity-100 font-bold whitespace-nowrap overflow-hidden'}`}>{translateTitle(title)}</span>
+            <span className={`ml-3 transition-all duration-300 ${!isSidebarOpen ? 'hidden w-0 opacity-0' : 'block opacity-100 font-medium whitespace-nowrap overflow-hidden text-sm'}`}>{translateTitle(title)}</span>
             {!isSidebarOpen && (
-              <div className="absolute left-full top-2 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700/80 transition-opacity">
                 {translateTitle(title)}
               </div>
             )}
@@ -257,21 +257,32 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = ({ isSidebarOpen, toggleSi
   };
 
   return (
-    <nav className="font-sans overscroll-contain flex flex-col h-full bg-gradient-to-br from-[#16284F] to-[#0C7C92] border-r border-white/10 text-slate-100 transition-all duration-[800ms]">
-      <div className={`flex flex-col gap-4 px-4 py-6 ${!isSidebarOpen ? 'items-center' : ''}`}>
-        <Link to="/" className={`flex items-center gap-3 ${!isSidebarOpen ? 'justify-center' : ''}`}>
+    <nav className="font-sans overscroll-contain flex flex-col h-full bg-slate-900 border-r border-slate-800 text-slate-100 transition-all duration-300">
+      <div className={`flex flex-col gap-4 px-4 py-5 ${!isSidebarOpen ? 'items-center' : ''}`}>
+        <Link to="/" className={`flex items-center gap-3 ${!isSidebarOpen ? 'justify-center' : ''} group`}>
           {logo ? (
-            <img src={logo} alt="System Logo" className="h-10 w-auto object-contain rounded-lg shadow-sm" />
+            <img src={logo} alt="System Logo" className="h-10 w-auto object-contain rounded-xl shadow-sm" />
           ) : (
-            <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/20">B</div>
+            <div className="h-10 w-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md shadow-indigo-500/25 group-hover:scale-105 transition-transform">
+              B
+            </div>
           )}
-            {isSidebarOpen && <span className="font-black text-xl tracking-tighter text-white">BMS <span className="text-blue-300">WEBSITE</span></span>}
+          {isSidebarOpen && (
+            <div className="flex flex-col">
+              <span className="font-heading font-black text-lg tracking-tight text-white leading-none">
+                BMS <span className="text-indigo-400 font-extrabold text-sm tracking-widest uppercase">Portal</span>
+              </span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mt-1">
+                Barber Management
+              </span>
+            </div>
+          )}
         </Link>
 
         {/* Search Bar */}
-        <div className={`relative w-full mt-2 transition-all duration-[800ms] ${!isSidebarOpen ? 'px-0 opacity-0 h-0 overflow-hidden' : 'opacity-100 h-10'}`}>
+        <div className={`relative w-full mt-1 transition-all duration-300 ${!isSidebarOpen ? 'px-0 opacity-0 h-0 overflow-hidden' : 'opacity-100 h-10'}`}>
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-             <svg className="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -279,7 +290,7 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = ({ isSidebarOpen, toggleSi
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-             className="block w-full pl-9 pr-3 py-2 text-sm border border-white/20 rounded-xl bg-white/10 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all"
+            className="block w-full pl-9 pr-3 py-2 text-xs border border-slate-700/80 rounded-xl bg-slate-800/60 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
             placeholder={t('common.search')}
           />
         </div>

@@ -11,6 +11,11 @@ const hasMenuPermission = (menuPath) => {
             const userId = req.user.user_id;
             const roleId = req.user.role_id;
 
+            // Admin (Role 1) has unconditional access to all resources
+            if (roleId === 1 || req.user.role === 'admin' || req.user.role === 'Admin') {
+                return next();
+            }
+
             // 1. Find the menu ID for this path
             const [menus] = await db.promise().query('SELECT id FROM cms_menus WHERE path = ? LIMIT 1', [menuPath]);
 

@@ -22,13 +22,23 @@ exports.getAllCategories = async (req, res) => {
             params.push(`%${search}%`, `%${search}%`);
         }
         
-        query += ' ORDER BY sort_order ASC, id DESC';
+        query += ' ORDER BY COALESCE(sort_order, display_order, 0) ASC, id DESC';
         
         const [categories] = await db.promise().query(query, params);
+
+        const normalized = categories.map(cat => ({
+            ...cat,
+            image: cat.image || cat.category_image || cat.image_url,
+            category_image: cat.category_image || cat.image || cat.image_url,
+            sort_order: cat.sort_order ?? cat.display_order ?? 0,
+            display_order: cat.display_order ?? cat.sort_order ?? 0,
+            color: cat.color || '#6366f1',
+            icon: cat.icon || cat.category_icon || 'fa-solid fa-scissors',
+        }));
         
         res.json({
             success: true,
-            data: categories
+            data: normalized
         });
     } catch (error) {
         console.error('Error fetching categories:', error.message);
@@ -58,10 +68,21 @@ exports.getCategoryById = async (req, res) => {
                 message: 'Category not found'
             });
         }
+
+        const cat = categories[0];
+        const normalized = {
+            ...cat,
+            image: cat.image || cat.category_image || cat.image_url,
+            category_image: cat.category_image || cat.image || cat.image_url,
+            sort_order: cat.sort_order ?? cat.display_order ?? 0,
+            display_order: cat.display_order ?? cat.sort_order ?? 0,
+            color: cat.color || '#6366f1',
+            icon: cat.icon || cat.category_icon || 'fa-solid fa-scissors',
+        };
         
         res.json({
             success: true,
-            data: categories[0]
+            data: normalized
         });
     } catch (error) {
         console.error('Error fetching category:', error.message);
@@ -88,7 +109,7 @@ exports.createCategory = async (req, res) => {
         } = req.body;
         
         // Validate required fields
-        if (!category_name) {
+        if (!category_name || !category_name.trim()) {
             return res.status(400).json({
                 success: false,
                 message: 'Category name is required'
@@ -98,7 +119,7 @@ exports.createCategory = async (req, res) => {
         // Check if category already exists
         const [existing] = await db.promise().query(
             'SELECT id FROM service_categories WHERE category_name = ?',
-            [category_name]
+            [category_name.trim()]
         );
         
         if (existing.length > 0) {
@@ -113,19 +134,30 @@ exports.createCategory = async (req, res) => {
         if (req.file) {
             image_url = `/uploads/categories/${req.file.filename}`;
         }
+
+        const sortVal = parseInt(sort_order, 10) || 0;
+        const colorVal = color || '#6366f1';
+        const iconVal = icon || 'fa-solid fa-scissors';
+        const statusVal = status || 'active';
+        const createdBy = req.user?.user_id || req.user?.id || 1;
         
         const [result] = await db.promise().query(
             `INSERT INTO service_categories 
-            (category_name, description, image, icon, color, sort_order, status, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            (category_name, description, image, image_url, category_image, icon, category_icon, color, sort_order, display_order, status, created_by, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
             [
-                category_name,
+                category_name.trim(),
                 description || null,
                 image_url,
-                icon || null,
-                color || '#6366f1',
-                sort_order || 0,
-                status || 'active'
+                image_url,
+                image_url,
+                iconVal,
+                iconVal,
+                colorVal,
+                sortVal,
+                sortVal,
+                statusVal,
+                createdBy
             ]
         );
         
@@ -134,13 +166,15 @@ exports.createCategory = async (req, res) => {
             message: 'Category created successfully',
             data: {
                 id: result.insertId,
-                category_name,
+                category_name: category_name.trim(),
                 description,
                 image: image_url,
-                icon,
-                color,
-                sort_order,
-                status
+                category_image: image_url,
+                icon: iconVal,
+                color: colorVal,
+                sort_order: sortVal,
+                display_order: sortVal,
+                status: statusVal
             }
         });
     } catch (error) {
@@ -182,7 +216,7 @@ exports.updateCategory = async (req, res) => {
         }
         
         // Get image path if uploaded
-        let image_url = existing[0].image;
+        let image_url = existing[0].image || existing[0].category_image || existing[0].image_url;
         if (req.file) {
             // Delete old image if exists
             if (existing[0].image) {
@@ -193,27 +227,51 @@ exports.updateCategory = async (req, res) => {
             }
             image_url = `/uploads/categories/${req.file.filename}`;
         }
+
+        const sortVal = sort_order !== undefined ? parseInt(sort_order, 10) || 0 : (existing[0].sort_order ?? existing[0].display_order ?? 0);
+        const iconVal = icon !== undefined ? icon : (existing[0].icon || existing[0].category_icon);
+        const colorVal = color || existing[0].color || '#6366f1';
+        const statusVal = status || existing[0].status || 'active';
+        const nameVal = category_name ? category_name.trim() : existing[0].category_name;
+        const descVal = description !== undefined ? description : existing[0].description;
         
         await db.promise().query(
             `UPDATE service_categories 
-            SET category_name = ?, description = ?, image = ?, icon = ?, 
-                color = ?, sort_order = ?, status = ?, updated_at = NOW()
+            SET category_name = ?, description = ?, image = ?, image_url = ?, category_image = ?,
+                icon = ?, category_icon = ?, color = ?, sort_order = ?, display_order = ?,
+                status = ?, updated_at = NOW()
             WHERE id = ?`,
             [
-                category_name || existing[0].category_name,
-                description !== undefined ? description : existing[0].description,
+                nameVal,
+                descVal,
                 image_url,
-                icon !== undefined ? icon : existing[0].icon,
-                color || existing[0].color,
-                sort_order !== undefined ? sort_order : existing[0].sort_order,
-                status || existing[0].status,
+                image_url,
+                image_url,
+                iconVal,
+                iconVal,
+                colorVal,
+                sortVal,
+                sortVal,
+                statusVal,
                 id
             ]
         );
         
         res.json({
             success: true,
-            message: 'Category updated successfully'
+            message: 'Category updated successfully',
+            data: {
+                id: parseInt(id, 10),
+                category_name: nameVal,
+                description: descVal,
+                image: image_url,
+                category_image: image_url,
+                icon: iconVal,
+                color: colorVal,
+                sort_order: sortVal,
+                display_order: sortVal,
+                status: statusVal
+            }
         });
     } catch (error) {
         console.error('Error updating category:', error.message);
@@ -340,8 +398,8 @@ exports.updateSortOrder = async (req, res) => {
         // Update sort order for each category
         for (const cat of categories) {
             await db.promise().query(
-                'UPDATE service_categories SET sort_order = ?, updated_at = NOW() WHERE id = ?',
-                [cat.sort_order, cat.id]
+                'UPDATE service_categories SET sort_order = ?, display_order = ?, updated_at = NOW() WHERE id = ?',
+                [cat.sort_order, cat.sort_order, cat.id]
             );
         }
         

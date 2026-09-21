@@ -122,9 +122,8 @@ const roleController = {
         try {
             for (const role of DEFAULT_ROLES) {
                 await db.query(
-                    `INSERT INTO roles (role_id, role_name, status)
-                     VALUES (?, ?, ?)
-                     ON DUPLICATE KEY UPDATE role_name = VALUES(role_name)`,
+                    `INSERT IGNORE INTO roles (role_id, role_name, status)
+                     VALUES (?, ?, ?)`,
                     [role.role_id, role.role_name, role.status]
                 );
             }
