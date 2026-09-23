@@ -34,8 +34,11 @@ export const getUserThemeSettings = async (): Promise<ThemeSettings> => {
       method: 'GET',
     });
     return response.settings;
-  } catch (error) {
-    console.error('Error fetching user theme settings:', error);
+  } catch (error: any) {
+    // 401 Unauthorized is expected for guests / unauthenticated users
+    if (error?.response?.status !== 401) {
+      console.warn('Non-critical: User theme settings fetch skipped:', error?.message);
+    }
     return {};
   }
 };
@@ -48,8 +51,11 @@ export const saveUserThemeSettings = async (settings: ThemeSettings): Promise<bo
       data: settings,
     });
     return true;
-  } catch (error) {
-    console.error('Error saving user theme settings:', error);
+  } catch (error: any) {
+    // 401 Unauthorized is normal for guests; preference is already saved in localStorage
+    if (error?.response?.status !== 401) {
+      console.warn('Non-critical: User theme settings sync skipped:', error?.message);
+    }
     return false;
   }
 };
@@ -157,22 +163,24 @@ export const getCurrentTheme = (): ThemeSettings => {
 };
 
 // Initialize theme from backend and localStorage
-export const initializeTheme = async () => {
+export const initializeTheme = async (isAuthenticated: boolean = false) => {
   try {
     // First apply saved local theme for immediate feedback
     const localTheme = getCurrentTheme();
     applyTheme(localTheme);
 
-    // Then fetch and apply backend settings
+    // Then fetch and apply backend settings (global logo, appearance)
     const systemSettings = await getSystemSettings();
-    if (systemSettings) {
+    if (systemSettings && Object.keys(systemSettings).length > 0) {
       applyTheme(systemSettings);
     }
 
-    // Finally apply user-specific settings if they exist
-    const userSettings = await getUserThemeSettings();
-    if (userSettings && Object.keys(userSettings).length > 0) {
-      applyTheme(userSettings);
+    // Only fetch user-specific settings if authenticated
+    if (isAuthenticated) {
+      const userSettings = await getUserThemeSettings();
+      if (userSettings && Object.keys(userSettings).length > 0) {
+        applyTheme(userSettings);
+      }
     }
   } catch (error) {
     console.error('Error initializing theme:', error);

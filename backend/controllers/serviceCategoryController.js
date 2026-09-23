@@ -30,10 +30,11 @@ exports.getAllCategories = async (req, res) => {
             ...cat,
             image: cat.image || cat.category_image || cat.image_url,
             category_image: cat.category_image || cat.image || cat.image_url,
+            banner_image: cat.banner_image || cat.category_image || cat.image || cat.image_url,
             sort_order: cat.sort_order ?? cat.display_order ?? 0,
             display_order: cat.display_order ?? cat.sort_order ?? 0,
-            color: cat.color || '#6366f1',
-            icon: cat.icon || cat.category_icon || 'fa-solid fa-scissors',
+            color: cat.color || '#ec4899',
+            icon: cat.icon || cat.category_icon || 'fa-solid fa-spa',
         }));
         
         res.json({
@@ -74,10 +75,11 @@ exports.getCategoryById = async (req, res) => {
             ...cat,
             image: cat.image || cat.category_image || cat.image_url,
             category_image: cat.category_image || cat.image || cat.image_url,
+            banner_image: cat.banner_image || cat.category_image || cat.image || cat.image_url,
             sort_order: cat.sort_order ?? cat.display_order ?? 0,
             display_order: cat.display_order ?? cat.sort_order ?? 0,
-            color: cat.color || '#6366f1',
-            icon: cat.icon || cat.category_icon || 'fa-solid fa-scissors',
+            color: cat.color || '#ec4899',
+            icon: cat.icon || cat.category_icon || 'fa-solid fa-spa',
         };
         
         res.json({
@@ -105,7 +107,9 @@ exports.createCategory = async (req, res) => {
             icon, 
             color, 
             sort_order, 
-            status 
+            status,
+            banner_image,
+            image
         } = req.body;
         
         // Validate required fields
@@ -129,28 +133,30 @@ exports.createCategory = async (req, res) => {
             });
         }
         
-        // Get image path if uploaded
-        let image_url = null;
+        // Get image path if uploaded or provided
+        let image_url = image || req.body.image_url || null;
         if (req.file) {
             image_url = `/uploads/categories/${req.file.filename}`;
         }
+        const bannerVal = banner_image || image_url;
 
         const sortVal = parseInt(sort_order, 10) || 0;
-        const colorVal = color || '#6366f1';
-        const iconVal = icon || 'fa-solid fa-scissors';
+        const colorVal = color || '#ec4899';
+        const iconVal = icon || 'fa-solid fa-spa';
         const statusVal = status || 'active';
         const createdBy = req.user?.user_id || req.user?.id || 1;
         
         const [result] = await db.promise().query(
             `INSERT INTO service_categories 
-            (category_name, description, image, image_url, category_image, icon, category_icon, color, sort_order, display_order, status, created_by, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            (category_name, description, image, image_url, category_image, banner_image, icon, category_icon, color, sort_order, display_order, status, created_by, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
             [
                 category_name.trim(),
                 description || null,
                 image_url,
                 image_url,
                 image_url,
+                bannerVal,
                 iconVal,
                 iconVal,
                 colorVal,
@@ -170,6 +176,7 @@ exports.createCategory = async (req, res) => {
                 description,
                 image: image_url,
                 category_image: image_url,
+                banner_image: bannerVal,
                 icon: iconVal,
                 color: colorVal,
                 sort_order: sortVal,
@@ -199,7 +206,9 @@ exports.updateCategory = async (req, res) => {
             icon, 
             color, 
             sort_order, 
-            status 
+            status,
+            banner_image,
+            image
         } = req.body;
         
         // Check if category exists
@@ -215,11 +224,11 @@ exports.updateCategory = async (req, res) => {
             });
         }
         
-        // Get image path if uploaded
-        let image_url = existing[0].image || existing[0].category_image || existing[0].image_url;
+        // Get image path if uploaded or passed
+        let image_url = image || req.body.image_url || existing[0].image || existing[0].category_image || existing[0].image_url;
         if (req.file) {
             // Delete old image if exists
-            if (existing[0].image) {
+            if (existing[0].image && existing[0].image.startsWith('/uploads/')) {
                 const oldImagePath = path.join(__dirname, '..', existing[0].image);
                 if (fs.existsSync(oldImagePath)) {
                     fs.unlinkSync(oldImagePath);
@@ -228,16 +237,17 @@ exports.updateCategory = async (req, res) => {
             image_url = `/uploads/categories/${req.file.filename}`;
         }
 
+        const bannerVal = banner_image !== undefined ? banner_image : (existing[0].banner_image || image_url);
         const sortVal = sort_order !== undefined ? parseInt(sort_order, 10) || 0 : (existing[0].sort_order ?? existing[0].display_order ?? 0);
-        const iconVal = icon !== undefined ? icon : (existing[0].icon || existing[0].category_icon);
-        const colorVal = color || existing[0].color || '#6366f1';
+        const iconVal = icon !== undefined ? icon : (existing[0].icon || existing[0].category_icon || 'fa-solid fa-spa');
+        const colorVal = color || existing[0].color || '#ec4899';
         const statusVal = status || existing[0].status || 'active';
         const nameVal = category_name ? category_name.trim() : existing[0].category_name;
         const descVal = description !== undefined ? description : existing[0].description;
         
         await db.promise().query(
             `UPDATE service_categories 
-            SET category_name = ?, description = ?, image = ?, image_url = ?, category_image = ?,
+            SET category_name = ?, description = ?, image = ?, image_url = ?, category_image = ?, banner_image = ?,
                 icon = ?, category_icon = ?, color = ?, sort_order = ?, display_order = ?,
                 status = ?, updated_at = NOW()
             WHERE id = ?`,
@@ -247,6 +257,7 @@ exports.updateCategory = async (req, res) => {
                 image_url,
                 image_url,
                 image_url,
+                bannerVal,
                 iconVal,
                 iconVal,
                 colorVal,
@@ -266,6 +277,7 @@ exports.updateCategory = async (req, res) => {
                 description: descVal,
                 image: image_url,
                 category_image: image_url,
+                banner_image: bannerVal,
                 icon: iconVal,
                 color: colorVal,
                 sort_order: sortVal,

@@ -22,4 +22,10 @@ router.put('/:id',   verifyToken, restrictTo([ROLES.ADMIN]), roleController.upda
 // Delete a role (Admin only; system role IDs 1-5 are protected in controller)
 router.delete('/:id', verifyToken, restrictTo([ROLES.ADMIN]), roleController.deleteRole);
 
+// Clone a role with all permissions (Admin only)
+router.post('/:id/clone', verifyToken, restrictTo([ROLES.ADMIN]), roleController.cloneRole);
+
+// Get users assigned to a role (Admin only)
+router.get('/:id/users', verifyToken, restrictTo([ROLES.ADMIN]), roleController.getRoleUsers);
+
 module.exports = router;

@@ -215,9 +215,9 @@ const ServiceDetailsPage: React.FC = () => {
                         )}
                       </div>
                     )}
-                    {service.total_bookings && (
+                    {(service as any).total_bookings && (
                       <span className="text-gray-500 dark:text-gray-400">
-                        • {service.total_bookings} bookings
+                        • {(service as any).total_bookings} bookings
                       </span>
                     )}
                   </div>

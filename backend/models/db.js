@@ -61,6 +61,25 @@ connectWithRetry();
 const initializeDatabase = async () => {
   const tableDefinitions = [
     {
+      name: 'roles',
+      create: `CREATE TABLE IF NOT EXISTS \`roles\` (
+        \`role_id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`role_name\` varchar(50) NOT NULL,
+        \`description\` text DEFAULT NULL,
+        \`status\` tinyint(1) DEFAULT 1,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
+        \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'role_id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'role_name', definition: 'varchar(50) NOT NULL' },
+        { name: 'description', definition: 'text DEFAULT NULL' },
+        { name: 'status', definition: 'tinyint(1) DEFAULT 1' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
+        { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
+      ]
+    },
+    {
       name: 'employees',
       create: `CREATE TABLE IF NOT EXISTS \`employees\` (
         \`employee_id\` int(11) NOT NULL PRIMARY KEY,
@@ -97,6 +116,9 @@ const initializeDatabase = async () => {
         \`category_icon\` varchar(50) DEFAULT NULL,
         \`image_url\` varchar(255) DEFAULT NULL,
         \`category_image\` varchar(255) DEFAULT NULL,
+        \`banner_image\` varchar(255) DEFAULT NULL,
+        \`color\` varchar(50) DEFAULT '#ec4899',
+        \`sort_order\` int(11) DEFAULT 0,
         \`status\` enum('active','inactive') DEFAULT 'active',
         \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
         \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -109,6 +131,9 @@ const initializeDatabase = async () => {
         { name: 'category_icon', definition: 'varchar(50) DEFAULT NULL' },
         { name: 'image_url', definition: 'varchar(255) DEFAULT NULL' },
         { name: 'category_image', definition: 'varchar(255) DEFAULT NULL' },
+        { name: 'banner_image', definition: 'varchar(255) DEFAULT NULL' },
+        { name: 'color', definition: "varchar(50) DEFAULT '#ec4899'" },
+        { name: 'sort_order', definition: 'int(11) DEFAULT 0' },
         { name: 'status', definition: "enum('active','inactive') DEFAULT 'active'" },
         { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
         { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
@@ -133,7 +158,10 @@ const initializeDatabase = async () => {
         \`is_featured\` tinyint(1) DEFAULT 0,
         \`image_url\` varchar(255) DEFAULT NULL,
         \`service_image\` varchar(255) DEFAULT NULL,
+        \`banner_image\` varchar(255) DEFAULT NULL,
         \`service_icon\` varchar(50) DEFAULT NULL,
+        \`rating_avg\` decimal(3,2) DEFAULT 0.00,
+        \`rating_count\` int(11) DEFAULT 0,
         \`max_customers_per_slot\` int(11) DEFAULT 1,
         \`preparation_time\` int(11) DEFAULT 0,
         \`cleanup_time\` int(11) DEFAULT 0,
@@ -161,7 +189,10 @@ const initializeDatabase = async () => {
         { name: 'is_featured', definition: 'tinyint(1) DEFAULT 0' },
         { name: 'image_url', definition: 'varchar(255) DEFAULT NULL' },
         { name: 'service_image', definition: 'varchar(255) DEFAULT NULL' },
+        { name: 'banner_image', definition: 'varchar(255) DEFAULT NULL' },
         { name: 'service_icon', definition: 'varchar(50) DEFAULT NULL' },
+        { name: 'rating_avg', definition: 'decimal(3,2) DEFAULT 0.00' },
+        { name: 'rating_count', definition: 'int(11) DEFAULT 0' },
         { name: 'max_customers_per_slot', definition: 'int(11) DEFAULT 1' },
         { name: 'preparation_time', definition: 'int(11) DEFAULT 0' },
         { name: 'cleanup_time', definition: 'int(11) DEFAULT 0' },
@@ -363,21 +394,27 @@ const initializeDatabase = async () => {
       name: 'service_ratings',
       create: `CREATE TABLE IF NOT EXISTS \`service_ratings\` (
         \`id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        \`booking_id\` int(11) NOT NULL,
+        \`booking_id\` bigint(20) unsigned DEFAULT NULL,
         \`service_id\` int(11) NOT NULL,
+        \`user_id\` int(11) DEFAULT NULL,
         \`customer_id\` int(11) DEFAULT NULL,
-        \`rating\` int(11) DEFAULT NULL,
+        \`rating\` int(11) NOT NULL DEFAULT 5,
         \`review\` text DEFAULT NULL,
-        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp()
+        \`review_text\` text DEFAULT NULL,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
+        \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
       columns: [
         { name: 'id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
-        { name: 'booking_id', definition: 'int(11) NOT NULL' },
+        { name: 'booking_id', definition: 'bigint(20) unsigned DEFAULT NULL' },
         { name: 'service_id', definition: 'int(11) NOT NULL' },
+        { name: 'user_id', definition: 'int(11) DEFAULT NULL' },
         { name: 'customer_id', definition: 'int(11) DEFAULT NULL' },
-        { name: 'rating', definition: 'int(11) DEFAULT NULL' },
+        { name: 'rating', definition: 'int(11) NOT NULL DEFAULT 5' },
         { name: 'review', definition: 'text DEFAULT NULL' },
-        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' }
+        { name: 'review_text', definition: 'text DEFAULT NULL' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
+        { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
       ]
     },
     {
@@ -467,6 +504,148 @@ const initializeDatabase = async () => {
         { name: 'blocked_until', definition: 'datetime DEFAULT NULL' },
         { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' }
       ]
+    },
+    {
+      name: 'complaints',
+      create: `CREATE TABLE IF NOT EXISTS \`complaints\` (
+        \`complaint_id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`user_id\` int(11) NOT NULL,
+        \`title\` varchar(150) NOT NULL,
+        \`category_id\` bigint(20) unsigned DEFAULT NULL,
+        \`description\` text NOT NULL,
+        \`status\` enum('Pending','In Progress','Resolved','Closed') NOT NULL DEFAULT 'Pending',
+        \`priority\` enum('Low','Medium','High','Critical') DEFAULT 'Medium',
+        \`tracking_number\` varchar(50) DEFAULT NULL,
+        \`resolution_notes\` text DEFAULT NULL,
+        \`is_escalated\` tinyint(1) DEFAULT 0,
+        \`assigned_department_id\` int(11) DEFAULT NULL,
+        \`assigned_to_user_id\` int(11) DEFAULT NULL,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
+        \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'complaint_id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'user_id', definition: 'int(11) NOT NULL' },
+        { name: 'title', definition: 'varchar(150) NOT NULL' },
+        { name: 'category_id', definition: 'bigint(20) unsigned DEFAULT NULL' },
+        { name: 'description', definition: 'text NOT NULL' },
+        { name: 'status', definition: "enum('Pending','In Progress','Resolved','Closed') NOT NULL DEFAULT 'Pending'" },
+        { name: 'priority', definition: "enum('Low','Medium','High','Critical') DEFAULT 'Medium'" },
+        { name: 'tracking_number', definition: 'varchar(50) DEFAULT NULL' },
+        { name: 'resolution_notes', definition: 'text DEFAULT NULL' },
+        { name: 'is_escalated', definition: 'tinyint(1) DEFAULT 0' },
+        { name: 'assigned_department_id', definition: 'int(11) DEFAULT NULL' },
+        { name: 'assigned_to_user_id', definition: 'int(11) DEFAULT NULL' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
+        { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
+      ]
+    },
+    {
+      name: 'complaint_assignees',
+      create: `CREATE TABLE IF NOT EXISTS \`complaint_assignees\` (
+        \`id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`complaint_id\` int(11) NOT NULL,
+        \`assignee_id\` int(11) NOT NULL,
+        \`assigned_by\` int(11) DEFAULT NULL,
+        \`assigned_at\` timestamp NOT NULL DEFAULT current_timestamp(),
+        \`unassigned_at\` timestamp NULL DEFAULT NULL,
+        \`notes\` text DEFAULT NULL,
+        \`is_active\` tinyint(1) DEFAULT 1
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'complaint_id', definition: 'int(11) NOT NULL' },
+        { name: 'assignee_id', definition: 'int(11) NOT NULL' },
+        { name: 'assigned_by', definition: 'int(11) DEFAULT NULL' },
+        { name: 'assigned_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
+        { name: 'unassigned_at', definition: 'timestamp NULL DEFAULT NULL' },
+        { name: 'notes', definition: 'text DEFAULT NULL' },
+        { name: 'is_active', definition: 'tinyint(1) DEFAULT 1' }
+      ]
+    },
+    {
+      name: 'complaint_comments',
+      create: `CREATE TABLE IF NOT EXISTS \`complaint_comments\` (
+        \`comment_id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`complaint_id\` int(11) NOT NULL,
+        \`user_id\` int(11) NOT NULL,
+        \`comment_text\` text NOT NULL,
+        \`is_internal\` tinyint(1) DEFAULT 0,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp(),
+        \`updated_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'comment_id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'complaint_id', definition: 'int(11) NOT NULL' },
+        { name: 'user_id', definition: 'int(11) NOT NULL' },
+        { name: 'comment_text', definition: 'text NOT NULL' },
+        { name: 'is_internal', definition: 'tinyint(1) DEFAULT 0' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' },
+        { name: 'updated_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()' }
+      ]
+    },
+    {
+      name: 'complaint_history',
+      create: `CREATE TABLE IF NOT EXISTS \`complaint_history\` (
+        \`history_id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`complaint_id\` int(11) NOT NULL,
+        \`changed_by\` int(11) DEFAULT NULL,
+        \`old_status\` varchar(50) DEFAULT NULL,
+        \`new_status\` varchar(50) DEFAULT NULL,
+        \`change_notes\` text DEFAULT NULL,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'history_id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'complaint_id', definition: 'int(11) NOT NULL' },
+        { name: 'changed_by', definition: 'int(11) DEFAULT NULL' },
+        { name: 'old_status', definition: 'varchar(50) DEFAULT NULL' },
+        { name: 'new_status', definition: 'varchar(50) DEFAULT NULL' },
+        { name: 'change_notes', definition: 'text DEFAULT NULL' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' }
+      ]
+    },
+    {
+      name: 'complaint_feedback',
+      create: `CREATE TABLE IF NOT EXISTS \`complaint_feedback\` (
+        \`feedback_id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`complaint_id\` int(11) NOT NULL,
+        \`user_id\` int(11) NOT NULL,
+        \`rating\` int(11) DEFAULT NULL,
+        \`comments\` text DEFAULT NULL,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'feedback_id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'complaint_id', definition: 'int(11) NOT NULL' },
+        { name: 'user_id', definition: 'int(11) NOT NULL' },
+        { name: 'rating', definition: 'int(11) DEFAULT NULL' },
+        { name: 'comments', definition: 'text DEFAULT NULL' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' }
+      ]
+    },
+    {
+      name: 'complaint_attachments',
+      create: `CREATE TABLE IF NOT EXISTS \`complaint_attachments\` (
+        \`attachment_id\` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        \`complaint_id\` int(11) NOT NULL,
+        \`file_name\` varchar(255) NOT NULL,
+        \`file_path\` varchar(500) NOT NULL,
+        \`file_size\` int(11) DEFAULT NULL,
+        \`file_type\` varchar(100) DEFAULT NULL,
+        \`uploaded_by\` int(11) DEFAULT NULL,
+        \`created_at\` timestamp NOT NULL DEFAULT current_timestamp()
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`,
+      columns: [
+        { name: 'attachment_id', definition: 'int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY' },
+        { name: 'complaint_id', definition: 'int(11) NOT NULL' },
+        { name: 'file_name', definition: 'varchar(255) NOT NULL' },
+        { name: 'file_path', definition: 'varchar(500) NOT NULL' },
+        { name: 'file_size', definition: 'int(11) DEFAULT NULL' },
+        { name: 'file_type', definition: 'varchar(100) DEFAULT NULL' },
+        { name: 'uploaded_by', definition: 'int(11) DEFAULT NULL' },
+        { name: 'created_at', definition: 'timestamp NOT NULL DEFAULT current_timestamp()' }
+      ]
     }
   ];
 
@@ -494,6 +673,13 @@ const initializeDatabase = async () => {
         console.error(`  ❌ Failed to check/add column ${table.name}.${col.name}:`, err.message);
       }
     }
+  }
+
+  // Ensure service_ratings.booking_id allows NULL
+  try {
+    await pool.promise().query("ALTER TABLE `service_ratings` MODIFY COLUMN `booking_id` bigint(20) unsigned DEFAULT NULL");
+  } catch (err) {
+    // Ignore if table doesn't exist yet or already altered
   }
 
   // Seed menus if empty
@@ -576,6 +762,390 @@ const initializeDatabase = async () => {
     }
   } catch (err) {
     console.error("❌ Failed to seed role_menu_permissions:", err.message);
+  }
+
+  // Ensure special direct service actions in cms_menus for all roles
+  try {
+    const specialMenus = [
+      {
+        title: 'Book Service',
+        path: '/services/book/12',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>',
+        color: 'blue',
+        parent_id: 100,
+        order_index: 4
+      },
+      {
+        title: 'Rate Service',
+        path: '/rate-service/15',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>',
+        color: 'yellow',
+        parent_id: 100,
+        order_index: 5
+      }
+    ];
+
+    for (const sm of specialMenus) {
+      const [ex] = await pool.promise().query("SELECT id FROM cms_menus WHERE path = ?", [sm.path]);
+      let mId;
+      if (ex.length === 0) {
+        const [maxRes] = await pool.promise().query("SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM cms_menus");
+        const nextId = maxRes[0].next_id;
+        await pool.promise().query(
+          "INSERT INTO cms_menus (id, title, path, icon, color, parent_id, order_index, is_section, is_dropdown, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 1)",
+          [nextId, sm.title, sm.path, sm.icon, sm.color, sm.parent_id, sm.order_index]
+        );
+        mId = nextId;
+      } else {
+        mId = ex[0].id;
+      }
+      for (const rId of [1, 2, 3, 4, 5]) {
+        await pool.promise().query(
+          "INSERT IGNORE INTO role_menu_permissions (role_id, menu_id, can_view, can_create, can_edit, can_delete) VALUES (?, ?, 1, 1, 1, 0)",
+          [rId, mId]
+        );
+      }
+    }
+  } catch (err) {
+    // Non-blocking
+  }
+
+  // Seed Beauty Salon categories & services (self-contained inside models/db.js)
+  try {
+    const beautyCategories = [
+      {
+        id: 1,
+        category_name: 'Hair Styling & Care',
+        description: 'Expert haircuts, styling, vibrant coloring, balayage, and restorative hair treatments.',
+        icon: 'fa-scissors',
+        category_icon: 'fa-scissors',
+        color: '#ec4899',
+        sort_order: 1,
+        image_url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      },
+      {
+        id: 2,
+        category_name: 'Luxury Facials & Skincare',
+        description: 'HydraFacials, deep cleansing, anti-aging therapies, and rejuvenating skin peel treatments.',
+        icon: 'fa-spa',
+        category_icon: 'fa-spa',
+        color: '#a855f7',
+        sort_order: 2,
+        image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1512290900672-1f486427d11a?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      },
+      {
+        id: 3,
+        category_name: 'Nail Bar & Pedicure',
+        description: 'Deluxe spa pedicures, manicures, acrylic sculpting, and long-lasting gel nail art.',
+        icon: 'fa-hand-sparkles',
+        category_icon: 'fa-hand-sparkles',
+        color: '#f43f5e',
+        sort_order: 3,
+        image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      },
+      {
+        id: 4,
+        category_name: 'Bridal & Glam Makeup',
+        description: 'Bespoke bridal makeovers, party glam, photoshoot aesthetics, and premium false lash applications.',
+        icon: 'fa-wand-magic-sparkles',
+        category_icon: 'fa-wand-magic-sparkles',
+        color: '#d946ef',
+        sort_order: 4,
+        image_url: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      },
+      {
+        id: 5,
+        category_name: 'Body Spa & Massages',
+        description: 'Swedish full-body massage, hot stone relaxation, aromatherapy, and exfoliating body polishes.',
+        icon: 'fa-hot-tub-person',
+        category_icon: 'fa-hot-tub-person',
+        color: '#06b6d4',
+        sort_order: 5,
+        image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      },
+      {
+        id: 6,
+        category_name: 'Waxing & Brow Sculpting',
+        description: 'Precision eyebrow threading, tinting, and gentle silky full-body waxing services.',
+        icon: 'fa-feather',
+        category_icon: 'fa-feather',
+        color: '#eab308',
+        sort_order: 6,
+        image_url: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      },
+      {
+        id: 7,
+        category_name: 'Gentlemen Grooming',
+        description: 'Classic skin fades, beard sculpt & contouring, and royal hot-towel steam shave treatments.',
+        icon: 'fa-crown',
+        category_icon: 'fa-crown',
+        color: '#3b82f6',
+        sort_order: 7,
+        image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1200&q=80',
+        status: 'active'
+      }
+    ];
+
+    for (const cat of beautyCategories) {
+      await pool.promise().query(
+        `INSERT INTO service_categories 
+          (id, category_name, description, icon, category_icon, color, sort_order, image_url, category_image, banner_image, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+          category_name=VALUES(category_name),
+          description=VALUES(description),
+          icon=VALUES(icon),
+          category_icon=VALUES(category_icon),
+          color=VALUES(color),
+          sort_order=VALUES(sort_order),
+          image_url=VALUES(image_url),
+          category_image=VALUES(category_image),
+          banner_image=VALUES(banner_image),
+          status=VALUES(status)`,
+        [
+          cat.id, cat.category_name, cat.description, cat.icon, cat.category_icon,
+          cat.color, cat.sort_order, cat.image_url, cat.image_url, cat.banner_image, cat.status
+        ]
+      );
+    }
+
+    const beautyServices = [
+      {
+        category_id: 1,
+        service_name: 'Signature Blowout & Styling',
+        service_slug: 'signature-blowout-styling',
+        short_description: 'Volumizing wash, deep conditioning scalp massage, and red-carpet blowout styling.',
+        description: 'Indulge in our salon signature blowout. Begins with an invigorating organic hair bath, conditioning scalp massage, and finished with a blowout that leaves hair silky, radiant, and bouncing with volume.',
+        price: 450.00,
+        discount_price: 380.00,
+        duration: 45,
+        duration_minutes: 45,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 4.90,
+        rating_count: 24,
+        image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-wind',
+        service_type: 'hair'
+      },
+      {
+        category_id: 1,
+        service_name: 'Balayage & Color Glossing',
+        service_slug: 'balayage-color-glossing',
+        short_description: 'Hand-painted sun-kissed dimension with a nourishing gloss tone sealant.',
+        description: 'Custom hand-painted French balayage highlights designed to enhance your natural tones with zero harsh demarcation lines. Includes a restorative bond builder and high-shine gloss toner.',
+        price: 1800.00,
+        discount_price: 1550.00,
+        duration: 120,
+        duration_minutes: 120,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 5.00,
+        rating_count: 18,
+        image_url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-palette',
+        service_type: 'hair'
+      },
+      {
+        category_id: 2,
+        service_name: 'Hydra-Glow Deep Cleansing Facial',
+        service_slug: 'hydra-glow-facial',
+        short_description: 'Vortex suction infusion with hyaluronic acid, LED light therapy, and detox massage.',
+        description: 'A non-invasive, multi-step treatment that combines the benefits of next-level hydra-dermabrasion, a chemical peel, automated painless extractions, and a special delivery of Antioxidants and Hyaluronic Acid for instantly glowing skin.',
+        price: 950.00,
+        discount_price: 850.00,
+        duration: 60,
+        duration_minutes: 60,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 4.95,
+        rating_count: 32,
+        image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1512290900672-1f486427d11a?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-droplet',
+        service_type: 'skincare'
+      },
+      {
+        category_id: 3,
+        service_name: 'Deluxe Rosewater Pedicure & Gel Manicure',
+        service_slug: 'deluxe-pedicure-gel-manicure',
+        short_description: 'Organic rose petal foot bath, callus smoothing, massage, and chip-resistant gel polish.',
+        description: 'Pure relaxation for hands and feet. Featuring a warm rose petal foot bath, organic sugar scrub exfoliation, hot towel wrap, hydrating paraffin dip, and high-shine LED gel manicure with custom nail art accent.',
+        price: 750.00,
+        discount_price: 680.00,
+        duration: 75,
+        duration_minutes: 75,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 4.88,
+        rating_count: 19,
+        image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-hand-sparkles',
+        service_type: 'nails'
+      },
+      {
+        category_id: 4,
+        service_name: 'Royal Bridal Makeover Package',
+        service_slug: 'royal-bridal-makeover',
+        short_description: 'Complete high-definition bridal makeup, couture hairstyling, mink lashes, and veil setting.',
+        description: 'Our premier VIP bridal beauty experience. Includes skin prep, airbrush or high-definition bridal makeup contouring, custom false lashes, bridal hairstyling with jewelry/veil pinning, and a touch-up emergency kit.',
+        price: 3200.00,
+        discount_price: 2900.00,
+        duration: 150,
+        duration_minutes: 150,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 5.00,
+        rating_count: 15,
+        image_url: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-heart',
+        service_type: 'bridal'
+      },
+      {
+        category_id: 5,
+        service_name: 'Swedish Aromatherapy Relaxing Massage',
+        service_slug: 'swedish-aromatherapy-massage',
+        short_description: 'Full-body stress relief using organic botanical essential oils and warm compress.',
+        description: 'Melt away everyday tension and fatigue with a full-body rhythmic Swedish massage. Uses warm aromatic botanical oils, long fluid strokes, and pressure-point techniques to restore muscular ease and serenity.',
+        price: 1100.00,
+        discount_price: 950.00,
+        duration: 60,
+        duration_minutes: 60,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 4.92,
+        rating_count: 27,
+        image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-spa',
+        service_type: 'spa'
+      },
+      {
+        category_id: 7,
+        service_name: 'VIP Royal Gentleman Cut & Hot Towel Shave',
+        service_slug: 'vip-royal-gentleman-cut-shave',
+        short_description: 'Precision scissor/clipper haircut, warm steam lather shave, and cold stone tonic splash.',
+        description: 'The definitive gentlemen grooming ritual. Features an architected haircut, straight-razor neck line, hot herbal steam towels, pre-shave essential oils, straight-razor shave, and an ice-cold tonic skin soothing splash.',
+        price: 650.00,
+        discount_price: 550.00,
+        duration: 60,
+        duration_minutes: 60,
+        is_available: 1,
+        status: 'active',
+        is_featured: 1,
+        rating_avg: 4.96,
+        rating_count: 41,
+        image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
+        service_image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
+        banner_image: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1200&q=80',
+        service_icon: 'fa-crown',
+        service_type: 'barber'
+      }
+    ];
+
+    for (const s of beautyServices) {
+      const [existing] = await pool.promise().query(
+        'SELECT id FROM services WHERE service_slug = ? LIMIT 1',
+        [s.service_slug]
+      );
+
+      if (existing.length > 0) {
+        await pool.promise().query(
+          `UPDATE services SET
+            category_id = ?, service_name = ?, short_description = ?, description = ?,
+            price = ?, discount_price = ?, duration = ?, duration_minutes = ?,
+            is_available = ?, status = ?, is_featured = ?, rating_avg = ?, rating_count = ?,
+            image_url = ?, service_image = ?, banner_image = ?, service_icon = ?, service_type = ?
+           WHERE id = ?`,
+          [
+            s.category_id, s.service_name, s.short_description, s.description,
+            s.price, s.discount_price, s.duration, s.duration_minutes,
+            s.is_available, s.status, s.is_featured, s.rating_avg, s.rating_count,
+            s.image_url, s.service_image, s.banner_image, s.service_icon, s.service_type,
+            existing[0].id
+          ]
+        );
+      } else {
+        await pool.promise().query(
+          `INSERT INTO services 
+            (category_id, service_name, service_slug, short_description, description,
+             price, discount_price, duration, duration_minutes, is_available, status,
+             is_featured, rating_avg, rating_count, image_url, service_image, banner_image,
+             service_icon, service_type)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            s.category_id, s.service_name, s.service_slug, s.short_description, s.description,
+            s.price, s.discount_price, s.duration, s.duration_minutes, s.is_available, s.status,
+            s.is_featured, s.rating_avg, s.rating_count, s.image_url, s.service_image, s.banner_image,
+            s.service_icon, s.service_type
+          ]
+        );
+      }
+    }
+
+    const sampleRatings = [
+      { service_slug: 'hydra-glow-facial', user_id: 9004, rating: 5, review: 'Absolute glow! My skin has never looked so fresh and radiant.' },
+      { service_slug: 'signature-blowout-styling', user_id: 9004, rating: 5, review: 'Fantastic styling and head massage, lasted for 3 full days.' },
+      { service_slug: 'swedish-aromatherapy-massage', user_id: 9004, rating: 5, review: 'Incredible deep relaxation. Highly recommend the lavender essential oil.' },
+      { service_slug: 'deluxe-pedicure-gel-manicure', user_id: 9004, rating: 5, review: 'Flawless nail art and super soothing rosewater bath!' }
+    ];
+
+    for (const r of sampleRatings) {
+      const [svc] = await pool.promise().query('SELECT id FROM services WHERE service_slug = ? LIMIT 1', [r.service_slug]);
+      if (svc.length > 0) {
+        const [existingRating] = await pool.promise().query(
+          'SELECT id FROM service_ratings WHERE service_id = ? AND (user_id = ? OR customer_id = ?) LIMIT 1',
+          [svc[0].id, r.user_id, r.user_id]
+        );
+        if (existingRating.length === 0) {
+          await pool.promise().query(
+            `INSERT INTO service_ratings (booking_id, service_id, user_id, customer_id, rating, review, review_text)
+             VALUES (NULL, ?, ?, ?, ?, ?, ?)`,
+            [svc[0].id, r.user_id, r.user_id, r.rating, r.review, r.review]
+          );
+        }
+      }
+    }
+    console.log('✅ Ensured Beauty Salon categories, services & sample ratings seeded');
+  } catch (err) {
+    console.warn("ℹ️ Beauty Salon seeding note:", err.message);
+  }
+
+  try {
+    // Keep unpermitted legacy CMS modules deactivated
+    const unpermittedLegacyIds = [1, 2, 4, 5, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 50, 51, 52, 53, 54];
+    await pool.promise().query('UPDATE cms_menus SET is_active = 0 WHERE id IN (?)', [unpermittedLegacyIds]);
+  } catch (cleanErr) {
+    console.warn("ℹ️ Menu cleanup note:", cleanErr.message);
   }
 };
 

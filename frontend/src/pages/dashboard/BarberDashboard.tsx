@@ -37,12 +37,12 @@ const BarberDashboard: React.FC = () => {
       // Get today's bookings for this barber
       const bookingsRes = await bookingApi.getBookings({ 
         date: today, 
-        barber_id: user?.user_id 
+        barber_id: user?.user_id ? Number(user.user_id) : undefined 
       });
       
       // Get queue for this barber
       const queueRes = await queueApi.getQueues({ 
-        barber_id: user?.user_id,
+        barber_id: user?.user_id ? Number(user.user_id) : undefined,
         queue_status: 'queued'
       });
 

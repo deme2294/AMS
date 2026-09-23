@@ -107,7 +107,7 @@ const DashboardOverview: React.FC = () => {
             })
         );
       } else {
-        promises.push(null, null);
+        promises.push(Promise.resolve(null), Promise.resolve(null));
       }
 
       // Availability slots (all roles)
@@ -140,7 +140,7 @@ const DashboardOverview: React.FC = () => {
           })
         );
       } else {
-        promises.push(null, null, null);
+        promises.push(Promise.resolve(null), Promise.resolve(null), Promise.resolve(null));
       }
 
       const [dashboardRes, analyticsRes, slotsRes, serviceStatsRes, dailyBookingsRes, recentBookingsRes] = await Promise.all(promises);

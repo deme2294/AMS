@@ -5,6 +5,18 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Response interceptor to unwrap backend error messages for apiClient callers
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    const customError = new Error(message);
+    (customError as any).response = error.response;
+    (customError as any).status = error.response?.status;
+    return Promise.reject(customError);
+  }
+);
+
 const getBaseUrl = (url: string, fallback: string): string => {
   let cleanUrl = (url || '').trim();
   // Fallback only if URL is invalid or undefined
@@ -36,7 +48,15 @@ export const registerLogoutCallback = (callback: () => void) => {
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    const isExcludedFromAutoLogout =
+      url.includes('/settings/user-theme') ||
+      url.includes('/user-theme') ||
+      url.includes('/logout') ||
+      url.includes('/login') ||
+      url.includes('/check-auth');
+
+    if (error.response?.status === 401 && !isExcludedFromAutoLogout) {
       console.warn('[SECURITY] Session expired detected via interceptor. Triggering logout.');
       if (onLogoutCallback) onLogoutCallback();
     }
@@ -451,7 +471,12 @@ export const deleteMediaItem = async (id: number | string): Promise<void> => {
 export interface Role {
   role_id: number;
   role_name: string;
+  description?: string | null;
   status: number;
+  is_system?: boolean;
+  user_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Department {
@@ -465,6 +490,7 @@ export interface User {
   role_id: number;
   status: number | string;
   created_at: string;
+  updated_at?: string;
   name?: string;
   fname?: string;
   lname?: string;
@@ -472,10 +498,19 @@ export interface User {
   phone?: string;
   role_name?: string;
   department_id?: number;
+  department_name?: string;
+  employee_id?: number;
+  online_flag?: number | boolean;
+  failed_login_attempts?: number;
+  account_locked_until?: string | null;
 }
 
 export const getUsers = async (): Promise<User[]> => {
   return request<User[]>('/users', { method: 'GET' });
+};
+
+export const getUserById = async (userId: number | string): Promise<User> => {
+  return request<User>(`/users/${userId}`, { method: 'GET' });
 };
 
 export const addUser = async (userData: any): Promise<any> => {
@@ -492,8 +527,21 @@ export const updateUser = async (userId: number | string, userData: any): Promis
   });
 };
 
-export const deleteUser = async (userId: number): Promise<void> => {
-  await request<{ success: boolean }>(`/users/${userId}`, { method: 'DELETE' });
+export const assignUserRole = async (userId: number | string, roleId: number | string): Promise<{ success: boolean; message: string; role_id: number; role_name: string }> => {
+  return request(`/users/${userId}/role`, {
+    method: 'PUT',
+    data: { role_id: Number(roleId) },
+  });
+};
+
+export const unlockUserAccount = async (userId: number | string): Promise<{ success: boolean; message: string }> => {
+  return request(`/users/${userId}/unlock`, {
+    method: 'POST',
+  });
+};
+
+export const deleteUser = async (userId: number | string): Promise<any> => {
+  return request(`/users/${userId}`, { method: 'DELETE' });
 };
 
 // --- BOARD MEMBERS & WHO WE ARE API ---
@@ -585,7 +633,7 @@ export const deleteWhoWeAreSection = async (id: number): Promise<void> => {
 };
 
 export const changeUserStatus = async (userId: number | string, status: number | string): Promise<any> => {
-  return request(`/${userId}/status`, {
+  return request(`/users/${userId}/status`, {
     method: 'PUT',
     data: { status },
   });
@@ -595,14 +643,14 @@ export const getRoles = async (): Promise<Role[]> => {
   return request<Role[]>('/roles', { method: 'GET' });
 };
 
-export const createRole = async (roleData: { role_name: string }): Promise<any> => {
+export const createRole = async (roleData: { role_name: string; description?: string; status?: number; clone_from_role_id?: number }): Promise<any> => {
   return request('/roles', {
     method: 'POST',
     data: roleData,
   });
 };
 
-export const updateRole = async (roleId: number | string, roleData: { role_name: string, status: number }): Promise<any> => {
+export const updateRole = async (roleId: number | string, roleData: { role_name?: string; description?: string; status?: number }): Promise<any> => {
   return request(`/roles/${roleId}`, {
     method: 'PUT',
     data: roleData,
@@ -611,6 +659,30 @@ export const updateRole = async (roleId: number | string, roleData: { role_name:
 
 export const deleteRole = async (roleId: number | string): Promise<any> => {
   return request(`/roles/${roleId}`, { method: 'DELETE' });
+};
+
+export const cloneRole = async (roleId: number | string, data: { role_name: string; description?: string }): Promise<any> => {
+  return request(`/roles/${roleId}/clone`, {
+    method: 'POST',
+    data,
+  });
+};
+
+export interface RoleUserItem {
+  user_id: number;
+  user_name: string;
+  status: number | string;
+  created_at?: string;
+  employee_id?: number;
+  full_name?: string;
+  fname?: string;
+  lname?: string;
+  email?: string;
+  phone?: string;
+}
+
+export const getRoleUsers = async (roleId: number | string): Promise<{ success: boolean; count: number; data: RoleUserItem[] }> => {
+  return request(`/roles/${roleId}/users`, { method: 'GET' });
 };
 
 export const getDepartments = async (): Promise<Department[]> => {
@@ -677,6 +749,52 @@ export const getUserPermissions = async (userId: number): Promise<{ menu_id: num
 
 export const updateUserPermissions = async (userId: number, permissions: { menu_id: number, permission_type: string }[]): Promise<any> => {
   return request(`/menus/user/${userId}`, { method: 'POST', data: { permissions } });
+};
+
+export interface RoleComparisonData {
+  roles: { role_id: number; role_name: string }[];
+  menus: Menu[];
+  matrix: Record<number, Record<number, {
+    can_view: boolean;
+    can_create: boolean;
+    can_edit: boolean;
+    can_delete: boolean;
+  }>>;
+  differenceMenuIds: number[];
+}
+
+export const getRoleComparison = async (roleIds?: number[]): Promise<RoleComparisonData> => {
+  const query = roleIds && roleIds.length > 0 ? `?roleIds=${roleIds.join(',')}` : '';
+  const response = await request<{
+    success: boolean;
+    roles: { role_id: number; role_name: string }[];
+    menus: Menu[];
+    matrix: Record<number, Record<number, {
+      can_view: boolean;
+      can_create: boolean;
+      can_edit: boolean;
+      can_delete: boolean;
+    }>>;
+    differenceMenuIds: number[];
+  }>(`/menus/compare${query}`, { method: 'GET' });
+  return {
+    roles: response.roles || [],
+    menus: response.menus || [],
+    matrix: response.matrix || {},
+    differenceMenuIds: response.differenceMenuIds || []
+  };
+};
+
+export const assignPermissionAction = async (
+  roleId: number,
+  menuId: number,
+  action: 'can_view' | 'can_create' | 'can_edit' | 'can_delete',
+  value: boolean
+): Promise<any> => {
+  return request('/menus/assign-action', {
+    method: 'POST',
+    data: { roleId, menuId, action, value }
+  });
 };
 
 // --- ANALYTICS API ---

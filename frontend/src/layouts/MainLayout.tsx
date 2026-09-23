@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EnhancedTopNavbar from '../components/nav/EnhancedTopNavbar';
 import VerticalNavbar from '../components/nav/VerticalNavbar';
 import Footer from '../components/Footer';
+import { useAuth } from '../components/Auth/AuthContext';
 import { initializeTheme } from '../services/themeService';
 
 interface MainLayoutProps {
@@ -9,6 +10,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -38,8 +40,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   // Initialize theme on mount
   useEffect(() => {
-    initializeTheme();
-  }, []);
+    initializeTheme(isAuthenticated);
+  }, [isAuthenticated]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

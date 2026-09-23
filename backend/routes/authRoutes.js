@@ -27,7 +27,17 @@ router.get("/check-auth", (req, res, next) => {
     next();
 }, verifyToken, authMiddleware.getCurrentUser);
 router.get("/me", verifyToken, authMiddleware.getCurrentUser); // New standard user info endpoint
-router.put("/logout", verifyToken, authMiddleware.logout); // Simplified: no ID in URL
+// Logout endpoint: gracefully clear cookies/session even if token is expired or missing
+router.put("/logout", (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    const token = (authHeader && authHeader.split(" ")[1]) || req.cookies?.token;
+    if (!token) {
+        return authMiddleware.logout(req, res, next);
+    }
+    verifyToken(req, res, () => {
+        return authMiddleware.logout(req, res, next);
+    });
+});
 router.post("/forgot-password", authLimiter, authMiddleware.forgotPassword);
 router.post("/reset-password", authLimiter, authMiddleware.resetPassword);
 router.post("/redeem-account", authLimiter, authMiddleware.redeemAccount);

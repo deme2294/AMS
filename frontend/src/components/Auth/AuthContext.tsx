@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { registerLogoutCallback, BACKEND_URL } from '../../services/apiService';
 
@@ -177,8 +177,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     }, []);
 
+    const isLoggingOutRef = useRef(false);
+
     const logout = useCallback(async () => {
-        const userId = state.user?.user_id;
+        if (isLoggingOutRef.current) return;
+        isLoggingOutRef.current = true;
 
         // Security: Ensure sensitive data is explicitly wiped locally
         if (typeof window !== 'undefined' && window.localStorage) {
@@ -188,17 +191,17 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         dispatch({ type: 'LOGOUT' });
 
-        if (userId) {
-            try {
-                // Notifying the server to clear cookies and revoke token
-                // Use the new secure route that doesn't expose ID in the URL
-                await axios.put(`${API_BASE_URL}/logout`, {}, { withCredentials: true });
-            } catch (error) {
-                // We log the error but don't stop the user from being logged out locally
-                console.warn("[AUTH] Server-side logout failed, but local session cleared:", error);
-            }
+        try {
+            // Notifying the server to clear cookies and revoke token
+            await axios.put(`${API_BASE_URL}/logout`, {}, { withCredentials: true, timeout: 4000 });
+        } catch (error) {
+            console.warn("[AUTH] Server-side logout notification completed or skipped:", error);
+        } finally {
+            setTimeout(() => {
+                isLoggingOutRef.current = false;
+            }, 1000);
         }
-    }, [state.user?.user_id]);
+    }, []);
 
     // --- Effects ---
     useEffect(() => {
@@ -278,11 +281,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         dispatch,
         // Computed role flags — avoids importing ROLES everywhere
         isAdmin:        roleId === 1,
-        isManager:      roleId === 2,
-        isBarber:       roleId === 3,
-        isReceptionist: roleId === 4,
-        isCustomer:     roleId === 5,
-        isStaff:        [1, 2, 3, 4].includes(roleId),
+        isBarber:       roleId === 2,
+        isCustomer:     roleId === 3,
+        isManager:      roleId === 4,
+        isReceptionist: roleId === 5,
+        isStaff:        [1, 2, 4, 5].includes(roleId),
     };
 
     return (

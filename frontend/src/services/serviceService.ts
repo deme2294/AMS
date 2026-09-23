@@ -16,12 +16,15 @@ const normalizeService = (data: any): any => {
     cleanup_time: Number(data.cleanup_time),
     booking_buffer_time: Number(data.booking_buffer_time),
     // Avg rating from DB (decimal): round to 1 decimal
-    avg_rating: data.avg_rating != null ? Math.round(Number(data.avg_rating) * 10) / 10 : null,
-    total_ratings: data.total_ratings != null ? Number(data.total_ratings) : null,
+    avg_rating: data.avg_rating != null ? Math.round(Number(data.avg_rating) * 10) / 10 : (data.rating_avg != null ? Math.round(Number(data.rating_avg) * 10) / 10 : null),
+    total_ratings: data.total_ratings != null ? Number(data.total_ratings) : (data.rating_count != null ? Number(data.rating_count) : null),
+    rating_avg: data.rating_avg != null ? Number(data.rating_avg) : (data.avg_rating != null ? Number(data.avg_rating) : 0),
+    rating_count: data.rating_count != null ? Number(data.rating_count) : (data.total_ratings != null ? Number(data.total_ratings) : 0),
     // Ensure booleans
     is_featured: data.is_featured == 1 || data.is_featured === true,
     is_available: data.is_available == 1 || data.is_available === true,
-    service_image: fixImageUrl(data.service_image),
+    service_image: fixImageUrl(data.service_image || data.image_url),
+    banner_image: fixImageUrl(data.banner_image || data.service_image || data.image_url),
   };
 };
 
@@ -33,6 +36,10 @@ export interface ServiceCategory {
   category_name: string;
   description: string | null;
   category_image: string | null;
+  banner_image?: string | null;
+  color?: string;
+  sort_order?: number;
+  icon?: string;
   status: 'active' | 'inactive';
   created_by: number;
   created_by_name?: string;
@@ -44,15 +51,20 @@ export interface Service {
   id: number;
   category_id: number;
   category_name?: string;
+  category_color?: string;
+  category_banner?: string;
   barber_id: number | null;
   barber_name?: string;
   service_name: string;
   service_slug: string;
   description: string | null;
+  short_description?: string | null;
   price: number;
   discount_price: number | null;
   duration_minutes: number;
   service_image: string | null;
+  image_url?: string | null;
+  banner_image?: string | null;
   service_icon: string | null;
   is_featured: boolean;
   is_available: boolean;
@@ -60,7 +72,7 @@ export interface Service {
   preparation_time: number;
   cleanup_time: number;
   booking_buffer_time: number;
-  service_type: 'standard' | 'combo' | 'home_service' | 'vip';
+  service_type: 'standard' | 'combo' | 'home_service' | 'vip' | string;
   status: 'active' | 'inactive';
   created_by: number;
   created_by_name?: string;
@@ -68,6 +80,8 @@ export interface Service {
   updated_at: string;
   avg_rating?: number | null;
   total_ratings?: number | null;
+  rating_avg?: number | null;
+  rating_count?: number | null;
   // rating counts by star (1..5)
   stars_1?: number;
   stars_2?: number;
@@ -148,6 +162,11 @@ export const serviceCategoryApi = {
     if (data.category_name) formData.append('category_name', data.category_name);
     if (data.description) formData.append('description', data.description);
     if (data.status) formData.append('status', data.status);
+    if (data.banner_image) formData.append('banner_image', data.banner_image);
+    if (data.color) formData.append('color', data.color);
+    if (data.sort_order !== undefined) formData.append('sort_order', String(data.sort_order));
+    if (data.icon) formData.append('icon', data.icon);
+    if (data.category_image) formData.append('image', data.category_image);
     if (data.imageFile) formData.append('image', data.imageFile);
 
     return request<{ success: boolean; message: string; data: ServiceCategory }>('/services/categories', {
@@ -163,6 +182,11 @@ export const serviceCategoryApi = {
     if (data.category_name) formData.append('category_name', data.category_name);
     if (data.description !== undefined) formData.append('description', data.description || '');
     if (data.status) formData.append('status', data.status);
+    if (data.banner_image) formData.append('banner_image', data.banner_image);
+    if (data.color) formData.append('color', data.color);
+    if (data.sort_order !== undefined) formData.append('sort_order', String(data.sort_order));
+    if (data.icon) formData.append('icon', data.icon);
+    if (data.category_image) formData.append('image', data.category_image);
     if (data.imageFile) formData.append('image', data.imageFile);
 
     return request<{ success: boolean; message: string; data: ServiceCategory }>(`/services/categories/${id}`, {
@@ -180,12 +204,12 @@ export const serviceCategoryApi = {
 };
 
 // -------------------------
-// Services API
+// Services API (Admin & Customer with Auth)
 // -------------------------
 export const serviceApi = {
-  // GET all services (with filters)
-  getAll: async (filters?: ServiceFilters) => {
-    const response = await request<ServiceListResponse>('/services', { params: filters });
+  // GET all services with filters & pagination
+  getAll: async (params?: ServiceFilters) => {
+    const response = await request<ServiceListResponse>('/services', { params });
     if (response.success) {
       response.data = response.data.map(normalizeService);
     }
@@ -201,13 +225,14 @@ export const serviceApi = {
     return response;
   },
 
-  // CREATE service with optional image
+  // CREATE service
   create: async (data: Partial<Service> & { imageFile?: File }) => {
     const formData = new FormData();
     if (data.category_id) formData.append('category_id', String(data.category_id));
     if (data.barber_id !== undefined) formData.append('barber_id', data.barber_id ? String(data.barber_id) : '');
     if (data.service_name) formData.append('service_name', data.service_name);
     if (data.description !== undefined) formData.append('description', data.description || '');
+    if (data.short_description !== undefined) formData.append('short_description', data.short_description || '');
     if (data.price) formData.append('price', String(data.price));
     if (data.discount_price !== undefined) formData.append('discount_price', data.discount_price ? String(data.discount_price) : '');
     if (data.duration_minutes) formData.append('duration_minutes', String(data.duration_minutes));
@@ -220,6 +245,9 @@ export const serviceApi = {
     if (data.booking_buffer_time) formData.append('booking_buffer_time', String(data.booking_buffer_time));
     if (data.service_type) formData.append('service_type', data.service_type);
     if (data.status) formData.append('status', data.status);
+    if (data.banner_image) formData.append('banner_image', data.banner_image);
+    if (data.image_url) formData.append('image_url', data.image_url);
+    if (data.service_image) formData.append('service_image', data.service_image);
     if (data.imageFile) formData.append('service_image', data.imageFile);
 
     return request<{ success: boolean; message: string; data: Service }>('/services', {
@@ -236,6 +264,7 @@ export const serviceApi = {
     if (data.barber_id !== undefined) formData.append('barber_id', data.barber_id ? String(data.barber_id) : '');
     if (data.service_name) formData.append('service_name', data.service_name);
     if (data.description !== undefined) formData.append('description', data.description || '');
+    if (data.short_description !== undefined) formData.append('short_description', data.short_description || '');
     if (data.price !== undefined) formData.append('price', String(data.price));
     if (data.discount_price !== undefined) formData.append('discount_price', data.discount_price ? String(data.discount_price) : '');
     if (data.duration_minutes !== undefined) formData.append('duration_minutes', String(data.duration_minutes));
@@ -248,6 +277,9 @@ export const serviceApi = {
     if (data.booking_buffer_time !== undefined) formData.append('booking_buffer_time', String(data.booking_buffer_time));
     if (data.service_type) formData.append('service_type', data.service_type);
     if (data.status) formData.append('status', data.status);
+    if (data.banner_image) formData.append('banner_image', data.banner_image);
+    if (data.image_url) formData.append('image_url', data.image_url);
+    if (data.service_image) formData.append('service_image', data.service_image);
     if (data.imageFile) formData.append('service_image', data.imageFile);
 
     return request<{ success: boolean; message: string; data: Service }>(`/services/${id}`, {
@@ -395,7 +427,7 @@ export const bookingApi = {
     }),
 
   // GET bookings (admin/barber)
-  getBookings: (filters?: { date?: string; barber_id?: number; status?: string }) =>
+  getBookings: (filters?: { date?: string; barber_id?: number; status?: string; approval_status?: string }) =>
     request<{ success: boolean; data: any[] }>('/service_bookings', { params: filters }),
 
   // GET customer bookings (authenticated customers only)
@@ -797,3 +829,60 @@ export const analyticsApi = {
   getRevenueStats: () =>
     request<{ success: boolean; data: RevenueStats }>('/service-analytics/revenue'),
 };
+
+// -------------------------
+// Service Ratings & Reviews API
+// -------------------------
+export interface ServiceRatingItem {
+  id: number;
+  service_id: number;
+  service_name: string;
+  service_image?: string | null;
+  user_id: number;
+  customer_name: string;
+  user_name?: string;
+  rating: number;
+  review_text: string;
+  created_at: string;
+}
+
+export interface AdminRatingsStats {
+  total_reviews: number;
+  average_rating: number;
+  five_star: number;
+  four_star: number;
+  three_star: number;
+  two_star: number;
+  one_star: number;
+}
+
+export interface AdminRatingsResponse {
+  success: boolean;
+  data: ServiceRatingItem[];
+  stats: AdminRatingsStats;
+}
+
+export const ratingsApi = {
+  // Admin: Get all ratings across all salon services
+  getAllAdminRatings: (params?: { service_id?: number; rating?: number; search?: string; limit?: number; offset?: number }) =>
+    request<AdminRatingsResponse>('/services/admin/ratings', { params }),
+
+  // Customer: Submit rating & review for a service
+  rateService: (serviceId: number, rating: number, reviewText?: string) =>
+    request<{ success: boolean; message: string }>(`/services/${serviceId}/rate`, {
+      method: 'POST',
+      data: { rating, review_text: reviewText }
+    }),
+
+  // Customer: Get my rating for a service
+  getMyRating: (serviceId: number) =>
+    request<{ success: boolean; data: any }>(`/services/${serviceId}/rate`),
+
+  // Public: Get all ratings for a single service
+  getServiceRatings: (serviceId: number) =>
+    request<{ success: boolean; data: any[] }>(`/services/${serviceId}/ratings`),
+
+  // Public: Get rating summary (average & star counts) for a service
+  getRatingsSummary: (serviceId: number) =>
+    request<{ success: boolean; data: any }>(`/services/${serviceId}/ratings/summary`),
+};

@@ -205,6 +205,19 @@ router.get('/public/:id/ratings',           serviceController.getServiceRatings)
 router.post('/public/:id/rate', verifyToken, serviceController.submitServiceRating);
 router.get('/public/:id/rate',  verifyToken, serviceController.getMyServiceRating);
 
+// Admin ratings monitoring across all salon services
+router.get('/admin/ratings',
+    verifyToken,
+    restrictTo(SERVICE_MANAGERS),
+    serviceController.getAllAdminRatings
+);
+
+// Authenticated / general service ratings routes
+router.get('/:id/ratings/summary',          serviceController.getServiceRatingsSummary);
+router.get('/:id/ratings',                  serviceController.getServiceRatings);
+router.post('/:id/rate',       verifyToken, serviceController.submitServiceRating);
+router.get('/:id/rate',        verifyToken, serviceController.getMyServiceRating);
+
 // ================================================
 // SERVICES PARAM ROUTES (after fixed routes)
 // ================================================

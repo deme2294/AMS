@@ -198,12 +198,24 @@ app.use(
 // --- 3. RATE LIMITING (Protection against DDoS and Brute Force) ---
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 500, // Reduced from 1000 for better security
+  max: process.env.NODE_ENV === 'production' ? 1000 : 10000,
+  skip: (req) => {
+    if (req.method === 'OPTIONS') return true;
+    if (req.path === '/health' || req.path === '/api/health') return true;
+    if (req.path === '/logout' || req.path === '/api/logout') return true;
+    if (process.env.NODE_ENV !== 'production') {
+      const ip = req.ip || req.connection?.remoteAddress || '';
+      if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || req.hostname === 'localhost') {
+        return true;
+      }
+    }
+    return false;
+  },
   message: {
     success: false,
     message: "Too many requests from this IP, please try again after 15 minutes."
   },
-  standardHeaders: 'draft-7', // Modern RateLimit headers (Fix for: missing rate-limit headers)
+  standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
 
@@ -339,6 +351,7 @@ app.use("/api/booking_workflow", require("./routes/bookingWorkflowRoutes.js"));
 app.use("/api/queues", require("./routes/queueRoutes.js"));
 app.use("/api/notifications", require("./routes/notificationRoutes.js"));
 app.use("/api/settings", require("./routes/settingsRoutes.js"));
+app.use("/api/menus", require("./routes/menuRoutes.js"));
 
 // Complaint Analytics Endpoint - Mock Data for now
 app.get("/api/complaints/analytics", verifyToken, restrictTo([ROLES.ADMIN, ROLES.MANAGER]), (req, res) => {
@@ -367,11 +380,6 @@ app.get("/api/complaints/analytics", verifyToken, restrictTo([ROLES.ADMIN, ROLES
       recentComplaints: []
     }
   });
-});
-
-// Menus endpoint - Returns empty array for now
-app.get("/api/menus/my-nav", verifyToken, (req, res) => {
-  res.json({ success: true, data: [] });
 });
 
 // Notification & Stats fallback routes

@@ -11,15 +11,23 @@ import DashboardAnalytics   from "../pages/dashboard/DashboardAnalytics";
 import ManagerDashboard     from "../pages/dashboard/ManagerDashboard";
 import BarberDashboard      from "../pages/dashboard/BarberDashboard";
 import ReceptionistDashboard from "../pages/dashboard/ReceptionistDashboard";
+import CustomerDashboard    from "../pages/dashboard/CustomerDashboard";
 
 // Services & Categories
 import CategoriesManagement   from "../pages/categories/CategoriesManagement";
 import ServiceCategoriesPage  from "../pages/services/ServiceCategoriesPage";
 import ServicesPage           from "../pages/services/ServicesPage";
+import ServiceDetailsPage     from "../pages/services/ServiceDetailsPage";
+import EditServicePage        from "../pages/services/EditServicePage";
 import CustomerServicesPage   from "../pages/services/CustomerServicesPage";
 import ServiceSubmissionPage  from "../pages/standalone/ServiceSubmissionPage";
 import ReviewBookingsPage     from "../pages/services/ReviewBookingsPage";
 import QueueManagementPage    from "../pages/services/QueueManagementPage";
+import ServiceBookingPage     from "../pages/standalone/ServiceBookingPage";
+import RateServicePage        from "../pages/standalone/RateServicePage";
+import AvailabilityManagementPage from "../pages/services/AvailabilityManagementPage";
+import TrackMyBooking         from "../pages/standalone/TrackMyBooking";
+import QueueTrackingPage      from "../pages/dashboard/QueueTracking";
 
 // Users & Employees
 import AllUsersPage           from "../pages/users/AllUsersPage";
@@ -27,6 +35,7 @@ import AddNewUserPage         from "../pages/users/AddNewUserPage";
 import EditUserPage           from "../pages/users/EditUserPage";
 import ManageEmployeesPage    from "../pages/users/ManageEmployeesPage";
 import RolesPermissionsPage   from "../pages/users/RolesPermissionsPage";
+import PermissionsManagementPage from "../pages/users/PermissionsManagementPage";
 
 // ─────────────────────────────────────────────────────────
 // Route Configuration Map
@@ -43,6 +52,7 @@ const routeConfig: Record<string, React.ComponentType<any>> = {
     // Services
     '/services/categories':  ServiceCategoriesPage,
     '/services':             ServicesPage,
+    '/services/availability': AvailabilityManagementPage,
     '/customer/services':    CustomerServicesPage,
     '/service-submission':   ServiceSubmissionPage,
     '/services/review':      ReviewBookingsPage,
@@ -54,6 +64,10 @@ const routeConfig: Record<string, React.ComponentType<any>> = {
     '/users/edit/:userId':   EditUserPage,
     '/users/manage-employees': ManageEmployeesPage,
     '/users/roles':          RolesPermissionsPage,
+    '/users/permissions':    PermissionsManagementPage,
+    '/permissions':          PermissionsManagementPage,
+    '/rate-services':        RateServicePage,
+    '/rate-service/:id':     RateServicePage,
 };
 
 // ─────────────────────────────────────────────────────────
@@ -63,31 +77,37 @@ const ROLE_PERMISSIONS: Record<number, string[]> = {
     [ROLES.ADMIN]: [
         '/dashboard/overview', '/dashboard/analytics',
         '/categories',
-        '/services/categories', '/services', '/service-submission',
+        '/services/categories', '/services', '/services/availability', '/service-submission',
         '/services/review', '/services/queue',
         '/users/all', '/users/add', '/users/edit/:userId',
-        '/users/manage-employees', '/users/roles',
+        '/users/manage-employees', '/users/roles', '/users/permissions', '/permissions',
         '/customer/services',
+        '/rate-services', '/rate-service/:id',
     ],
     [ROLES.MANAGER]: [
         '/dashboard/overview', '/dashboard/analytics',
         '/categories',
-        '/services/categories', '/services',
+        '/services/categories', '/services', '/services/availability',
         '/services/review', '/services/queue',
         '/users/manage-employees',
+        '/rate-services', '/rate-service/:id',
     ],
     [ROLES.BARBER]: [
         '/dashboard/overview',
         '/services', '/services/queue',
+        '/rate-services', '/rate-service/:id',
     ],
     [ROLES.RECEPTIONIST]: [
         '/dashboard/overview',
-        '/services/review', '/services/queue',
+        '/services', '/services/review', '/services/queue',
         '/customer/services',
+        '/rate-services', '/rate-service/:id',
     ],
     [ROLES.CUSTOMER]: [
         '/dashboard/overview',
+        '/services',
         '/customer/services',
+        '/rate-services', '/rate-service/:id',
     ],
 };
 
@@ -96,10 +116,10 @@ const ROLE_PERMISSIONS: Record<number, string[]> = {
 // ─────────────────────────────────────────────────────────
 const ROLE_PREFIX: Record<number, string> = {
     [ROLES.ADMIN]: 'admin',
-    [ROLES.MANAGER]: 'manager',
     [ROLES.BARBER]: 'barber',
-    [ROLES.RECEPTIONIST]: 'receptionist',
     [ROLES.CUSTOMER]: 'customer',
+    [ROLES.MANAGER]: 'manager',
+    [ROLES.RECEPTIONIST]: 'receptionist',
 };
 
 // ─────────────────────────────────────────────────────────
@@ -110,9 +130,12 @@ function RoleDashboard({ roleId }: { roleId: number }) {
         case ROLES.MANAGER:      return <ManagerDashboard />;
         case ROLES.BARBER:       return <BarberDashboard />;
         case ROLES.RECEPTIONIST: return <ReceptionistDashboard />;
+        case ROLES.CUSTOMER:     return <CustomerDashboard />;
         default:                 return <DashboardOverview />;
     }
 }
+
+import { getMyNavigation, Menu } from "../services/apiService";
 
 // ─────────────────────────────────────────────────────────
 // DynamicRoutes Component
@@ -120,12 +143,48 @@ function RoleDashboard({ roleId }: { roleId: number }) {
 const DynamicRoutes: React.FC = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
+    const [dynamicPaths, setDynamicPaths] = useState<string[]>([]);
+
+    const roleId = user ? Number(user.role_id) : 0;
+    const dynamicPrefix = user?.role_name ? user.role_name.toLowerCase().replace(/[^a-z0-9]/g, '') : null;
+    const rolePrefix = ROLE_PREFIX[roleId] || dynamicPrefix || 'user';
 
     useEffect(() => {
-        // Small delay to allow auth to settle
-        const t = setTimeout(() => setLoading(false), 300);
-        return () => clearTimeout(t);
-    }, []);
+        let isMounted = true;
+        const fetchPermissions = async () => {
+            try {
+                // If Admin, grant all paths immediately
+                if (roleId === ROLES.ADMIN) {
+                    if (isMounted) {
+                        setDynamicPaths(Object.keys(routeConfig));
+                        setLoading(false);
+                    }
+                    return;
+                }
+
+                // Fetch permitted navigation for this user's dynamic role
+                const myNav = await getMyNavigation();
+                if (isMounted && Array.isArray(myNav)) {
+                    const paths: string[] = [];
+                    myNav.forEach((item: Menu) => {
+                        if (item.path) {
+                            paths.push(item.path.startsWith('/') ? item.path : `/${item.path}`);
+                        }
+                    });
+                    setDynamicPaths(paths);
+                }
+            } catch (err) {
+                console.warn("[DynamicRoutes] Failed to fetch dynamic navigation, falling back to static:", err);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchPermissions();
+        return () => { isMounted = false; };
+    }, [roleId]);
 
     if (loading) {
         return (
@@ -135,14 +194,27 @@ const DynamicRoutes: React.FC = () => {
         );
     }
 
-    const roleId = user ? Number(user.role_id) : 0;
-    const allowedPaths = new Set<string>(ROLE_PERMISSIONS[roleId] || []);
-    const rolePrefix = ROLE_PREFIX[roleId] || 'user';
+    // Merge static baseline permissions with dynamic database menu permissions
+    const staticAllowed = ROLE_PERMISSIONS[roleId] || [];
+    const allowedPaths = new Set<string>([...staticAllowed, ...dynamicPaths]);
+
+    // Admin always gets everything in routeConfig
+    if (roleId === ROLES.ADMIN) {
+        Object.keys(routeConfig).forEach(p => allowedPaths.add(p));
+        allowedPaths.add('/dashboard/overview');
+        allowedPaths.add('/dashboard/analytics');
+    }
+
+    // Always ensure dashboard overview is allowed
+    allowedPaths.add('/dashboard/overview');
 
     // Always ensure sub-routes are accessible if parent is allowed
     if (allowedPaths.has('/users/all')) {
         allowedPaths.add('/users/edit/:userId');
         allowedPaths.add('/users/add');
+    }
+    if (allowedPaths.has('/services')) {
+        allowedPaths.add('/services/categories');
     }
 
     return (
@@ -175,6 +247,41 @@ const DynamicRoutes: React.FC = () => {
             <Route path="/services/*" element={<Navigate to={`/${rolePrefix}/services`} replace />} />
             <Route path="/users/*" element={<Navigate to={`/${rolePrefix}/users/all`} replace />} />
 
+            {/* Universal Booking & Services routes for ALL authenticated roles */}
+            <Route path={`/${rolePrefix}/services/book`} element={roleId === ROLES.CUSTOMER ? <CustomerServicesPage /> : <ServicesPage />} />
+            <Route path={`/${rolePrefix}/services/book/:serviceId`} element={<ServiceBookingPage />} />
+            <Route path={`/${rolePrefix}/services/:id`} element={<ServiceDetailsPage />} />
+            <Route path={`/${rolePrefix}/services/details/:id`} element={<ServiceDetailsPage />} />
+
+            {/* Availability Route for Admin, Manager, and roles with permission */}
+            {(roleId === ROLES.ADMIN || roleId === ROLES.MANAGER || allowedPaths.has('/services/availability')) && (
+                <Route path={`/${rolePrefix}/services/availability`} element={<AvailabilityManagementPage />} />
+            )}
+
+            {/* Edit Service Route for Admin and Manager */}
+            {(roleId === ROLES.ADMIN || roleId === ROLES.MANAGER) && (
+                <Route path={`/${rolePrefix}/services/edit/:serviceId`} element={<EditServicePage />} />
+            )}
+
+            {/* Universal Tracking routes */}
+            <Route path={`/${rolePrefix}/track-booking`} element={<TrackMyBooking />} />
+            <Route path={`/${rolePrefix}/track-booking/:referenceNumber`} element={<TrackMyBooking />} />
+            <Route path={`/${rolePrefix}/queues/track`} element={<QueueTrackingPage />} />
+            <Route path={`/${rolePrefix}/queues/track/:referenceNumber`} element={<QueueTrackingPage />} />
+
+            {/* Universal Rating routes */}
+            <Route path={`/${rolePrefix}/rate-services`} element={<RateServicePage />} />
+            <Route path={`/${rolePrefix}/rate-services/:id`} element={<RateServicePage />} />
+            <Route path={`/${rolePrefix}/rate-service/:id`} element={<RateServicePage />} />
+
+            {/* Customer services route */}
+            <Route path={`/${rolePrefix}/customer/services`} element={<CustomerServicesPage />} />
+
+            {/* Service submission */}
+            {allowedPaths.has('/service-submission') && (
+                <Route path={`/${rolePrefix}/service-submission`} element={<ServiceSubmissionPage />} />
+            )}
+
             {/* Services sub-routes with role prefix */}
             {allowedPaths.has('/services') && (
                 <Route path={`/${rolePrefix}/services/*`} element={
@@ -183,6 +290,11 @@ const DynamicRoutes: React.FC = () => {
                         <Route path="review" element={allowedPaths.has('/services/review') ? <ReviewBookingsPage /> : <Navigate to={`/${rolePrefix}/services`} replace />} />
                         <Route path="queue"  element={allowedPaths.has('/services/queue')  ? <QueueManagementPage /> : <Navigate to={`/${rolePrefix}/services`} replace />} />
                         <Route path="categories" element={allowedPaths.has('/services/categories') ? <ServiceCategoriesPage /> : <Navigate to={`/${rolePrefix}/services`} replace />} />
+                        <Route path="availability" element={allowedPaths.has('/services/availability') ? <AvailabilityManagementPage /> : <Navigate to={`/${rolePrefix}/services`} replace />} />
+                        <Route path="book" element={roleId === ROLES.CUSTOMER ? <CustomerServicesPage /> : <ServicesPage />} />
+                        <Route path="book/:serviceId" element={<ServiceBookingPage />} />
+                        <Route path="edit/:serviceId" element={<EditServicePage />} />
+                        <Route path=":id"    element={<ServiceDetailsPage />} />
                         <Route path="*"      element={<Navigate to={`/${rolePrefix}/services`} replace />} />
                     </Routes>
                 } />
@@ -203,19 +315,15 @@ const DynamicRoutes: React.FC = () => {
                         <Route path="edit/:userId" element={<EditUserPage />} />
                         <Route path="manage-employees" element={allowedPaths.has('/users/manage-employees') ? <ManageEmployeesPage /> : <Navigate to={`/${rolePrefix}/users/all`} replace />} />
                         <Route path="roles" element={allowedPaths.has('/users/roles') ? <RolesPermissionsPage /> : <Navigate to={`/${rolePrefix}/users/all`} replace />} />
+                        <Route path="permissions" element={allowedPaths.has('/users/permissions') ? <PermissionsManagementPage /> : <Navigate to={`/${rolePrefix}/users/all`} replace />} />
                         <Route path="*" element={<Navigate to={`/${rolePrefix}/users/all`} replace />} />
                     </Routes>
                 } />
             )}
 
-            {/* Customer services route */}
-            {allowedPaths.has('/customer/services') && (
-                <Route path={`/${rolePrefix}/customer/services`} element={<CustomerServicesPage />} />
-            )}
-
-            {/* Service submission */}
-            {allowedPaths.has('/service-submission') && (
-                <Route path={`/${rolePrefix}/service-submission`} element={<ServiceSubmissionPage />} />
+            {/* Direct Permissions Route */}
+            {allowedPaths.has('/permissions') && (
+                <Route path={`/${rolePrefix}/permissions`} element={<PermissionsManagementPage />} />
             )}
 
             {/* Access Denied Fallback */}

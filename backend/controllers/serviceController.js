@@ -635,9 +635,8 @@ const createService = async (req, res) => {
             });
         }
 
-        // Handle image upload
-        // If service image is not uploaded, auto-fill from the selected category image
-        let imagePath = null;
+        // Handle image upload or passed URL
+        let imagePath = req.body.image_url || req.body.service_image || null;
         if (req.file) {
             imagePath = `/uploads/services/${req.file.filename}`;
         }
@@ -652,15 +651,16 @@ const createService = async (req, res) => {
                 imagePath = categoryRows[0].cat_image;
             }
         }
+        const bannerPath = req.body.banner_image || imagePath;
 
         // Insert
         const [result] = await con.promise().query(
             `INSERT INTO services (
                 category_id, barber_id, service_name, service_slug, description, 
-                price, discount_price, duration, duration_minutes, service_image, image_url, service_icon,
+                price, discount_price, duration, duration_minutes, service_image, image_url, banner_image, service_icon,
                 is_featured, is_available, max_customers_per_slot, preparation_time,
                 cleanup_time, booking_buffer_time, service_type, status, created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 category_id,
                 barber_id || null,
@@ -673,6 +673,7 @@ const createService = async (req, res) => {
                 parseInt(duration_minutes) || 30,
                 imagePath,
                 imagePath,
+                bannerPath,
                 service_icon || null,
                 featured ? 1 : 0,
                 available ? 1 : 0,
@@ -787,24 +788,66 @@ const updateService = async (req, res) => {
         const updateFields = [];
         const updateValues = [];
 
-        if (category_id !== undefined) { updateFields.push("category_id = ?"); updateValues.push(category_id); }
-        if (barber_id !== undefined) { updateFields.push("barber_id = ?"); updateValues.push(barber_id); }
+        if (category_id !== undefined && category_id !== '' && category_id !== 'null') {
+            updateFields.push("category_id = ?");
+            updateValues.push(parseInt(category_id, 10));
+        }
+        if (barber_id !== undefined) {
+            const cleanBarberId = (barber_id && barber_id !== '' && barber_id !== 'null' && barber_id !== '0')
+                ? parseInt(barber_id, 10)
+                : null;
+            updateFields.push("barber_id = ?");
+            updateValues.push(cleanBarberId);
+        }
         if (service_name !== undefined) {
             updateFields.push("service_name = ?, service_slug = ?");
-            updateValues.push(service_name.trim(), service_name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+            updateValues.push(service_name.trim(), service_name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
         }
-        if (description !== undefined) { updateFields.push("description = ?"); updateValues.push(description); }
-        if (price !== undefined) { updateFields.push("price = ?"); updateValues.push(parseFloat(price)); }
-        if (discount_price !== undefined) { updateFields.push("discount_price = ?"); updateValues.push(discount_price ? parseFloat(discount_price) : null); }
-        if (duration_minutes !== undefined) { updateFields.push("duration_minutes = ?"); updateValues.push(parseInt(duration_minutes)); }
-        if (req.file) { updateFields.push("service_image = ?"); updateValues.push(imagePath); }
-        if (service_icon !== undefined) { updateFields.push("service_icon = ?"); updateValues.push(service_icon); }
+        if (description !== undefined) { updateFields.push("description = ?"); updateValues.push(description || null); }
+        if (price !== undefined && price !== '') { updateFields.push("price = ?"); updateValues.push(parseFloat(price)); }
+        if (discount_price !== undefined) {
+            const cleanDiscount = (discount_price && discount_price !== '' && discount_price !== 'null')
+                ? parseFloat(discount_price)
+                : null;
+            updateFields.push("discount_price = ?");
+            updateValues.push(cleanDiscount);
+        }
+        if (duration_minutes !== undefined && duration_minutes !== '') {
+            const dur = parseInt(duration_minutes, 10) || 30;
+            updateFields.push("duration = ?, duration_minutes = ?");
+            updateValues.push(dur, dur);
+        }
+        if (req.file) {
+            updateFields.push("service_image = ?, image_url = ?");
+            updateValues.push(imagePath, imagePath);
+        } else if (req.body.image_url || req.body.service_image) {
+            const directImg = req.body.image_url || req.body.service_image;
+            updateFields.push("service_image = ?, image_url = ?");
+            updateValues.push(directImg, directImg);
+        }
+        if (req.body.banner_image !== undefined) {
+            updateFields.push("banner_image = ?");
+            updateValues.push(req.body.banner_image || null);
+        }
+        if (service_icon !== undefined) { updateFields.push("service_icon = ?"); updateValues.push(service_icon || null); }
         if (featured !== undefined) { updateFields.push("is_featured = ?"); updateValues.push(featured ? 1 : 0); }
         if (available !== undefined) { updateFields.push("is_available = ?"); updateValues.push(available ? 1 : 0); }
-        if (max_customers_per_slot !== undefined) { updateFields.push("max_customers_per_slot = ?"); updateValues.push(max_customers_per_slot); }
-        if (preparation_time !== undefined) { updateFields.push("preparation_time = ?"); updateValues.push(preparation_time); }
-        if (cleanup_time !== undefined) { updateFields.push("cleanup_time = ?"); updateValues.push(cleanup_time); }
-        if (booking_buffer_time !== undefined) { updateFields.push("booking_buffer_time = ?"); updateValues.push(booking_buffer_time); }
+        if (max_customers_per_slot !== undefined) {
+            updateFields.push("max_customers_per_slot = ?");
+            updateValues.push(parseInt(max_customers_per_slot, 10) || 1);
+        }
+        if (preparation_time !== undefined) {
+            updateFields.push("preparation_time = ?");
+            updateValues.push(parseInt(preparation_time, 10) || 0);
+        }
+        if (cleanup_time !== undefined) {
+            updateFields.push("cleanup_time = ?");
+            updateValues.push(parseInt(cleanup_time, 10) || 0);
+        }
+        if (booking_buffer_time !== undefined) {
+            updateFields.push("booking_buffer_time = ?");
+            updateValues.push(parseInt(booking_buffer_time, 10) || 0);
+        }
         if (service_type !== undefined) { updateFields.push("service_type = ?"); updateValues.push(service_type); }
         if (status !== undefined) { updateFields.push("status = ?"); updateValues.push(status); }
 
@@ -1969,7 +2012,6 @@ const submitServiceRating = async (req, res) => {
             return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
         }
 
-
         // Verify service exists
         const [service] = await con.promise().query(
             "SELECT id FROM services WHERE id = ? AND status = 'active' AND is_available = 1",
@@ -1979,41 +2021,57 @@ const submitServiceRating = async (req, res) => {
             return res.status(404).json({ success: false, message: "Service not found or unavailable" });
         }
 
-        // Upsert rating (create or update existing)
+        // Check if this user already rated this service
         const [existing] = await con.promise().query(
-            "SELECT id FROM service_ratings WHERE service_id = ? AND user_id = ?",
+            "SELECT id, rating, review_text FROM service_ratings WHERE service_id = ? AND user_id = ?",
             [id, user_id]
         );
+        const isUpdate = existing.length > 0;
 
-        if (existing.length > 0) {
-            // Update existing
-            await con.promise().query(
-                `UPDATE service_ratings 
-                 SET rating = ?, review_text = ?, updated_at = NOW()
-                 WHERE id = ?`,
-                [rating, review_text || null, existing[0].id]
+        // Atomic upsert: INSERT ... ON DUPLICATE KEY UPDATE
+        // This guarantees no duplicate rows even under race conditions
+        await con.promise().query(
+            `INSERT INTO service_ratings (service_id, user_id, customer_id, rating, review_text, review, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+             ON DUPLICATE KEY UPDATE
+               rating = VALUES(rating),
+               review_text = VALUES(review_text),
+               review = VALUES(review_text),
+               updated_at = NOW()`,
+            [id, user_id, user_id, parsedRating, review_text || null, review_text || null]
+        );
+
+        // Aggregate and update the denormalized avg/count cache on the services row
+        try {
+            const [avgRows] = await con.promise().query(
+                "SELECT COUNT(*) as cnt, AVG(rating) as avg_val FROM service_ratings WHERE service_id = ?",
+                [id]
             );
-            return res.status(200).json({
-                success: true,
-                message: "Rating updated successfully"
-            });
-        } else {
-            // Insert new
-            await con.promise().query(
-                `INSERT INTO service_ratings (service_id, user_id, rating, review_text, created_at)
-                 VALUES (?, ?, ?, ?, NOW())`,
-                [id, user_id, rating, review_text || null]
-            );
-            return res.status(201).json({
-                success: true,
-                message: "Rating submitted successfully"
-            });
+            if (avgRows && avgRows.length > 0) {
+                const count = avgRows[0].cnt || 0;
+                const avgVal = parseFloat(avgRows[0].avg_val || 0).toFixed(2);
+                await con.promise().query(
+                    "UPDATE services SET rating_avg = ?, rating_count = ? WHERE id = ?",
+                    [avgVal, count, id]
+                );
+            }
+        } catch (syncErr) {
+            // Non-critical: rating_avg column may not exist in older schema
+            console.warn('[submitServiceRating] avg sync warning:', syncErr.message);
         }
 
-        // NOTE:
-        // Do not hard-depend on services.rating_avg existing.
-        // The public UI fetches avg/total from /services/public/:id/ratings/summary,
-        // which aggregates from service_ratings.
+        return res.status(200).json({
+            success: true,
+            isUpdate,
+            message: isUpdate
+                ? "Your rating has been updated successfully"
+                : "Thank you! Your rating has been submitted",
+            data: {
+                service_id: Number(id),
+                rating: parsedRating,
+                review_text: review_text || null
+            }
+        });
 
     } catch (error) {
         console.error("Error submitting service rating:", error);
@@ -2046,6 +2104,85 @@ const getMyServiceRating = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to fetch your rating",
+            error: error.message
+        });
+    }
+};
+
+// GET all ratings across all services (Admin / Salon Manager inspection)
+const getAllAdminRatings = async (req, res) => {
+    try {
+        const { service_id, rating, search, limit = 100, offset = 0 } = req.query;
+
+        let query = `
+            SELECT 
+                sr.id,
+                sr.service_id,
+                sr.user_id,
+                sr.rating,
+                COALESCE(sr.review_text, sr.review, '') AS review_text,
+                sr.created_at,
+                s.service_name,
+                COALESCE(s.image_url, s.service_image) AS service_image,
+                COALESCE(e.name, u.user_name, 'Client') AS customer_name,
+                u.user_name
+            FROM service_ratings sr
+            LEFT JOIN services s ON sr.service_id = s.id
+            LEFT JOIN users u ON COALESCE(sr.user_id, sr.customer_id) = u.user_id
+            LEFT JOIN employees e ON u.employee_id = e.employee_id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (service_id) {
+            query += " AND sr.service_id = ?";
+            params.push(service_id);
+        }
+        if (rating) {
+            query += " AND sr.rating = ?";
+            params.push(rating);
+        }
+        if (search) {
+            query += " AND (s.service_name LIKE ? OR sr.review_text LIKE ? OR u.user_name LIKE ? OR e.name LIKE ?)";
+            params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+        }
+
+        query += " ORDER BY sr.created_at DESC LIMIT ? OFFSET ?";
+        params.push(parseInt(limit, 10), parseInt(offset, 10));
+
+        const [ratings] = await con.promise().query(query, params);
+
+        // Compute aggregate stats across all ratings
+        const [statsRows] = await con.promise().query(`
+            SELECT 
+                COUNT(*) AS total_reviews,
+                IFNULL(AVG(rating), 0) AS average_rating,
+                SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS five_star,
+                SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS four_star,
+                SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS three_star,
+                SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS two_star,
+                SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS one_star
+            FROM service_ratings
+        `);
+
+        return res.status(200).json({
+            success: true,
+            data: ratings,
+            stats: statsRows[0] || {
+                total_reviews: 0,
+                average_rating: 0,
+                five_star: 0,
+                four_star: 0,
+                three_star: 0,
+                two_star: 0,
+                one_star: 0
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching admin ratings:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch ratings",
             error: error.message
         });
     }
@@ -2376,6 +2513,7 @@ module.exports = {
     getServiceRatings,
     getServiceRatingsSummary,
     submitServiceRating,
-    getMyServiceRating
+    getMyServiceRating,
+    getAllAdminRatings
 };
 

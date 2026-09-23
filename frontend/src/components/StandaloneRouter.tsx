@@ -9,6 +9,8 @@ import LoginPage from '../components/demo components/login';
 import QueueTrackingPage from '../pages/dashboard/QueueTracking';
 import RateServicePage from '../pages/standalone/RateServicePage';
 
+import ServiceDetailsPage from '../pages/services/ServiceDetailsPage';
+
 const StandaloneRouter: React.FC = () => {
   return (
     <PublicLayout>
@@ -16,8 +18,10 @@ const StandaloneRouter: React.FC = () => {
         {/* Public Homepage - Services Display */}
         <Route path="/" element={<PublicHomepage />} />
         
-        {/* Legacy Routes */}
+        {/* Legacy Routes & Details */}
         <Route path="/services" element={<ServicesListingPage />} />
+        <Route path="/services/:id" element={<ServiceDetailsPage />} />
+        <Route path="/services/details/:id" element={<ServiceDetailsPage />} />
         <Route path="/services/book/:serviceId" element={<ServiceBookingPage />} />
         
          {/* Customer Auth Routes */}

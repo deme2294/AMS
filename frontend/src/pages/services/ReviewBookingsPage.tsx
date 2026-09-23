@@ -49,6 +49,15 @@ const ReviewBookingsPage: React.FC = () => {
   const [quickSuccess, setQuickSuccess] = useState<string | null>(null);
   const [quickError, setQuickError] = useState<string | null>(null);
 
+  // Queue Approval Feedback state
+  const [approvalFeedback, setApprovalFeedback] = useState<{
+    id: number;
+    message: string;
+    ticket?: string;
+    queuePosition?: number;
+    waitTime?: number;
+  } | null>(null);
+
   const handleQuickAccept = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickRef.trim()) {
@@ -103,6 +112,15 @@ const ReviewBookingsPage: React.FC = () => {
       if (res.success) {
         // Update local state dynamically
         setBookings(prev => prev.map(b => b.id === id ? { ...b, approval_status: 'approved', status: 'confirmed' } : b));
+        const q = res.data?.queue;
+        setApprovalFeedback({
+          id,
+          message: res.message || 'Booking approved successfully and dispatched to live queue!',
+          ticket: q?.ticket_number || res.data?.reference_number,
+          queuePosition: q?.queue_position,
+          waitTime: q?.estimated_wait_time,
+        });
+        setTimeout(() => setApprovalFeedback(null), 8000);
       } else {
         alert(res.message || 'Failed to approve booking');
       }
@@ -287,6 +305,52 @@ const ReviewBookingsPage: React.FC = () => {
           </div>
         )}
       </motion.div>
+
+      {/* Queue Approval Feedback Banner */}
+      <AnimatePresence>
+        {approvalFeedback && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -8 }}
+            className="p-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-indigo-500/10 border-2 border-emerald-500/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/30">
+                <FaCheck className="text-base" />
+              </div>
+              <div>
+                <h4 className="font-heading font-bold text-sm text-emerald-900 dark:text-emerald-300">
+                  {approvalFeedback.message}
+                </h4>
+                <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                  {approvalFeedback.ticket && (
+                    <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-lg border border-emerald-300/40">
+                      Ticket: <strong>{approvalFeedback.ticket}</strong>
+                    </span>
+                  )}
+                  {approvalFeedback.queuePosition !== undefined && (
+                    <span className="bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-lg border border-indigo-300/40">
+                      Queue Position: <strong>#{approvalFeedback.queuePosition}</strong>
+                    </span>
+                  )}
+                  {approvalFeedback.waitTime !== undefined && (
+                    <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-lg border border-amber-300/40">
+                      Est. Wait: <strong>{approvalFeedback.waitTime} mins</strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setApprovalFeedback(null)}
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors self-end sm:self-center"
+            >
+              Dismiss
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tab Filters */}
       <div className="flex flex-wrap gap-2 p-1.5 glass-panel w-fit">

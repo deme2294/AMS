@@ -46,7 +46,7 @@ export const useRole = () => {
         canManageServices: () => MANAGEMENT_ROLE_IDS.includes(roleId as RoleId),
 
         /** Returns true if user can handle booking workflows. */
-        canManageBookings: () => [ROLES.ADMIN, ROLES.MANAGER, ROLES.RECEPTIONIST].includes(roleId as RoleId),
+        canManageBookings: () => ([ROLES.ADMIN, ROLES.MANAGER, ROLES.RECEPTIONIST] as number[]).includes(roleId),
 
         /** Returns true if user can view all staff queues. */
         canViewQueue: () => STAFF_ROLE_IDS.includes(roleId as RoleId),

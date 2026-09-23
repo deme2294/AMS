@@ -125,7 +125,7 @@ const CustomerRegister: React.FC = () => {
           navigate('/login', { 
             state: { 
               message: 'Registration successful! Please login with your credentials.',
-              email: formData.username, // Prefill standard login field with the chosen username
+              email: formData.username,
               from: redirectUrl || '/dashboard/overview'
             }
           });
@@ -146,17 +146,17 @@ const CustomerRegister: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-slate-950/60 backdrop-blur-2xl rounded-[2rem] border border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 max-w-md w-full text-center"
+          className="bg-white/95 dark:bg-slate-950/60 backdrop-blur-2xl rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 max-w-md w-full text-center"
         >
-          <div className="w-20 h-20 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-            <FaCheckCircle className="text-green-400 text-4xl" />
+          <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+            <FaCheckCircle className="text-emerald-500 text-4xl" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-3">Registration Successful!</h2>
-          <p className="text-slate-300 text-sm leading-relaxed mb-6">
+          <h2 className="text-2xl font-bold font-heading text-slate-900 dark:text-white mb-3">Registration Successful!</h2>
+          <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
             Your account has been created successfully. We are redirecting you to the login page to verify your credentials.
           </p>
-          <div className="flex items-center justify-center gap-3 text-sm text-blue-400 font-semibold bg-blue-500/5 py-3 px-4 rounded-xl border border-blue-500/10">
-            <Spinner animation="border" size="sm" className="text-blue-400" />
+          <div className="flex items-center justify-center gap-3 text-sm text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-500/5 py-3 px-4 rounded-xl border border-indigo-500/15">
+            <Spinner animation="border" size="sm" className="text-indigo-600 dark:text-indigo-400" />
             <span>Redirecting to Secure Gateway...</span>
           </div>
         </motion.div>
@@ -169,7 +169,7 @@ const CustomerRegister: React.FC = () => {
       {/* Back Button */}
       <button 
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-all duration-300 group text-sm font-medium bg-slate-800/40 hover:bg-slate-800/85 px-4 py-2.5 rounded-xl border border-slate-700/30"
+        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white mb-6 transition-all duration-300 group text-sm font-semibold bg-white/80 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/85 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/30 shadow-sm"
       >
         <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" /> Back to Home
       </button>
@@ -178,19 +178,19 @@ const CustomerRegister: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-slate-950/50 backdrop-blur-2xl rounded-[2.5rem] border border-slate-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.4)] overflow-hidden"
+        className="bg-white/95 dark:bg-slate-950/50 backdrop-blur-2xl rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800/80 shadow-[0_20px_60px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] overflow-hidden transition-colors duration-300"
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 text-center relative overflow-hidden">
+        {/* Header Banner */}
+        <div className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 p-6 md:p-8 text-center relative overflow-hidden">
           {/* Atmospheric design glows */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
           
           <div className="relative z-10">
-            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20 shadow-inner">
+            <div className="w-14 h-14 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/25 shadow-inner">
               <FaCut className="text-white text-xl animate-pulse" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Create Customer Account</h1>
+            <h1 className="text-2xl md:text-3xl font-heading font-black text-white tracking-tight">Create Customer Account</h1>
             <p className="text-blue-100 text-xs md:text-sm mt-1.5 font-medium">Join BarberShop Pro for seamless appointments & grooming insights</p>
           </div>
         </div>
@@ -198,9 +198,9 @@ const CustomerRegister: React.FC = () => {
         {/* Form Container */}
         <div className="p-6 md:p-10">
           {error && (
-            <Alert variant="danger" className="mb-6 bg-red-950/40 border-red-800 text-red-200 rounded-xl py-3 px-4 backdrop-blur-sm text-sm">
+            <Alert variant="danger" className="mb-6 bg-rose-50 dark:bg-red-950/40 border-rose-200 dark:border-red-800 text-rose-700 dark:text-red-200 rounded-xl py-3 px-4 backdrop-blur-sm text-sm">
               <div className="flex items-center gap-2.5">
-                <FaShieldAlt className="text-red-400 text-base" />
+                <FaShieldAlt className="text-rose-500 dark:text-red-400 text-base" />
                 <span>{error}</span>
               </div>
             </Alert>
@@ -211,18 +211,18 @@ const CustomerRegister: React.FC = () => {
               
               {/* Column 1: Personal Details */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
-                  <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Personal Details</h3>
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-200 uppercase tracking-widest">Personal Details</h3>
                 </div>
 
                 {/* Full Name */}
                 <div>
-                  <label htmlFor="reg-fullname" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Full Name <span className="text-red-500">*</span>
+                  <label htmlFor="reg-fullname" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Full Name <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm pointer-events-none" />
                     <input
                       type="text"
                       id="reg-fullname"
@@ -230,20 +230,20 @@ const CustomerRegister: React.FC = () => {
                       value={formData.full_name}
                       onChange={handleChange}
                       placeholder="e.g. John Doe"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-900/60 border border-slate-700/30 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 transition-all rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm font-medium"
                       required
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">Please enter your legal first and last name</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Please enter your legal first and last name</p>
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label htmlFor="reg-email" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Email Address <span className="text-red-500">*</span>
+                  <label htmlFor="reg-email" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Email Address <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm pointer-events-none" />
                     <input
                       type="email"
                       id="reg-email"
@@ -251,20 +251,20 @@ const CustomerRegister: React.FC = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="e.g. john@example.com"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-900/60 border border-slate-700/30 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 transition-all rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm font-medium"
                       required
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">We will send appointment receipts & updates here</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">We will send appointment receipts & updates here</p>
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label htmlFor="reg-phone" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Phone Number <span className="text-red-500">*</span>
+                  <label htmlFor="reg-phone" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Phone Number <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <FaPhone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <FaPhone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm pointer-events-none" />
                     <input
                       type="tel"
                       id="reg-phone"
@@ -272,28 +272,28 @@ const CustomerRegister: React.FC = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="e.g. +251 911 234 567"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-900/60 border border-slate-700/30 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 transition-all rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm font-medium"
                       required
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">Used strictly for scheduling & SMS notifications</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Used strictly for scheduling & SMS notifications</p>
                 </div>
               </div>
 
               {/* Column 2: Account Setup */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
-                  <span className="w-1.5 h-4 bg-indigo-500 rounded-full"></span>
-                  <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Account Setup</h3>
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <span className="w-1.5 h-4 bg-blue-600 rounded-full"></span>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-200 uppercase tracking-widest">Account Setup</h3>
                 </div>
 
                 {/* Username */}
                 <div>
-                  <label htmlFor="reg-username" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Choose Username <span className="text-red-500">*</span>
+                  <label htmlFor="reg-username" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Choose Username <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm pointer-events-none" />
                     <input
                       type="text"
                       id="reg-username"
@@ -301,20 +301,20 @@ const CustomerRegister: React.FC = () => {
                       value={formData.username}
                       onChange={handleChange}
                       placeholder="e.g. john_doe"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-900/60 border border-slate-700/30 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 transition-all rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm font-medium"
                       required
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">3-30 characters; alphanumeric & underscores only</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">3-30 characters; alphanumeric & underscores only</p>
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label htmlFor="reg-password" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Password <span className="text-red-500">*</span>
+                  <label htmlFor="reg-password" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Password <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm pointer-events-none" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       id="reg-password"
@@ -322,13 +322,13 @@ const CustomerRegister: React.FC = () => {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="••••••••"
-                      className="w-full pl-11 pr-12 py-3 bg-slate-900/60 border border-slate-700/30 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm"
+                      className="w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 transition-all rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm font-medium"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
@@ -336,48 +336,48 @@ const CustomerRegister: React.FC = () => {
                 </div>
 
                 {/* Dynamic Password Strength Checklist */}
-                <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl space-y-2.5">
-                  <p className="font-bold text-slate-200 text-xs flex items-center gap-2">
-                    <FaShieldAlt className="text-blue-400" /> Security Standards Check:
+                <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-2.5">
+                  <p className="font-bold text-slate-900 dark:text-slate-200 text-xs flex items-center gap-2">
+                    <FaShieldAlt className="text-indigo-600 dark:text-blue-400" /> Security Standards Check:
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.length ? "bg-green-500/20 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.length ? "bg-emerald-500/20 text-emerald-600 dark:text-green-400" : "bg-rose-500/10 text-rose-500 dark:text-red-400"}`}>
                         {passwordCriteria.length ? "✓" : "•"}
                       </span>
-                      <span className={passwordCriteria.length ? "text-green-300 font-semibold" : "text-slate-400"}>
+                      <span className={passwordCriteria.length ? "text-emerald-700 dark:text-green-300 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Min. 8 characters
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.uppercase ? "bg-green-500/20 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.uppercase ? "bg-emerald-500/20 text-emerald-600 dark:text-green-400" : "bg-rose-500/10 text-rose-500 dark:text-red-400"}`}>
                         {passwordCriteria.uppercase ? "✓" : "•"}
                       </span>
-                      <span className={passwordCriteria.uppercase ? "text-green-300 font-semibold" : "text-slate-400"}>
+                      <span className={passwordCriteria.uppercase ? "text-emerald-700 dark:text-green-300 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Uppercase character
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.lowercase ? "bg-green-500/20 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.lowercase ? "bg-emerald-500/20 text-emerald-600 dark:text-green-400" : "bg-rose-500/10 text-rose-500 dark:text-red-400"}`}>
                         {passwordCriteria.lowercase ? "✓" : "•"}
                       </span>
-                      <span className={passwordCriteria.lowercase ? "text-green-300 font-semibold" : "text-slate-400"}>
+                      <span className={passwordCriteria.lowercase ? "text-emerald-700 dark:text-green-300 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Lowercase character
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.number ? "bg-green-500/20 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.number ? "bg-emerald-500/20 text-emerald-600 dark:text-green-400" : "bg-rose-500/10 text-rose-500 dark:text-red-400"}`}>
                         {passwordCriteria.number ? "✓" : "•"}
                       </span>
-                      <span className={passwordCriteria.number ? "text-green-300 font-semibold" : "text-slate-400"}>
+                      <span className={passwordCriteria.number ? "text-emerald-700 dark:text-green-300 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Number (0-9)
                       </span>
                     </div>
                     <div className="flex items-center gap-2 sm:col-span-2">
-                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.special ? "bg-green-500/20 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                      <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${passwordCriteria.special ? "bg-emerald-500/20 text-emerald-600 dark:text-green-400" : "bg-rose-500/10 text-rose-500 dark:text-red-400"}`}>
                         {passwordCriteria.special ? "✓" : "•"}
                       </span>
-                      <span className={passwordCriteria.special ? "text-green-300 font-semibold" : "text-slate-400"}>
+                      <span className={passwordCriteria.special ? "text-emerald-700 dark:text-green-300 font-semibold" : "text-slate-500 dark:text-slate-400"}>
                         Special symbol (@$!%*?&)
                       </span>
                     </div>
@@ -386,11 +386,11 @@ const CustomerRegister: React.FC = () => {
 
                 {/* Confirm Password */}
                 <div>
-                  <label htmlFor="reg-confirmpassword" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Confirm Password <span className="text-red-500">*</span>
+                  <label htmlFor="reg-confirmpassword" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Confirm Password <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none" />
+                    <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm pointer-events-none" />
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       id="reg-confirmpassword"
@@ -398,13 +398,13 @@ const CustomerRegister: React.FC = () => {
                       value={formData.confirm_password}
                       onChange={handleChange}
                       placeholder="••••••••"
-                      className="w-full pl-11 pr-12 py-3 bg-slate-900/60 border border-slate-700/30 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm"
+                      className="w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 transition-all rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm font-medium"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
                     >
                       {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
@@ -420,7 +420,7 @@ const CustomerRegister: React.FC = () => {
                 type="submit"
                 id="reg-submit-btn"
                 disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 text-sm uppercase tracking-wider"
+                className="w-full py-4 bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 text-sm uppercase tracking-wider"
               >
                 {loading ? (
                   <>
@@ -438,12 +438,12 @@ const CustomerRegister: React.FC = () => {
           </form>
 
           {/* Login Link */}
-          <div className="text-center mt-8 pt-6 border-t border-slate-800">
-            <p className="text-slate-400 text-sm">
+          <div className="text-center mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
               Already registered?{' '}
               <Link 
                 to="/login" 
-                className="text-blue-400 font-bold hover:text-blue-300 hover:underline transition-all"
+                className="text-indigo-600 dark:text-blue-400 font-bold hover:text-indigo-500 dark:hover:text-blue-300 hover:underline transition-all"
               >
                 Access Secure Gateway
               </Link>
@@ -454,17 +454,17 @@ const CustomerRegister: React.FC = () => {
 
       {/* Trust & Performance Indicators */}
       <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-        <div className="bg-slate-900/50 backdrop-blur-md rounded-2xl p-4 border border-slate-800">
-          <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">100%</div>
-          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">SSL Encrypted</div>
+        <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="text-2xl font-black font-heading text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-blue-400 dark:to-cyan-300">100%</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">SSL Encrypted</div>
         </div>
-        <div className="bg-slate-900/50 backdrop-blur-md rounded-2xl p-4 border border-slate-800">
-          <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Strict</div>
-          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">Role Segregation</div>
+        <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="text-2xl font-black font-heading text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-blue-400 dark:to-cyan-300">Strict</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Role Segregation</div>
         </div>
-        <div className="bg-slate-900/50 backdrop-blur-md rounded-2xl p-4 border border-slate-800">
-          <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">24/7</div>
-          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">Secure Logs</div>
+        <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="text-2xl font-black font-heading text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-blue-400 dark:to-cyan-300">24/7</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Secure Logs</div>
         </div>
       </div>
     </div>

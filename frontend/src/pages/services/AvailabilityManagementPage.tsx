@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Form, Spinner } from 'react-bootstrap';
 import { serviceApi, bookingApi } from '../../services/serviceService';
 import { availabilityApi } from '../../services/availabilityService';
-import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../../components/Auth/AuthContext';
 
 export type AvailabilitySlot = {
@@ -359,7 +359,10 @@ const AvailabilityManagementPage: React.FC = () => {
   };
 
   const handleDelete = async (slot: AvailabilitySlot) => {
-    if (!confirm('Delete this availability slot?')) return;
+    const slotInfo = slot.barber_name
+      ? `for "${slot.barber_name}" on ${slot.available_date} (${slot.start_time.substring(0, 5)} - ${slot.end_time.substring(0, 5)})`
+      : `on ${slot.available_date} (${slot.start_time.substring(0, 5)} - ${slot.end_time.substring(0, 5)})`;
+    if (!confirm(`Are you sure you want to delete the availability slot ${slotInfo}?`)) return;
     setSubmitting(true);
     setFormError(null);
     try {
@@ -399,7 +402,14 @@ const AvailabilityManagementPage: React.FC = () => {
     <div className="container-fluid py-6 max-w-[1600px] mx-auto animate-fade-in">
       <div className="d-flex justify-content-between align-items-center mb-5 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight text-slate-900 dark:text-white">Availability Management</h2>
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5 mb-2 rounded-xl"
+            title="Go back to previous page"
+          >
+            <FaArrowLeft /> Back
+          </button>
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Availability Management</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1 mb-0">Set up, adjust, and monitor barber availability slot configurations</p>
         </div>
         <button className="btn btn-outline-secondary rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-300 dark:border-slate-700 font-semibold px-4 py-2" onClick={resetForm} disabled={submitting}>

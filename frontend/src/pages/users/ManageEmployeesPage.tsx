@@ -323,8 +323,9 @@ const ManageIdCardPersonsPage: React.FC = () => {
         navigate('/tools/id-generator', { state: { selectedIdCardPersons: selectedPersons } });
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this person?')) return;
+    const handleDelete = async (id: number, personName?: string) => {
+        const nameText = personName ? ` "${personName}"` : "";
+        if (!window.confirm(`Are you sure you want to delete the employee${nameText}?`)) return;
         try {
             await deleteIdCardPerson(id);
             notify('Person deleted successfully');
@@ -464,7 +465,7 @@ const ManageIdCardPersonsPage: React.FC = () => {
                                                                 size="sm"
                                                                 className="rounded-circle d-flex align-items-center justify-content-center"
                                                                 style={{ width: '32px', height: '32px' }}
-                                                                onClick={() => handleDelete(person.id!)}
+                                                                onClick={() => handleDelete(person.id!, `${person.fname || ''} ${person.lname || ''}`.trim())}
                                                             >
                                                                 <i className="fas fa-trash"></i>
                                                             </Button>

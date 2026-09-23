@@ -14,10 +14,10 @@
 
 const ROLES = Object.freeze({
     ADMIN: 1,
-    MANAGER: 2,
-    BARBER: 3,
-    RECEPTIONIST: 4,
-    CUSTOMER: 5,
+    BARBER: 2,
+    CUSTOMER: 3,
+    MANAGER: 4,
+    RECEPTIONIST: 5,
 });
 
 /**
@@ -25,10 +25,10 @@ const ROLES = Object.freeze({
  */
 const ROLE_NAMES = Object.freeze({
     1: 'Admin',
-    2: 'Manager',
-    3: 'Barber',
-    4: 'Receptionist',
-    5: 'Customer',
+    2: 'Barber',
+    3: 'Customer',
+    4: 'Manager',
+    5: 'Receptionist',
 });
 
 /**
@@ -36,10 +36,10 @@ const ROLE_NAMES = Object.freeze({
  */
 const ROLE_DESCRIPTIONS = Object.freeze({
     1: 'Full system control — manage all resources, users, analytics and settings.',
-    2: 'Manage an assigned branch, employees, and operational reports.',
-    3: 'View assigned services, customers, and appointments. Mark progress.',
-    4: 'Handle walk-ins, assist bookings, monitor queue, and check-in customers.',
-    5: 'Book services, view history, rate completed services, and submit complaints.',
+    2: 'View assigned services, customers, and appointments. Mark progress.',
+    3: 'Book services, view history, rate completed services, and submit complaints.',
+    4: 'Manage an assigned branch, employees, and operational reports.',
+    5: 'Handle walk-ins, assist bookings, monitor queue, and check-in customers.',
 });
 
 /**

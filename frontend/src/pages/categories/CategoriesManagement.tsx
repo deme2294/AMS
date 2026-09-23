@@ -8,6 +8,7 @@ import {
   Modal,
   Form,
   Input,
+  Select,
   Upload,
   message,
   Space,
@@ -26,20 +27,41 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   BgColorsOutlined,
+  EyeOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import categoryService, { ServiceCategory, CategoryFormData } from '../../services/categoryService';
+import { fixImageUrl } from '../../services/apiService';
+import { useAuth } from '../../components/Auth/AuthContext';
 import './CategoriesManagement.css';
 
+/**
+ * Normalizes any category image path to a full or root-relative URL
+ * so that Vite proxy and static serving handle it cleanly without "undefined/".
+ */
+export const getCategoryImageUrl = (img?: string | null): string => {
+  if (!img) return '';
+  const fixed = fixImageUrl(img);
+  if (fixed) return fixed;
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  return img.startsWith('/') ? img : `/${img}`;
+};
+
 const CategoriesManagement: React.FC = () => {
+  const { isAdmin, isManager } = useAuth();
+  const canManage = Boolean(isAdmin || isManager);
+
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [imageFile, setImageFile] = useState<File | undefined>();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     loadCategories();
@@ -49,98 +71,137 @@ const CategoriesManagement: React.FC = () => {
     try {
       setLoading(true);
       const data = await categoryService.getAllCategories();
-      setCategories(data);
+      setCategories(data || []);
     } catch (error: any) {
-      message.error(error.message || 'Failed to load categories');
+      const errMsg = error.response?.data?.message || error.message || 'Failed to load categories';
+      message.error(errMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const handleOpenModal = (category?: ServiceCategory) => {
+    if (!canManage) {
+      message.warning('Access denied: Only Administrators and Managers can modify categories.');
+      return;
+    }
+
     if (category) {
       setEditingCategory(category);
-      form.setFieldsValue({
-        category_name: category.category_name,
-        description: category.description,
-        icon: category.icon,
-        color: category.color || '#6366f1',
-        sort_order: category.sort_order,
-        status: category.status,
-      });
-      
-      // Set existing image
+      // Set existing image preview with fixed URL
       if (category.image) {
         setFileList([
           {
             uid: '-1',
             name: 'category-image',
             status: 'done',
-            url: `${import.meta.env.VITE_API_BASE_URL}${category.image}`,
+            url: getCategoryImageUrl(category.image),
           },
         ]);
+      } else {
+        setFileList([]);
       }
     } else {
       setEditingCategory(null);
-      form.resetFields();
-      form.setFieldsValue({
-        color: '#6366f1',
-        sort_order: 0,
-        status: 'active',
-      });
       setFileList([]);
     }
     setImageFile(undefined);
     setIsModalOpen(true);
   };
 
+  // Synchronize form fields safely when modal is open and Form element is mounted
+  useEffect(() => {
+    if (isModalOpen) {
+      if (editingCategory) {
+        form.setFieldsValue({
+          category_name: editingCategory.category_name,
+          description: editingCategory.description || '',
+          icon: editingCategory.icon || '',
+          color: editingCategory.color || '#6366f1',
+          sort_order: editingCategory.sort_order ?? 0,
+          status: editingCategory.status || 'active',
+        });
+      } else {
+        form.resetFields();
+        form.setFieldsValue({
+          category_name: '',
+          description: '',
+          icon: '',
+          color: '#6366f1',
+          sort_order: categories.length + 1,
+          status: 'active',
+        });
+      }
+    }
+  }, [isModalOpen, editingCategory, categories.length, form]);
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingCategory(null);
-    form.resetFields();
     setFileList([]);
     setImageFile(undefined);
   };
 
   const handleSubmit = async (values: CategoryFormData) => {
+    if (!canManage) {
+      message.error('Access denied: You do not have permission to perform this action.');
+      return;
+    }
+
     try {
+      setSubmitting(true);
       if (editingCategory) {
         await categoryService.updateCategory(editingCategory.id, values, imageFile);
-        message.success('Category updated successfully');
+        message.success(`Category "${values.category_name}" updated successfully`);
       } else {
         await categoryService.createCategory(values, imageFile);
-        message.success('Category created successfully');
+        message.success(`Category "${values.category_name}" created successfully`);
       }
       handleCloseModal();
-      loadCategories();
+      await loadCategories();
     } catch (error: any) {
-      message.error(error.message || 'Operation failed');
+      const errMsg = error.response?.data?.message || error.message || 'Operation failed';
+      message.error(errMsg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: number) => {
+    if (!canManage) {
+      message.error('Access denied: You do not have permission to delete categories.');
+      return;
+    }
+
     try {
       await categoryService.deleteCategory(id);
       message.success('Category deleted successfully');
-      loadCategories();
+      await loadCategories();
     } catch (error: any) {
-      message.error(error.message || 'Failed to delete category');
+      const errMsg = error.response?.data?.message || error.message || 'Failed to delete category';
+      message.error(errMsg);
     }
   };
 
   const handleToggleStatus = async (id: number) => {
+    if (!canManage) {
+      message.warning('Access denied: Only Admins and Managers can toggle category status.');
+      return;
+    }
+
     try {
-      await categoryService.toggleCategoryStatus(id);
-      message.success('Category status updated');
-      loadCategories();
+      const res = await categoryService.toggleCategoryStatus(id);
+      message.success(`Category status updated to ${res?.status || 'new status'}`);
+      await loadCategories();
     } catch (error: any) {
-      message.error(error.message || 'Failed to update status');
+      const errMsg = error.response?.data?.message || error.message || 'Failed to update status';
+      message.error(errMsg);
     }
   };
 
   const handleUploadChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setFileList(newFileList);
-    
+
     if (newFileList.length > 0 && newFileList[0].originFileObj) {
       setImageFile(newFileList[0].originFileObj as File);
     } else {
@@ -150,7 +211,7 @@ const CategoriesManagement: React.FC = () => {
 
   const filteredCategories = categories.filter(
     (cat) =>
-      cat.category_name.toLowerCase().includes(searchText.toLowerCase()) ||
+      cat.category_name?.toLowerCase().includes(searchText.toLowerCase()) ||
       (cat.description && cat.description.toLowerCase().includes(searchText.toLowerCase()))
   );
 
@@ -159,7 +220,10 @@ const CategoriesManagement: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: 80,
+      width: 75,
+      render: (id: number) => (
+        <span className="font-mono text-xs font-semibold text-slate-500">#{id}</span>
+      ),
     },
     {
       title: 'Image',
@@ -167,23 +231,29 @@ const CategoriesManagement: React.FC = () => {
       key: 'image',
       width: 90,
       render: (image: string, record: ServiceCategory) => {
-        const imageSrc = image
-          ? (image.startsWith('http') ? image : `${import.meta.env.VITE_API_BASE_URL || ''}${image}`)
-          : null;
-
+        const imageSrc = record.image ? getCategoryImageUrl(record.image) : null;
         const isFaIcon = record.icon && (record.icon.startsWith('fa-') || record.icon.includes('fa '));
 
         return (
           <div className="flex items-center justify-center">
             {imageSrc ? (
-              <img
-                src={imageSrc}
-                alt={record.category_name}
-                className="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700/80"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => setPreviewImage(imageSrc)}
+                title="Click to view image"
+              >
+                <img
+                  src={imageSrc}
+                  alt={record.category_name}
+                  className="w-12 h-12 object-cover rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <EyeOutlined className="text-white text-xs" />
+                </div>
+              </div>
             ) : (
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg shadow-sm"
@@ -192,7 +262,7 @@ const CategoriesManagement: React.FC = () => {
                 {isFaIcon ? (
                   <i className={record.icon}></i>
                 ) : (
-                  <span>{record.icon || record.category_name.charAt(0).toUpperCase()}</span>
+                  <span>{record.icon || record.category_name?.charAt(0).toUpperCase() || '✂️'}</span>
                 )}
               </div>
             )}
@@ -208,8 +278,22 @@ const CategoriesManagement: React.FC = () => {
         a.category_name.localeCompare(b.category_name),
       render: (text: string, record: ServiceCategory) => (
         <div>
-          <div className="font-semibold text-slate-900 dark:text-white">{text}</div>
-          <div className="text-xs text-slate-400">ID #{record.id}</div>
+          <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <span>{text}</span>
+            {record.color && (
+              <span
+                className="w-2.5 h-2.5 rounded-full inline-block"
+                style={{ backgroundColor: record.color }}
+                title={`Color: ${record.color}`}
+              />
+            )}
+          </div>
+          {record.icon && (
+            <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+              <span>Icon:</span>
+              <span className="font-mono text-[11px]">{record.icon}</span>
+            </div>
+          )}
         </div>
       ),
     },
@@ -218,17 +302,19 @@ const CategoriesManagement: React.FC = () => {
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
-      render: (desc: string) => <span className="text-slate-600 dark:text-slate-300 text-sm">{desc || '—'}</span>,
+      render: (desc: string) => (
+        <span className="text-slate-600 dark:text-slate-300 text-sm">{desc || '—'}</span>
+      ),
     },
     {
-      title: 'Sort Order',
+      title: 'Order',
       dataIndex: 'sort_order',
       key: 'sort_order',
-      width: 110,
+      width: 90,
       sorter: (a: ServiceCategory, b: ServiceCategory) => a.sort_order - b.sort_order,
       render: (order: number) => (
         <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
-          {order}
+          {order ?? 0}
         </span>
       ),
     },
@@ -237,53 +323,69 @@ const CategoriesManagement: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 120,
-      render: (status: string, record: ServiceCategory) => (
-        <span
-          onClick={() => handleToggleStatus(record.id)}
-          className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-all active:scale-95 ${
-            status === 'active'
-              ? 'badge-emerald text-emerald-700 dark:text-emerald-300'
-              : 'badge-rose text-rose-700 dark:text-rose-300'
-          }`}
-          title="Click to toggle status"
-        >
-          {status === 'active' ? (
-            <>
-              <CheckCircleOutlined className="text-xs" /> Active
-            </>
-          ) : (
-            <>
-              <CloseCircleOutlined className="text-xs" /> Inactive
-            </>
-          )}
-        </span>
-      ),
+      render: (status: string, record: ServiceCategory) => {
+        const isActive = status === 'active';
+        return (
+          <span
+            onClick={() => canManage && handleToggleStatus(record.id)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-all ${
+              canManage ? 'cursor-pointer active:scale-95' : 'cursor-default opacity-85'
+            } ${
+              isActive
+                ? 'badge-emerald text-emerald-700 dark:text-emerald-300'
+                : 'badge-rose text-rose-700 dark:text-rose-300'
+            }`}
+            title={canManage ? 'Click to toggle status' : 'Status managed by Admin/Manager'}
+          >
+            {isActive ? (
+              <>
+                <CheckCircleOutlined className="text-xs" /> Active
+              </>
+            ) : (
+              <>
+                <CloseCircleOutlined className="text-xs" /> Inactive
+              </>
+            )}
+          </span>
+        );
+      },
     },
     {
       title: 'Actions',
       key: 'actions',
-      width: 130,
+      width: 120,
       render: (_: any, record: ServiceCategory) => (
         <Space size="small">
-          <Tooltip title="Edit Category">
-            <Button
-              type="text"
-              icon={<EditOutlined className="text-indigo-600 dark:text-indigo-400" />}
-              onClick={() => handleOpenModal(record)}
-              className="hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg"
-            />
-          </Tooltip>
-          <Popconfirm
-            title="Delete Category"
-            description="Are you sure you want to delete this category? This action cannot be undone."
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Tooltip title="Delete Category">
-              <Button type="text" danger icon={<DeleteOutlined />} className="rounded-lg" />
+          {canManage ? (
+            <>
+              <Tooltip title="Edit Category">
+                <Button
+                  type="text"
+                  icon={<EditOutlined className="text-indigo-600 dark:text-indigo-400" />}
+                  onClick={() => handleOpenModal(record)}
+                  className="hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg"
+                />
+              </Tooltip>
+              <Popconfirm
+                title="Delete Category"
+                description="Are you sure you want to delete this category? If it has linked services, deletion will be blocked."
+                onConfirm={() => handleDelete(record.id)}
+                okText="Yes, Delete"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true }}
+              >
+                <Tooltip title="Delete Category">
+                  <Button type="text" danger icon={<DeleteOutlined />} className="rounded-lg" />
+                </Tooltip>
+              </Popconfirm>
+            </>
+          ) : (
+            <Tooltip title="Requires Admin or Manager permissions to modify">
+              <span className="text-xs text-slate-400 inline-flex items-center gap-1">
+                <LockOutlined className="text-xs" /> View only
+              </span>
             </Tooltip>
-          </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -301,21 +403,38 @@ const CategoriesManagement: React.FC = () => {
             <span className="badge-indigo text-xs py-1 px-3">
               {categories.length} Categories
             </span>
+            {!canManage && (
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">
+                <LockOutlined className="text-xs" /> View Only
+              </span>
+            )}
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Organize and manage catalog categories, icons, brand colors, and display sequence.
+            Organize catalog categories, icons, brand colors, images, and sequence for bookings.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => handleOpenModal()}
-            className="btn-modern-primary !h-10 !px-5 !rounded-xl !border-0 flex items-center gap-1.5"
-          >
-            Add Category
-          </Button>
+          {canManage ? (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => handleOpenModal()}
+              className="btn-modern-primary !h-10 !px-5 !rounded-xl !border-0 flex items-center gap-1.5"
+            >
+              Add Category
+            </Button>
+          ) : (
+            <Tooltip title="Only Admins and Managers can create categories">
+              <Button
+                disabled
+                icon={<LockOutlined />}
+                className="!h-10 !px-5 !rounded-xl flex items-center gap-1.5"
+              >
+                Add Category
+              </Button>
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -330,6 +449,9 @@ const CategoriesManagement: React.FC = () => {
               allowClear
               className="input-modern"
             />
+          </div>
+          <div className="text-xs text-slate-400">
+            Showing {filteredCategories.length} of {categories.length}
           </div>
         </div>
 
@@ -351,12 +473,18 @@ const CategoriesManagement: React.FC = () => {
         </Spin>
       </Card>
 
+      {/* Edit / Create Modal */}
       <Modal
-        title={editingCategory ? 'Edit Category' : 'Add New Category'}
+        title={
+          <div className="text-lg font-bold text-slate-900 dark:text-white">
+            {editingCategory ? `Edit: ${editingCategory.category_name}` : 'Add New Category'}
+          </div>
+        }
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
-        width={600}
+        width={620}
+        destroyOnHidden
       >
         <Form
           form={form}
@@ -367,26 +495,33 @@ const CategoriesManagement: React.FC = () => {
             sort_order: 0,
             status: 'active',
           }}
+          className="mt-4"
         >
           <Form.Item
             name="category_name"
-            label="Category Name"
+            label={<span className="font-semibold text-slate-700 dark:text-slate-300">Category Name</span>}
             rules={[
               { required: true, message: 'Please enter category name' },
               { min: 3, message: 'Category name must be at least 3 characters' },
             ]}
           >
-            <Input placeholder="e.g., Hair Styling, Spa Services" />
+            <Input placeholder="e.g., Hair Styling, Beard Grooming" className="input-modern" />
           </Form.Item>
 
-          <Form.Item name="description" label="Description">
+          <Form.Item
+            name="description"
+            label={<span className="font-semibold text-slate-700 dark:text-slate-300">Description</span>}
+          >
             <Input.TextArea
               rows={3}
-              placeholder="Brief description of this category"
+              placeholder="Brief description of the services included in this category"
+              className="input-modern"
             />
           </Form.Item>
 
-          <Form.Item label="Category Image">
+          <Form.Item
+            label={<span className="font-semibold text-slate-700 dark:text-slate-300">Category Image</span>}
+          >
             <Upload
               listType="picture-card"
               fileList={fileList}
@@ -394,31 +529,42 @@ const CategoriesManagement: React.FC = () => {
               beforeUpload={() => false}
               maxCount={1}
               accept="image/*"
+              onPreview={(file) => {
+                if (file.url || file.thumbUrl) {
+                  setPreviewImage(file.url || file.thumbUrl || null);
+                }
+              }}
             >
               {fileList.length === 0 && (
-                <div>
-                  <UploadOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
+                <div className="flex flex-col items-center justify-center p-3 text-slate-500">
+                  <UploadOutlined className="text-lg mb-1" />
+                  <div className="text-xs">Upload Image</div>
                 </div>
               )}
             </Upload>
-            <small style={{ color: '#888' }}>
-              Max size: 5MB. Supported formats: JPG, PNG, GIF
-            </small>
+            <div className="text-xs text-slate-400 mt-1">
+              Supports JPG, PNG, WebP up to 5MB. Uploading a new image replaces the previous one.
+            </div>
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="icon" label="Icon (Optional)">
-                <Input placeholder="e.g., ✂️, 💇, 🧖" />
+              <Form.Item
+                name="icon"
+                label={<span className="font-semibold text-slate-700 dark:text-slate-300">Icon / Emoji</span>}
+              >
+                <Input placeholder="e.g., fa-solid fa-scissors or ✂️" className="input-modern" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="color" label="Color">
+              <Form.Item
+                name="color"
+                label={<span className="font-semibold text-slate-700 dark:text-slate-300">Accent Color</span>}
+              >
                 <Input
                   type="color"
                   prefix={<BgColorsOutlined />}
-                  style={{ height: 40 }}
+                  className="input-modern !h-10 !p-1 cursor-pointer"
                 />
               </Form.Item>
             </Col>
@@ -428,35 +574,62 @@ const CategoriesManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="sort_order"
-                label="Sort Order"
+                label={<span className="font-semibold text-slate-700 dark:text-slate-300">Display Order</span>}
                 rules={[{ required: true, message: 'Please enter sort order' }]}
               >
-                <Input type="number" min={0} />
+                <Input type="number" min={0} className="input-modern" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="status"
-                label="Status"
+                label={<span className="font-semibold text-slate-700 dark:text-slate-300">Status</span>}
                 rules={[{ required: true }]}
               >
-                <select className="ant-input" style={{ width: '100%', height: 40 }}>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <Select
+                  options={[
+                    { value: 'active', label: 'Active' },
+                    { value: 'inactive', label: 'Inactive' },
+                  ]}
+                  className="w-full"
+                />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+          <Form.Item className="!mb-0 !mt-6 text-right">
             <Space>
-              <Button onClick={handleCloseModal}>Cancel</Button>
-              <Button type="primary" htmlType="submit">
-                {editingCategory ? 'Update' : 'Create'} Category
+              <Button onClick={handleCloseModal} className="rounded-xl">
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitting}
+                className="btn-modern-primary !rounded-xl !border-0"
+              >
+                {editingCategory ? 'Update Category' : 'Create Category'}
               </Button>
             </Space>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Image Preview Modal */}
+      <Modal
+        open={Boolean(previewImage)}
+        footer={null}
+        onCancel={() => setPreviewImage(null)}
+        centered
+        width={500}
+      >
+        {previewImage && (
+          <img
+            src={previewImage}
+            alt="Category Preview"
+            className="w-full h-auto max-h-[75vh] object-contain rounded-xl mt-4"
+          />
+        )}
       </Modal>
     </div>
   );

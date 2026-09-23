@@ -24,7 +24,8 @@ import {
   CheckIcon,
   ChatBubbleLeftRightIcon,
   ExclamationTriangleIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import { createPortal } from 'react-dom';
 
@@ -174,6 +175,17 @@ const EnhancedTopNavbar: React.FC<EnhancedTopNavbarProps> = ({ toggleSidebar, is
               <span className="h-0.5 bg-current rounded-full w-4.5"></span>
               <span className={`h-0.5 bg-current rounded-full transition-all duration-300 ${isSidebarOpen ? 'w-3.5' : 'w-4.5'}`}></span>
             </div>
+          </button>
+
+          {/* Universal Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-white dark:bg-slate-800 dark:hover:bg-slate-700 transition-all focus:outline-none active:scale-95 border border-slate-200/70 dark:border-slate-700/70 shadow-sm flex items-center gap-1.5 text-xs font-semibold"
+            title="Go back to previous page"
+            aria-label="Back to previous page"
+          >
+            <ArrowLeftIcon className="w-4 h-4 stroke-[2.5]" />
+            <span className="hidden sm:inline">Back</span>
           </button>
 
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800 h-6">
